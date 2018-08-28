@@ -15,6 +15,8 @@ install_py_pcha = function(method = "auto", conda = "auto",
                            python_version = "python 2.7.10",
                            envname = "reticulate_PCHA",
                            overwrite_env = F) {
+  packages = c("pip", "py_pcha", "numpy",
+               "scipy", "datetime")
   if(method != "virtualenv") {
     condas = conda_list(conda = conda)
     if(envname %in% condas$name & !overwrite_env) {
@@ -30,12 +32,13 @@ install_py_pcha = function(method = "auto", conda = "auto",
       conda_remove(envname, packages = NULL, conda = conda)
       conda_create(envname, packages = python_version, conda = conda)
     }
+    reticulate::py_install(packages = packages, envname = envname,
+                           method = method, conda = conda, pip = T)
+    conda_python(envname, conda = conda)
+  } else {
+    reticulate::py_install(packages = packages, envname = envname,
+                           method = method, conda = conda)
   }
-  packages = c("pip", "py_pcha", "numpy",
-               "scipy", "datetime")
-  reticulate::py_install(packages = packages, envname = envname,
-                         method = method, conda = conda, pip = T)
-  if(method != "virtualenv") conda_python(envname, conda = conda)
 }
 
 .py_pcha_installed = function() {

@@ -15,25 +15,27 @@ install_py_pcha = function(method = "auto", conda = "auto",
                            python_version = "python 2.7.10",
                            envname = "reticulate_PCHA",
                            overwrite_env = F) {
-  condas = conda_list(conda = conda)
-  if(envname %in% condas$name & !overwrite_env) {
-    python = condas[condas$name == envname,"python"]
-    python_v = system2(python, args = "-V", stdout = T, stderr = T)
-    correct_python = grepl(python_version, python_v, ignore.case = T)
-    if(!correct_python) {
-      stop(paste0("conda environment: ",envname,
-                  " exists but does not contain ",
-                  python_version, " (",python_v,")"))
+  if(method != "virtualenv") {
+    condas = conda_list(conda = conda)
+    if(envname %in% condas$name & !overwrite_env) {
+      python = condas[condas$name == envname,"python"]
+      python_v = system2(python, args = "-V", stdout = T, stderr = T)
+      correct_python = grepl(python_version, python_v, ignore.case = T)
+      if(!correct_python) {
+        stop(paste0("conda environment: ",envname,
+                    " exists but does not contain ",
+                    python_version, " (",python_v,")"))
+      }
+    } else {
+      conda_remove(envname, packages = NULL, conda = conda)
+      conda_create(envname, packages = python_version, conda = conda)
     }
-  } else {
-    conda_remove(envname, packages = NULL, conda = conda)
-    conda_create(envname, packages = python_version, conda = conda)
   }
   packages = c("pip", "py_pcha", "numpy",
                "scipy", "datetime")
   reticulate::py_install(packages = packages, envname = envname,
                          method = method, conda = conda, pip = T)
-  conda_python(envname, conda = conda)
+  if(method != "virtualenv") conda_python(envname, conda = conda)
 }
 
 .py_pcha_installed = function() {

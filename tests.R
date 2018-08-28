@@ -4,6 +4,7 @@ library(devtools)
 document()
 install()
 
+devtools::install_github("vitkl/ParetoTI", dependencies = T)
 library(ParetoTI)
 
 # test fitPCH

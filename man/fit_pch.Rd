@@ -41,7 +41,7 @@ fit_pch_subsample(i = 1, data, subsample = NULL, ...)
 
 \item{type}{one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package. "See also" for details.}
 
-\item{clust_options}{list of options for parallel processing. The default for "m" is list(cores = parallel::detectCores()-1, cluster_type = "PSOCK"). The default for "cmq" is list(memory = 2000, template = list(), n_jobs = 10). Change these options as required.}
+\item{clust_options}{list of options for parallel processing. The default for "m" is list(cores = parallel::detectCores()-1, cluster_type = "PSOCK"). The default for "cmq" is list(memory = 2000, template = list(), n_jobs = 10, fail_on_error = FALSE). Change these options as required.}
 
 \item{seed}{seed for reproducible random number generation. Works for all types of processing.}
 

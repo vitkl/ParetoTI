@@ -43,7 +43,7 @@ microbenchmark::microbenchmark({
                             noc=as.integer(3), delta=0.1, type = "m")
 }, times = 3)#, {
 #  # Use local parallel processing to fit the 10 polytopes to subsampled datasets each time looking at 70% of examples.
-arc_data = fit_pch_robust(data, n = 10, subsample = 0.7, seed = 2543,
+arc_data = fit_pch_robust(data, n = 100, subsample = 0.7, seed = 2543,
                           noc=as.integer(3), delta=0.1, type = "cmq")
 #})
 

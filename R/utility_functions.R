@@ -2,7 +2,8 @@
 ##' @rdname install_py_pcha
 ##' @name install_py_pcha
 ##' @author Vitalii Kleshchevnikov
-##' @details This is a helper function that install py_pcha and numpy python modules into conda environment. Unless you have a strong reason please use suggested defaults. Alternatively, use pip install --user py_pcha numpy scipy datetime.
+##' @description \code{install_py_pcha} is a helper function that installs py_pcha and numpy python modules into conda environment. Unless you have a strong reason please use suggested defaults. Alternatively, use pip install --user py_pcha numpy scipy datetime.
+##' @description \code{select_conda} is a helper function that tells R to use python conda environment created specifically for this package using \code{install_py_pcha}. This environment is used by default whe package is loaded. Set options(disable_ParetoTI_envname = TRUE) if you want to use other python installation. Set options(ParetoTI_envname = "other_env_name") if you want to use other conda environment.
 ##' @param method paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases. Use virtualenv if you don't want to install anaconda but virtualenv doesn't work on Windows. For conda method to work anaconda should be installed as described here: https://conda.io/docs/user-guide/install/index.html.
 ##' @param conda paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases.
 ##' @param python_version version to be installed into environment that is compatible with py_pcha module.
@@ -15,6 +16,7 @@
 ##' python -m pip install --user -i https://pypi.python.org/simple --upgrade pip setuptools wheel
 ##' @return path to python enviroment with py_pcha module installed
 ##' @export install_py_pcha
+##' @export select_conda
 ##' @seealso \code{\link{}}, \code{\link{}}
 install_py_pcha = function(method = "auto", conda = "auto",
                            python_version = "python 2.7.10",
@@ -55,5 +57,14 @@ install_py_pcha = function(method = "auto", conda = "auto",
       stop(paste0(err$message,
                   ", please use install_py_pcha() to install"))
     }
+  }
+}
+
+select_conda = function(conda = "auto", envname = "reticulate_PCHA"){
+  condas = tryCatch(conda_list(conda = conda), error = function(e) e)
+  if(envname %in% condas$name) {
+    use_python(condas[condas$name == envname, "python"],
+               required = FALSE) # suggest to use this envir but do not force.
+    use_condaenv(envname, conda = conda, required = FALSE)
   }
 }

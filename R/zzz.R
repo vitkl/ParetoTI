@@ -2,12 +2,13 @@
 .onLoad = function(libname, pkgname) {
   # if the python environment "reticulate_PCHA" installed using
   # install_py_pcha() is availlable - use it. If not - search other python binaries.
-  condas = conda_list(conda = "auto")
-  if("reticulate_PCHA" %in% condas$name) {
-    use_python(condas[condas$name == "reticulate_PCHA", "python"],
-               required = FALSE)
-    use_condaenv("reticulate_PCHA", conda = "auto", required = FALSE)
+  if(getOption("disable_ParetoTI_envname") == FALSE ||
+     is.null(getOption("disable_ParetoTI_envname"))){
+    envname = "reticulate_PCHA"
+    if(!is.null(getOption("ParetoTI_envname"))) envname = getOption("ParetoTI_envname")
+    select_conda(conda = "auto", envname = envname)
   }
+
 
   # add py_pcha to package namespace
   assign("py_PCHA",

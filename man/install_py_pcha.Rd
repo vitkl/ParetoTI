@@ -9,7 +9,7 @@ install_py_pcha(method = "auto", conda = "auto",
   overwrite_env = F)
 }
 \arguments{
-\item{method}{paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases.}
+\item{method}{paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases. Use virtualenv if you don't want to install anaconda but virtualenv doesn't work on Windows.}
 
 \item{conda}{paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases.}
 
@@ -27,6 +27,8 @@ Install python module py_pcha and numpy
 }
 \details{
 This is a helper function that install py_pcha and numpy python modules into conda environment. Unless you have a strong reason please use suggested defaults.
+
+If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution: "Older versions of pip and distribute default to http://pypi.python.org/simple, which no longer works. A solution is to install an up-to-date pip and distribute using pip install -i https://pypi.python.org/simple -U pip distribute into the virtual environment before running the rest of the build process."
 }
 \seealso{
 \code{\link{}}, \code{\link{}}

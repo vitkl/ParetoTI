@@ -15,10 +15,8 @@ install_py_pcha = function(method = "auto", conda = "auto",
                            python_version = "python 2.7.10",
                            envname = "reticulate_PCHA",
                            overwrite_env = F) {
-  packages = c("py_pcha", "numpy",
-               "scipy", "datetime")
+  packages = c("pip", "py_pcha", "numpy", "scipy", "datetime")
   if(method != "virtualenv") {
-    packages = c("pip", packages)
     condas = conda_list(conda = conda)
     if(envname %in% condas$name & !overwrite_env) {
       python = condas[condas$name == envname,"python"]

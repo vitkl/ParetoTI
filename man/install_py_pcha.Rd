@@ -6,7 +6,7 @@
 \usage{
 install_py_pcha(method = "auto", conda = "auto",
   python_version = "python 2.7.10", envname = "reticulate_PCHA",
-  overwrite_env = F)
+  env_dir = NULL, overwrite_env = F)
 }
 \arguments{
 \item{method}{paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases. Use virtualenv if you don't want to install anaconda but virtualenv doesn't work on Windows.}
@@ -16,6 +16,8 @@ install_py_pcha(method = "auto", conda = "auto",
 \item{python_version}{version to be installed into environment that is compatible with py_pcha module.}
 
 \item{envname}{name of the conda enviroment where PCHA should be installed. If that enviroment doesn't exist it will be created. If it contains incorrect python_version the function will give an error.}
+
+\item{env_dir}{directory in which to create python virtualenv when using that method. By default is NULL which results in ~/.virtualenvs.}
 
 \item{overwrite_env}{It TRUE overwrites conda environment.}
 }

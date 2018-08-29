@@ -16,7 +16,7 @@ archetypes = fit_pch(data, noc = as.integer(3), delta = 0.1)
 
 # install python and / or py_pcha module
 install_py_pcha()
-install_py_pcha(method = "virtualenv", env_dir = "$vk7")
+install_py_pcha(method = "virtualenv", env_dir = "$vk7/software/.virtualenvs/")
 
 set.seed(4354)
 N = 500

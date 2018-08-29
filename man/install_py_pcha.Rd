@@ -6,7 +6,7 @@
 \usage{
 install_py_pcha(method = "auto", conda = "auto",
   python_version = "python 2.7.10", envname = "reticulate_PCHA",
-  env_dir = NULL, overwrite_env = F)
+  overwrite_env = F)
 }
 \arguments{
 \item{method}{paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases. Use virtualenv if you don't want to install anaconda but virtualenv doesn't work on Windows.}
@@ -16,8 +16,6 @@ install_py_pcha(method = "auto", conda = "auto",
 \item{python_version}{version to be installed into environment that is compatible with py_pcha module.}
 
 \item{envname}{name of the conda enviroment where PCHA should be installed. If that enviroment doesn't exist it will be created. If it contains incorrect python_version the function will give an error.}
-
-\item{env_dir}{directory in which to create python virtualenv when using that method. By default is NULL which results in ~/.virtualenvs.}
 
 \item{overwrite_env}{It TRUE overwrites conda environment.}
 }
@@ -33,7 +31,8 @@ This is a helper function that install py_pcha and numpy python modules into con
 If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution: "Older versions of pip and distribute default to http://pypi.python.org/simple, which no longer works. A solution is to install an up-to-date pip and distribute using pip install -i https://pypi.python.org/simple -U pip distribute into the virtual environment before running the rest of the build process."
 # use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir
 export PYTHONUSERBASE=/some_dir/python_libs/
-python -m pip install --user --upgrade pip setuptools wheel
+python -m pip install --user -i https://pypi.python.org/simple -U pip distribute
+python -m pip install --user -i https://pypi.python.org/simple --upgrade pip setuptools wheel
 }
 \seealso{
 \code{\link{}}, \code{\link{}}

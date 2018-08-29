@@ -10,6 +10,9 @@
 ##' @param env_dir directory in which to create python virtualenv when using that method. By default is NULL which results in ~/.virtualenvs.
 ##' @param overwrite_env It TRUE overwrites conda environment.
 ##' @details If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution: "Older versions of pip and distribute default to http://pypi.python.org/simple, which no longer works. A solution is to install an up-to-date pip and distribute using pip install -i https://pypi.python.org/simple -U pip distribute into the virtual environment before running the rest of the build process."
+##' # use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir
+##' export PYTHONUSERBASE=/some_dir/python_libs/
+##' python -m pip install --user --upgrade pip setuptools wheel
 ##' @return path to python enviroment with py_pcha module installed
 ##' @export install_py_pcha
 ##' @seealso \code{\link{}}, \code{\link{}}

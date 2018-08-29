@@ -43,3 +43,9 @@ microbenchmark::microbenchmark({
 #  arc_data = fit_pch_robust(data, n = 10, subsample = 0.7,
 #                            noc=as.integer(3), delta=0.1, type = "cmq")
 #})
+
+
+
+# set directory for user libraries, update pip, setuptools, wheel in that environment
+#export PYTHONUSERBASE=$vk7/software/python_libs/
+#python -m pip install --user --upgrade pip setuptools wheel

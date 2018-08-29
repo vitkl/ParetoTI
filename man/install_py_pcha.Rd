@@ -31,6 +31,9 @@ Install python module py_pcha and numpy
 This is a helper function that install py_pcha and numpy python modules into conda environment. Unless you have a strong reason please use suggested defaults.
 
 If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution: "Older versions of pip and distribute default to http://pypi.python.org/simple, which no longer works. A solution is to install an up-to-date pip and distribute using pip install -i https://pypi.python.org/simple -U pip distribute into the virtual environment before running the rest of the build process."
+# use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir
+export PYTHONUSERBASE=/some_dir/python_libs/
+python -m pip install --user --upgrade pip setuptools wheel
 }
 \seealso{
 \code{\link{}}, \code{\link{}}

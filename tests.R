@@ -15,8 +15,9 @@ dim(data)
 archetypes = fit_pch(data, noc = as.integer(3), delta = 0.1)
 
 # install python and / or py_pcha module
-install_py_pcha()
-install_py_pcha(method = "virtualenv", env_dir = "$vk7/software/.virtualenvs/")
+install_py_pcha(method = "conda")
+ParetoTI::install_py_pcha(method = "virtualenv")
+reticulate::py_discover_config("py_pcha")
 
 set.seed(4354)
 N = 500
@@ -48,4 +49,5 @@ microbenchmark::microbenchmark({
 
 # set directory for user libraries, update pip, setuptools, wheel in that environment
 #export PYTHONUSERBASE=$vk7/software/python_libs/
-#python -m pip install --user --upgrade pip setuptools wheel
+#python -m pip install --user -i https://pypi.python.org/simple -U pip distribute
+#python -m pip install --user -i https://pypi.python.org/simple --upgrade pip setuptools wheel virtualenv -U pip --user distribute

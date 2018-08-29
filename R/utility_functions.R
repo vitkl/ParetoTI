@@ -3,7 +3,7 @@
 ##' @name install_py_pcha
 ##' @author Vitalii Kleshchevnikov
 ##' @details This is a helper function that install py_pcha and numpy python modules into conda environment. Unless you have a strong reason please use suggested defaults.
-##' @param method paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases.
+##' @param method paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases. Use virtualenv if you don't want to install anaconda but virtualenv doesn't work on Windows.
 ##' @param conda paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases.
 ##' @param python_version version to be installed into environment that is compatible with py_pcha module.
 ##' @param envname name of the conda enviroment where PCHA should be installed. If that enviroment doesn't exist it will be created. If it contains incorrect python_version the function will give an error.
@@ -15,9 +15,10 @@ install_py_pcha = function(method = "auto", conda = "auto",
                            python_version = "python 2.7.10",
                            envname = "reticulate_PCHA",
                            overwrite_env = F) {
-  packages = c("pip", "py_pcha", "numpy",
+  packages = c("py_pcha", "numpy",
                "scipy", "datetime")
   if(method != "virtualenv") {
+    packages = c("pip", packages)
     condas = conda_list(conda = conda)
     if(envname %in% condas$name & !overwrite_env) {
       python = condas[condas$name == envname,"python"]
@@ -43,10 +44,12 @@ install_py_pcha = function(method = "auto", conda = "auto",
 
 .py_pcha_installed = function() {
   # check if python package is availlable and give a helpful error message
-  err = tryCatch(py_PCHA$PCHA(matrix(rnorm(16), 4, 4),
+  err = tryCatch(py_PCHA$PCHA(matrix(1:6, 2, 3),
                               noc = as.integer(2)), error = function(e) e)
   if(!is.null(err$message)) {
-    stop(paste0(err$message,
-                ", please use install_py_pcha() to install"))
+    if(grepl("Python", err$message)){
+      stop(paste0(err$message,
+                  ", please use install_py_pcha() to install"))
+    }
   }
 }

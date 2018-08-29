@@ -10,12 +10,13 @@ library(ParetoTI)
 # test fitPCH
 set.seed(4354)
 N = 100
-X = matrix(rnorm(N * 10 * N), N * 10, N)
-dim(X)
-archetypes = fit_pch(X, noc = as.integer(3), delta = 0.1)
+data = matrix(rnorm(N * 10 * N), N * 10, N)
+dim(data)
+archetypes = fit_pch(data, noc = as.integer(3), delta = 0.1)
 
-# install python
+# install python and / or py_pcha module
 install_py_pcha()
+install_py_pcha(method = "virtualenv")
 
 set.seed(4354)
 N = 500
@@ -37,8 +38,8 @@ microbenchmark::microbenchmark({
   # Use local parallel processing to fit the 10 polytopes to subsampled datasets each time looking at 70% of examples.
   arc_data = fit_pch_robust(data, n = 10, subsample = 0.7,
                             noc=as.integer(3), delta=0.1, type = "m")
-}, {
-  # Use local parallel processing to fit the 10 polytopes to subsampled datasets each time looking at 70% of examples.
-  arc_data = fit_pch_robust(data, n = 10, subsample = 0.7,
-                            noc=as.integer(3), delta=0.1, type = "cmq")
-})
+}, times = 3)#, {
+#  # Use local parallel processing to fit the 10 polytopes to subsampled datasets each time looking at 70% of examples.
+#  arc_data = fit_pch_robust(data, n = 10, subsample = 0.7,
+#                            noc=as.integer(3), delta=0.1, type = "cmq")
+#})

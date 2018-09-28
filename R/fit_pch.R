@@ -48,6 +48,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                      delta = delta, verbose = verbose,
                      conv_crit = conv_crit, maxiter = maxiter)
   names(res) = c("XC", "S", "C", "SSE", "varexlp")
+  # add step sorting archetypes to improve reproducibility (archetypes are inherently exchangeable)
+
   res$call = match.call()
   class(res) = "pch_fit"
   res
@@ -96,20 +98,17 @@ fit_pch_robust = function(data, n = 3, subsample = NULL, check_installed = T,
   if(type == "cmq"){
     # set defaults or replace them with provided options
     default = list(memory = 2000, template = list(), n_jobs = 10,
-                   fail_on_error = FALSE)
+                   fail_on_error = FALSE, timeout = Inf)
     default_retain = !names(default) %in% names(clust_options)
     options = c(default[default_retain], clust_options)
-    # create a list of object for export
-    #export = ls(envir = environment())
-    #names(export) = export
-    #export = lapply(export, function(exp) eval(parse(text = exp)))
     # run analysis
     res = clustermq::Q(fun = ParetoTI::fit_pch_subsample, i = seq_len(n),
                        const = list(data = data, subsample = subsample, ...), # figure out how to supply this
-                       #export = list(),
                        seed = seed,
-                       memory = options$memory, #template = options$template,
-                       n_jobs = options$n_jobs, rettype = "list")
+                       memory = options$memory, template = options$template,
+                       n_jobs = options$n_jobs, rettype = "list",
+                       fail_on_error = options$fail_on_error,
+                       timeout = options$timeout)
   }
   # combine results ------------------------------------------------------------
   res = list(call = match.call(),

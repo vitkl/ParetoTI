@@ -9,8 +9,15 @@ project(arc_data, data)
 \arguments{
 \item{arc_data}{list of matrices storing the position of archetypes, class "pch_fit", "r_pch_fit". Each element of a list represents an independent run of the polytope fitting algorithm}
 
-\item{data}{matrix of data in which archetypes/polytope were found}
+\item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}
 }
 \description{
 Project in low dimentions (PCA) and process data and polytopes fits for plotting
+}
+\examples{
+# Random data that fits into the triangle
+set.seed(4355)
+arc_data = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
+                          mean = 0, sd = 1, N_dim = 2)
+data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 }

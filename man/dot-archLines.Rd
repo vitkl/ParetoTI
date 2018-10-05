@@ -4,12 +4,12 @@
 \alias{.archLines}
 \title{add a line between all archetypes}
 \usage{
-.archLines(Arch_data, label = "archetypes1")
+.archLines(arc_data, label = "archetypes1")
 }
 \arguments{
-\item{Arch_data}{data.table that contains positions of data points and archetypes}
-
 \item{label}{character specifying which data point to connect (when multiple replicates of fitted polytopes)}
+
+\item{Arch_data}{data.table that contains positions of data points and archetypes}
 }
 \description{
 add a line between all archetypes

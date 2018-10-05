@@ -28,9 +28,9 @@ generate_data(archetypes, N_examples = 10000, jiiter = 0.1, size = 1)
 \item{size}{scale the data within a polytope}
 }
 \value{
-\code{generate_arc()} matrix of archetypes of dim(archetypes, dimensions)
+\code{generate_arc()} object of class "random_arc" (similar to "pch_fit"), element XC is a matrix of archetypes of dim(archetypes, dimensions)
 
-\code{generate_data()} matrix of archetypes of dim(examples, dimensions)
+\code{generate_data()} matrix of archetypes of dim(dimensions, examples)
 }
 \description{
 \code{generate_arc()} generates the matrix of archetypes using specified coordinates (some noise added).
@@ -42,7 +42,7 @@ generate_data(archetypes, N_examples = 10000, jiiter = 0.1, size = 1)
 set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
                           mean = 0, sd = 1, N_dim = 2)
-data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 # Find Euclidian distance between data points and archetypes
 distance = sqrt(arch_dist(data, archetypes))
 # Find Euclidian distance between archetypes

@@ -9,22 +9,36 @@ devtools::load_all()
 devtools::install_github("vitkl/ParetoTI", dependencies = T)
 library(ParetoTI)
 
-# test fitPCH
-set.seed(4354)
-N = 100
-data = matrix(rnorm(N * 10 * N), N * 10, N)
-dim(data)
-archetypes = fit_pch(data, noc = as.integer(3), delta = 0.1)
-
 # install python and / or py_pcha module
 install_py_pcha(method = "conda")
 ParetoTI::install_py_pcha(method = "virtualenv")
 reticulate::py_discover_config("py_pcha")
 
-set.seed(4354)
-N = 500
-data = matrix(rnorm(N * 10 * N), N * 10, N)
-dim(data)
+library(ParetoTI)
+library(ggplot2)
+# Random data that fits into the triangle (2D)
+set.seed(4355)
+archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
+                          mean = 0, sd = 1, N_dim = 2)
+data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+plot_arc(arch_data = archetypes, data = data,
+    which_dimensions = 1:2) +
+    theme_bw()
+# Plot data as 2D density rather than points
+plot_arc(arch_data = archetypes, data = data,
+    which_dimensions = 1:2, geom = ggplot2::geom_bin2d) +
+    theme_bw()
+
+# Random data that fits into the triangle (3D)
+set.seed(4355)
+archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
+                          mean = 0, sd = 1, N_dim = 3)
+data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+plot_arc(arch_data = archetypes, data = data,
+    which_dimensions = 1:3)
+
+# test fitPCH
+arc_data = fit_pch(data, noc = as.integer(3), delta = 0.1)
 
 microbenchmark::microbenchmark({
   # Fit a polytope with 3 vertices to data matrix
@@ -44,7 +58,7 @@ microbenchmark::microbenchmark({
 }, times = 3)#, {
 #  # Use parallel processing on a computing cluster with clustermq to fit the 10 polytopes to subsampled datasets each time looking at 70% of examples.
 arc_data_cmq = fit_pch_robust(data, n = 20, subsample = 0.95, seed = 2543,
-                          noc=as.integer(3), delta=0.1, type = "cmq")
+                              noc=as.integer(3), delta=0.1, type = "cmq")
 #})
 
 

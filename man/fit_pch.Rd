@@ -70,9 +70,10 @@ varexlp - numeric vector (1L), Percent variation explained by the model.
 \code{fit_pch()} provides an R interface to python implementation of PCHA algorithm (Principal Convex Hull Analysis) by Ulf Aslak (https://github.com/ulfaslak/py_pcha) which was originally developed for Archetypal Analysis by Mørup et. al.
 }
 \examples{
-set.seed(4354)
-N = 500
-data = matrix(rnorm(N * 10 * N), N * 10, N)
+set.seed(4355)
+archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
+                          mean = 0, sd = 1, N_dim = 2)
+data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 dim(data)
 # Fit a polytope with 3 vertices to data matrix
 arc = fit_pch(data, noc=as.integer(3), delta=0.1)

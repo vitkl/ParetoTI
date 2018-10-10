@@ -4,12 +4,13 @@
 \alias{.archLines}
 \title{add a line between all archetypes}
 \usage{
-.archLines(arc_data, label = "archetypes1")
+.archLines(arc_data, label = "archetypes1", type = c("average",
+  "all")[1], average_func = mean)
 }
 \arguments{
-\item{label}{character specifying which data point to connect (when multiple replicates of fitted polytopes)}
+\item{arc_data}{data.table that contains positions of data points and archetypes}
 
-\item{Arch_data}{data.table that contains positions of data points and archetypes}
+\item{label}{character specifying which data point to connect (when multiple replicates of fitted polytopes)}
 }
 \description{
 add a line between all archetypes

@@ -16,41 +16,41 @@ process_for_plotly = function(arc_data, data){
 
 }
 
-.arc_data_table = function(arc_data, data){
+.arc_data_table = function(arc_data, data, type = c("average", "all")[1], average_func = mean){
   if(is(arc_data, "pch_fit") | is(arc_data, "random_arc")){
-    arc_data = as.data.table(arc_data$XC)
+    arc_data = as.data.table(t(arc_data$XC))
     arc_data$lab = "archetypes"
     data = as.data.table(t(data))
     data$lab = "data"
   }
   if(is(arc_data, "r_pch_fit")){
-    arc_data = arc_data[!sapply(arc_data, is.null)]
-    # transpose matrices from pcha
-    nrepl = length(archetypes)
-    narch = nrow(archetypes[[1]])
-    archetypes = Reduce(rbind, archetypes)
-    as.data.table(archetypes)
-    archetypes = data.table(PC1 = archetypes[,1],
-                            PC2 = archetypes[,2],
-                            PC3 = archetypes[,3],
-                            lab = c(rep(paste0("archetypes", 1:nrepl),
-                                        each = narch)))
-    setorder(archetypes, lab, PC1, PC2, PC3)
-    #archetypes[, archetype_num := c(rep(paste0("archetypes", 1:narch),
-    #                                   times = nrepl))]
-    as.data.table(mat)
-    Arch_data = data.table(PC1 = mat[,1],
-                           PC2 = mat[,2],
-                           PC3 = mat[,3],
-                           lab = rep("perturbations", nrow(mat)))
+    arc_data$pch_fits$XC = arc_data$pch_fits$XC[!sapply(arc_data$pch_fits$XC, is.null)]
+    arc_data = lapply(seq(1, length(arc_data$pch_fits$XC)), function(i){
+      arc_data = as.data.table(t(arc_data$pch_fits$XC[[i]]))
+      arc_data$lab = paste0("archetypes", i)
+      arc_data
+    })
+    arc_data = rbindlist(arc_data)
+    data = as.data.table(t(data))
+    data$lab = "data"
   }
   rbind(arc_data, data)
 }
 ##' add a line between all archetypes
-##'@param Arch_data data.table that contains positions of data points and archetypes
+##'@param arc_data data.table that contains positions of data points and archetypes
 ##'@param label character specifying which data point to connect (when multiple replicates of fitted polytopes)
-.archLines = function(arc_data, label = "archetypes1"){
-  arch_lines = arc_data[arc_data$lab == label]
+.archLines = function(arc_data, label = "archetypes1", type = c("average", "all")[1], average_func = mean){
+  arch_lines = arc_data[grepl(label, arc_data$lab)]
+  if(type == "average"){
+    arch_lines[, arch_id := seq(1, .N), by = lab]
+    col_names = colnames(arch_lines)
+    col_names = col_names[!col_names %in% c("lab", "arch_id")]
+    for (col_name in col_names) {
+      arch_lines[, c(col_name) := average_func(get(col_name)), by = "arch_id"]
+    }
+    arch_lines$lab = label
+    arch_lines = unique(arch_lines)
+  }
   aa = data.table(1:nrow(arch_lines))
   aa = aa[, .(V2 = 1:nrow(arch_lines)), by = V1]
   aa = aa[V1 != V2]

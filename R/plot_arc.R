@@ -2,11 +2,17 @@
 ##' @rdname plot_arc
 ##' @name plot_arc
 ##' @author Vitalii Kleshchevnikov
-##' @description \code{plot_arc()} generates the matrix of archetypes using specified coordinates (some noise added).
-##' @param arc_data list of matrices storing the position of archetypes, class "pch_fit", "r_pch_fit". Each element of a list represents an independent run of the polytope fitting algorithm
+##' @description \code{plot_arc()} plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "r_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").
+##' @param arc_data list of matrices storing the position of archetypes,  dim(dimensions, archetypes), class "pch_fit", "r_pch_fit". Each element of a list represents an independent run of the polytope fitting algorithm
 ##' @param data matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)
 ##' @param which_dimensions indices or character vector specifying dimension names
-##' @return \code{plot_arc()} ggplot2 plot
+##' @param type used when arc_data is "r_pch_fit", one of "average", "all"
+##' @param average_func used when arc_data is "r_pch_fit", function telling how to find average position of vertices
+##' @param geom plotting function to plot data in 2D, useful options are ggplot2::geom_point (scatterplot) and ggplot2::geom_bin2d (density)
+##' @param colors character vector giving color palette for different archetype fits and the data (both 3D and 2D plot)
+##' @param arch_size size of archetype point
+##' @param line_size width of lines connecting archetypes
+##' @return \code{plot_arc()} ggplot2 (2D) or plotly (3D) plot
 ##' @export plot_arc
 ##' @import plotly
 ##' @seealso \code{\link[ParetoTI]{fit_pch}}, \code{\link[ParetoTI]{arch_dist}}
@@ -34,10 +40,33 @@
 ##'     which_dimensions = 1:3) +
 ##'     theme_bw()
 plot_arc = function(arch_data, data, which_dimensions = as.integer(1:2),
+                    type = c("average", "all")[1], average_func = mean,
                     geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
-                    colors = c("#D62728", "#1F77B4", "#2CA02C", "#17BED0", "#006400", "#FF7E0F")) {
+                    colors = c("#D62728", "#1F77B4", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"),
+                    arch_size = NULL, line_size = NULL) {
   for_plot = ParetoTI:::.arc_data_table(arch_data, data)
-  lines_for_plot = ParetoTI:::.archLines(for_plot, label = "archetypes")
+  lines_for_plot = ParetoTI:::.archLines(for_plot, label = "archetypes", type, average_func)
+  if(is(arch_data, "r_pch_fit") & type == "average"){
+    for_plot[grepl("archetypes", lab), lab := "archetypes"]
+    ly_arch_size = 2
+    ly_line_size = 5
+    gg_arch_size = 2
+    gg_line_size = 1.5
+  } else {
+    ly_arch_size = 10
+    ly_line_size = 5
+    gg_arch_size = 5
+    gg_line_size = 1.5
+  }
+  # set sizes to manual when provided
+  if(!is.null(arch_size)){
+    ly_arch_size = arch_size
+    gg_arch_size = arch_size
+  }
+  if(!is.null(line_size)){
+    ly_line_size = line_size
+    gg_line_size = line_size
+  }
   if(is.integer(which_dimensions)){
     x = colnames(for_plot)[which_dimensions[1]]
     y = colnames(for_plot)[which_dimensions[2]]
@@ -52,10 +81,10 @@ plot_arc = function(arch_data, data, which_dimensions = as.integer(1:2),
       geom() +
       ggplot2::geom_path(data = lines_for_plot, inherit.aes = FALSE,
                          ggplot2::aes(x = get(x), y = get(y),
-                                      color = lab, group = lab), size = 1.5) +
+                                      color = lab, group = lab), size = gg_line_size) +
       ggplot2::geom_point(data = lines_for_plot, inherit.aes = FALSE,
                           ggplot2::aes(x = get(x), y = get(y),
-                                       color = lab, group = lab), size = 5) +
+                                       color = lab, group = lab), size = gg_arch_size) +
       ggplot2::xlab(colnames(for_plot)[which_dimensions[1]]) +
       ggplot2::ylab(colnames(for_plot)[which_dimensions[2]]) +
       ggplot2::scale_color_manual(values = colors)
@@ -70,13 +99,14 @@ plot_arc = function(arch_data, data, which_dimensions = as.integer(1:2),
     y = as.formula(paste0("~", y))
     z = as.formula(paste0("~", z))
     plot = plot_ly(for_plot, x = x, y = y, z = z,
-                           color = ~ lab, colors = colors,
-                           marker = list(size = 2)) %>%
-      add_markers()  %>%
-      add_trace(x = x, y = y, z = z, mode = 'lines',
-                data = lines_for_plot,
-                marker = list(size = 10), line = list(width = 5),
-                inherit = TRUE)
+                   color = ~ lab, colors = colors,
+                   marker = list(size = 2)) %>%
+      add_markers()
+    plot = add_trace(p = plot, x = x, y = y, z = z, mode = 'lines',
+                     data = lines_for_plot,
+                     marker = list(size = ly_arch_size),
+                     line = list(width = ly_line_size),
+                     inherit = TRUE)
   } else stop("asked to plot < 2 or > 3 dimensions, or dataset has less dimensions than specified by which_dimensions")
   plot
 }

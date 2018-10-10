@@ -9,14 +9,16 @@
 ##' @param I vector, entries of data to use for dictionary in C (optional)
 ##' @param U vector, entries of data to model in S (optional)
 ##' @param delta TO DO: find definition in matlab code
-##' @param verbose TO DO: find definition in matlab code, probably "display some messages"
-##' @param conv_crit TO DO: find definition in matlab code, probably "stop whe improvement in each iteraction is < conv_crit"
+##' @param verbose TO DO: find definition in matlab code, probably "display messages"
+##' @param conv_crit TO DO: find definition in matlab code, probably "stop when improvement in each iteraction is < conv_crit"
 ##' @param maxiter TO DO: find definition in matlab code, probably "max number of iterations"
 ##' @param check_installed if TRUE, check if python module py_pcha is found. Useful to set to FALSE for running analysis or within other functions
+##' @param order_by integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector.
+##' @param direction used for ordering. If TRUE use 2 dimentions and measure the side of the c(1,1) vector each vector is located. If FALSE use more than 2 dimentions (provided via order_by) and use cosine distance from c(1,1, ..., 1) to order vertices.
 ##' @return \code{fit_pch()} object of class pch_fit (list) containing the following elements:
-##' XC - numeric matrix, I x noc feature matrix (i.e. XC=data[,I]*C forming the archetypes);
-##' S - numeric matrix, noc x length(U) matrix, S>=0 |S_j|_1=1;
-##' C - numeric matrix, noc x length(U) matrix, S>=0 |S_j|_1=1;
+##' XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes);
+##' S - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
+##' C - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 ##' SSE - numeric vector (1L), Sum of Squared Errors;
 ##' varexlp - numeric vector (1L), Percent variation explained by the model.
 ##' @export fit_pch
@@ -42,14 +44,20 @@
 ##'                          noc=as.integer(3), delta=0.1, type = "m")
 fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    delta = 0, verbose = FALSE, conv_crit = 1e-6,
-                   maxiter = 500, check_installed = T) {
+                   maxiter = 500, check_installed = T,
+                   order_by = c(1, 2), sign = T) {
   if(check_installed) .py_pcha_installed()
   # run PCHA
   res = py_PCHA$PCHA(X = data, noc = as.integer(noc), I = I, U = U,
                      delta = delta, verbose = verbose,
                      conv_crit = conv_crit, maxiter = maxiter)
   names(res) = c("XC", "S", "C", "SSE", "varexlp")
-  # add step sorting archetypes to improve reproducibility (archetypes are inherently exchangeable)
+  # step sorting archetypes to improve reproducibility (archetypes are inherently exchangeable)
+  XC2 = res$XC[order_by,]
+  arch_order = .find_vertex_order(XC2, noc, sign = sign)
+  res$XC = res$XC[, arch_order]
+  res$S = res$S[arch_order, ]
+  res$C = res$C[arch_order, ]
 
   res$call = match.call()
   class(res) = "pch_fit"
@@ -140,4 +148,20 @@ fit_pch_subsample = function(i = 1, data, subsample = NULL, ...) {
        C = lapply(pch_fit_list, function(pch) pch$C),
        SSE = vapply(pch_fit_list, function(pch) pch$SSE, FUN.VALUE = numeric(1L)),
        varexlp = vapply(pch_fit_list, function(pch) pch$varexlp, FUN.VALUE = numeric(1L)))
+}
+
+## .find_vertex_order orders vertices by cosine relative to the unit vector c(1, 1)
+## Cosine is negative when vertex vector is to the left (counter-clockwise) of the unit vector
+## Solution taken from here: https://stackoverflow.com/questions/13221873/determining-if-one-2d-vector-is-to-the-right-or-left-of-another
+## XC2 is a matrix of dim(dimensions, archetype) that has only 2 dimentions
+.find_vertex_order = function(XC2, noc, sign = T){
+  cosine = vapply(seq(1, noc), function(i){
+    sum(XC2[,i]) / sqrt(2 * sum(XC2[,i]^2))
+  }, FUN.VALUE = numeric(1L))
+  if(isTRUE(sign)){
+    sign = sign(vapply(seq(1, noc), function(i) -XC2[1,i] + XC2[2,i],
+                       FUN.VALUE = numeric(1L)))
+    cosine = cosine * sign
+  }
+  order(cosine)
 }

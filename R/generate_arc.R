@@ -7,7 +7,7 @@
 ##' @param mean mean of random distribution added to arc_coord
 ##' @param sd standard deviationn of random distribution added to arc_coord
 ##' @param N_dim number of dimentions. Can be set to large number of dimentions, in that case arc_coord will be recycled keeping true dimensionality of the data as specified in arc_coord.
-##' @return \code{generate_arc()} object of class "random_arc" (similar to "pch_fit"), element XC is a matrix of archetypes of dim(archetypes, dimensions)
+##' @return \code{generate_arc()} object of class "random_arc" (similar to "pch_fit"), element XC is a matrix of archetypes of dim(dimensions, archetypes)
 ##' @export generate_arc
 ##' @seealso \code{\link[ParetoTI]{fit_pch}}, \code{\link[ParetoTI]{arch_dist}}
 ##' @examples
@@ -28,7 +28,7 @@ generate_arc = function(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
     archetypes[i,] = archetypes[i,] + arc_coord[[i]]
   }
 
-  archetypes = list(XC = archetypes,
+  archetypes = list(XC = t(archetypes),
                     S = NA, C = NA, SSE = NA,
                     varexlp = NA, call = match.call())
   class(archetypes) = "random_arc"
@@ -37,7 +37,7 @@ generate_arc = function(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
 
 ##' @rdname generate_arc
 ##' @name generate_data
-##' @param archetypes matrix of archetypes of dim(archetypes, dimensions)
+##' @param archetypes matrix of archetypes of dim(dimensions, archetypes)
 ##' @param N_examples number of examples to be generated
 ##' @param jiiter add noise to weigth so that data is not a perfect polytope (e.g. triangle, see examples)
 ##' @param size scale the data within a polytope
@@ -45,10 +45,10 @@ generate_arc = function(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
 ##' @return \code{generate_data()} matrix of archetypes of dim(dimensions, examples)
 ##' @export generate_data
 generate_data = function(archetypes, N_examples = 1e4, jiiter = 0.1, size = 1) {
-  n_arc = nrow(archetypes)
+  n_arc = ncol(archetypes)
   weights = matrix(runif(N_examples * n_arc, 0, 1), N_examples, n_arc)
   weights = (weights / rowSums(weights)) * size
   noise = matrix(rnorm(N_examples * n_arc, 0, jiiter), N_examples, n_arc)
   weights = weights + noise
-  t(weights %*% archetypes)
+  t(weights %*% t(archetypes))
 }

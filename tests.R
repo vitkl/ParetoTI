@@ -9,7 +9,7 @@ devtools::load_all()
 devtools::install_github("vitkl/ParetoTI", dependencies = T)
 library(ParetoTI)
 
-# install python and / or py_pcha module
+# create python environment and install py_pcha module
 install_py_pcha(method = "conda")
 ParetoTI::install_py_pcha(method = "virtualenv")
 reticulate::py_discover_config("py_pcha")
@@ -20,46 +20,61 @@ library(ggplot2)
 set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
                           mean = 0, sd = 1, N_dim = 2)
-data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
 plot_arc(arch_data = archetypes, data = data,
-    which_dimensions = 1:2) +
-    theme_bw()
+         which_dimensions = 1:2) +
+  theme_bw()
 # Plot data as 2D density rather than points
 plot_arc(arch_data = archetypes, data = data,
-    which_dimensions = 1:2, geom = ggplot2::geom_bin2d) +
-    theme_bw()
+         which_dimensions = 1:2, geom = ggplot2::geom_bin2d) +
+  theme_bw()
 
 # Random data that fits into the triangle (3D)
 set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
                           mean = 0, sd = 1, N_dim = 3)
-data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
 plot_arc(arch_data = archetypes, data = data,
-    which_dimensions = 1:3)
+         which_dimensions = 1:3)
 
 # test fitPCH
-arc_data = fit_pch(data, noc = as.integer(3), delta = 0.1)
+arc_data = fit_pch(data, noc = as.integer(3), delta = 0)
+plot_arc(arch_data = arc_data, data = data,
+         which_dimensions = 1:3)
+plot_arc(arch_data = arc_data, data = data,
+         which_dimensions = 1:2) +
+  theme_bw()
 
-microbenchmark::microbenchmark({
+
+speed_test = microbenchmark::microbenchmark({
   # Fit a polytope with 3 vertices to data matrix
   arc = fit_pch(data, noc=as.integer(3), delta=0.1)
 }, {
   # Fit the same polytope 3 times without subsampling to test convergence of the algorithm.
-  arc_rob = fit_pch_robust(data, n = 3, subsample = NULL,
-                           noc=as.integer(3), delta=0.1)
+  arc_rob_conv = fit_pch_robust(data, n = 3, subsample = NULL,
+                                noc=as.integer(3), delta=0.1)
 }, {
-  # Fit the 10 polytopes to subsampled datasets each time looking at 70% of examples.
-  arc_data = fit_pch_robust(data, n = 10, subsample = 0.7, seed = 2543,
-                            noc=as.integer(3), delta=0.1)
+  # Fit the 20 polytopes to subsampled datasets each time looking at 70% of examples.
+  arc_data_rob = fit_pch_robust(data, n = 20, subsample = 0.95, seed = 2543,
+                                noc=as.integer(3), delta=0.1)
 }, {
-  # Use local parallel processing to fit the 10 polytopes to subsampled datasets each time looking at 70% of examples.
-  arc_data = fit_pch_robust(data, n = 10, subsample = 0.7, seed = 2543,
-                            noc=as.integer(3), delta=0.1, type = "m")
-}, times = 3)#, {
-#  # Use parallel processing on a computing cluster with clustermq to fit the 10 polytopes to subsampled datasets each time looking at 70% of examples.
-arc_data_cmq = fit_pch_robust(data, n = 20, subsample = 0.95, seed = 2543,
-                              noc=as.integer(3), delta=0.1, type = "cmq")
-#})
+  # Use local parallel processing to fit the 20 polytopes to subsampled datasets each time looking at 70% of examples.
+  arc_data_rob_m = fit_pch_robust(data, n = 20, subsample = 0.95, seed = 2543, sign = F,
+                                  noc=as.integer(3), delta=0.1, type = "m")
+}, times = 5)
+speed_test_cmq = microbenchmark::microbenchmark({
+  # Use parallel processing on a computing cluster with clustermq to fit the 20 polytopes to subsampled datasets each time looking at 95% of examples.
+  arc_data_rob_cmq = fit_pch_robust(data, n = 100, subsample = 0.95, seed = 2543,
+                                    noc = as.integer(3), sign = F,
+                                    delta = 0.1, type = "cmq",
+                                    clust_options = list(memory = 1000, n_jobs = 10))
+}, times = 5)
+
+plot_arc(arch_data = arc_data_rob_m, data = data,
+         which_dimensions = 1:3)
+plot_arc(arch_data = arc_data_rob_m, data = data,
+         which_dimensions = 1:2, line_size = 1) +
+  theme_bw()
 
 
 # comparing RPCHA and R-python inferface
@@ -123,6 +138,10 @@ microbenchmark::microbenchmark({
   #RPCHA
   res = PCHA::PCHA(data, noc=as.integer(3), delta=0.1, conv_crit = 1e-06, maxiter = 500, verbose = FALSE)
 }, times = 10)
+res$XC = as.matrix(res$XC)
+class(res) = "pch_fit"
+plot_arc(arch_data = res, data = data,
+         which_dimensions = 1:3)
 
 devtools::load_all()
 

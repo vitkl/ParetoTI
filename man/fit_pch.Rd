@@ -8,7 +8,7 @@
 \usage{
 fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
   verbose = FALSE, conv_crit = 1e-06, maxiter = 500,
-  check_installed = T)
+  check_installed = T, order_by = c(1, 2), sign = T)
 
 fit_pch_robust(data, n = 3, subsample = NULL, check_installed = T,
   type = c("s", "m", "cmq")[1], clust_options = list(), seed = 235,
@@ -27,13 +27,15 @@ fit_pch_subsample(i = 1, data, subsample = NULL, ...)
 
 \item{delta}{TO DO: find definition in matlab code}
 
-\item{verbose}{TO DO: find definition in matlab code, probably "display some messages"}
+\item{verbose}{TO DO: find definition in matlab code, probably "display messages"}
 
-\item{conv_crit}{TO DO: find definition in matlab code, probably "stop whe improvement in each iteraction is < conv_crit"}
+\item{conv_crit}{TO DO: find definition in matlab code, probably "stop when improvement in each iteraction is < conv_crit"}
 
 \item{maxiter}{TO DO: find definition in matlab code, probably "max number of iterations"}
 
 \item{check_installed}{if TRUE, check if python module py_pcha is found. Useful to set to FALSE for running analysis or within other functions}
+
+\item{order_by}{integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector.}
 
 \item{n}{number of samples that should be taken}
 
@@ -46,12 +48,14 @@ fit_pch_subsample(i = 1, data, subsample = NULL, ...)
 \item{seed}{seed for reproducible random number generation. Works for all types of processing.}
 
 \item{i}{iteration number}
+
+\item{direction}{used for ordering. If TRUE use 2 dimentions and measure the side of the c(1,1) vector each vector is located. If FALSE use more than 2 dimentions (provided via order_by) and use cosine distance from c(1,1, ..., 1) to order vertices.}
 }
 \value{
 \code{fit_pch()} object of class pch_fit (list) containing the following elements:
-XC - numeric matrix, I x noc feature matrix (i.e. XC=data[,I]*C forming the archetypes);
-S - numeric matrix, noc x length(U) matrix, S>=0 |S_j|_1=1;
-C - numeric matrix, noc x length(U) matrix, S>=0 |S_j|_1=1;
+XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes);
+S - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
+C - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 SSE - numeric vector (1L), Sum of Squared Errors;
 varexlp - numeric vector (1L), Percent variation explained by the model.
 

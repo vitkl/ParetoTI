@@ -19,7 +19,7 @@ generate_data(archetypes, N_examples = 10000, jiiter = 0.1, size = 1)
 
 \item{N_dim}{number of dimentions. Can be set to large number of dimentions, in that case arc_coord will be recycled keeping true dimensionality of the data as specified in arc_coord.}
 
-\item{archetypes}{matrix of archetypes of dim(archetypes, dimensions)}
+\item{archetypes}{matrix of archetypes of dim(dimensions, archetypes)}
 
 \item{N_examples}{number of examples to be generated}
 
@@ -28,7 +28,7 @@ generate_data(archetypes, N_examples = 10000, jiiter = 0.1, size = 1)
 \item{size}{scale the data within a polytope}
 }
 \value{
-\code{generate_arc()} object of class "random_arc" (similar to "pch_fit"), element XC is a matrix of archetypes of dim(archetypes, dimensions)
+\code{generate_arc()} object of class "random_arc" (similar to "pch_fit"), element XC is a matrix of archetypes of dim(dimensions, archetypes)
 
 \code{generate_data()} matrix of archetypes of dim(dimensions, examples)
 }

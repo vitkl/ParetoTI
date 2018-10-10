@@ -5,22 +5,35 @@
 \title{Plot data with archetypes in 2D and 3D}
 \usage{
 plot_arc(arch_data, data, which_dimensions = as.integer(1:2),
+  type = c("average", "all")[1], average_func = mean,
   geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
   colors = c("#D62728", "#1F77B4", "#2CA02C", "#17BED0", "#006400",
-  "#FF7E0F"))
+  "#FF7E0F"), arch_size = NULL, line_size = NULL)
 }
 \arguments{
 \item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}
 
 \item{which_dimensions}{indices or character vector specifying dimension names}
 
-\item{arc_data}{list of matrices storing the position of archetypes, class "pch_fit", "r_pch_fit". Each element of a list represents an independent run of the polytope fitting algorithm}
+\item{type}{used when arc_data is "r_pch_fit", one of "average", "all"}
+
+\item{average_func}{used when arc_data is "r_pch_fit", function telling how to find average position of vertices}
+
+\item{geom}{plotting function to plot data in 2D, useful options are ggplot2::geom_point (scatterplot) and ggplot2::geom_bin2d (density)}
+
+\item{colors}{character vector giving color palette for different archetype fits and the data (both 3D and 2D plot)}
+
+\item{arch_size}{size of archetype point}
+
+\item{line_size}{width of lines connecting archetypes}
+
+\item{arc_data}{list of matrices storing the position of archetypes,  dim(dimensions, archetypes), class "pch_fit", "r_pch_fit". Each element of a list represents an independent run of the polytope fitting algorithm}
 }
 \value{
-\code{plot_arc()} ggplot2 plot
+\code{plot_arc()} ggplot2 (2D) or plotly (3D) plot
 }
 \description{
-\code{plot_arc()} generates the matrix of archetypes using specified coordinates (some noise added).
+\code{plot_arc()} plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "r_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").
 }
 \examples{
 library(ParetoTI)

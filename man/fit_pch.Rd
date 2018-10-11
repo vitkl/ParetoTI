@@ -8,7 +8,8 @@
 \usage{
 fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
   verbose = FALSE, conv_crit = 1e-06, maxiter = 500,
-  check_installed = T, order_by = c(1, 2), sign = T)
+  check_installed = T, order_by = seq(1, nrow(data)),
+  order_by_side = TRUE)
 
 fit_pch_robust(data, n = 3, subsample = NULL, check_installed = T,
   type = c("s", "m", "cmq")[1], clust_options = list(), seed = 235,
@@ -37,6 +38,8 @@ fit_pch_subsample(i = 1, data, subsample = NULL, ...)
 
 \item{order_by}{integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector.}
 
+\item{order_by_side}{used for ordering. If TRUE use 2 dimentions, cosine distance to c(1,1) and measure to which side of the c(1,1) vector each vertex vector is located. If FALSE use more than 2 dimentions (provided via order_by) and use cosine distance to c(1,1, ..., 1) to order vertices.}
+
 \item{n}{number of samples that should be taken}
 
 \item{subsample}{either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times which is usefult for evaluating how often the algorithm gets stuck in local optima}
@@ -48,8 +51,6 @@ fit_pch_subsample(i = 1, data, subsample = NULL, ...)
 \item{seed}{seed for reproducible random number generation. Works for all types of processing.}
 
 \item{i}{iteration number}
-
-\item{direction}{used for ordering. If TRUE use 2 dimentions and measure the side of the c(1,1) vector each vector is located. If FALSE use more than 2 dimentions (provided via order_by) and use cosine distance from c(1,1, ..., 1) to order vertices.}
 }
 \value{
 \code{fit_pch()} object of class pch_fit (list) containing the following elements:

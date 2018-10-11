@@ -21,8 +21,9 @@
 ##' # Find Euclidian distance between archetypes
 ##' arc_distance = sqrt(arch_dist(archetypes, archetypes))
 generate_arc = function(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
-                        mean = 0, sd = 1, N_dim = 2){
+                        mean = 0, sd = 1){
   n_arc = length(arc_coord)
+  N_dim = length(arc_coord[[1]])
   archetypes = matrix(rnorm(n_arc * N_dim, mean, sd), n_arc, N_dim)
   for (i in seq_len(n_arc)) {
     archetypes[i,] = archetypes[i,] + arc_coord[[i]]

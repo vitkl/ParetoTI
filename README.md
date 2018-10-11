@@ -37,7 +37,7 @@ library(ggplot2)
 # Generate random data that fits into the triangle (3D)
 set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
-                          mean = 0, sd = 1, N_dim = 3)
+                          mean = 0, sd = 1)
 data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 
 # Fit polytope to those data

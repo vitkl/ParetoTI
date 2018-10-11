@@ -19,7 +19,7 @@ library(ggplot2)
 # Random data that fits into the triangle (2D)
 set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
-                          mean = 0, sd = 1, N_dim = 2)
+                          mean = 0, sd = 1)
 data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
 plot_arc(arch_data = archetypes, data = data,
          which_dimensions = 1:2) +
@@ -32,7 +32,7 @@ plot_arc(arch_data = archetypes, data = data,
 # Random data that fits into the triangle (3D)
 set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
-                          mean = 0, sd = 1, N_dim = 3)
+                          mean = 0, sd = 1)
 data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
 plot_arc(arch_data = archetypes, data = data,
          which_dimensions = 1:3)
@@ -54,25 +54,25 @@ speed_test = microbenchmark::microbenchmark({
   arc_rob_conv = fit_pch_robust(data, n = 3, subsample = NULL,
                                 noc=as.integer(3), delta=0.1)
 }, {
-  # Fit the 20 polytopes to subsampled datasets each time looking at 70% of examples.
-  arc_data_rob = fit_pch_robust(data, n = 20, subsample = 0.95, seed = 2543,
+  # Fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
+  arc_data_rob = fit_pch_robust(data, n = 20, subsample = 0.65, seed = 2543,
                                 noc=as.integer(3), delta=0.1)
 }, {
-  # Use local parallel processing to fit the 20 polytopes to subsampled datasets each time looking at 70% of examples.
-  arc_data_rob_m = fit_pch_robust(data, n = 20, subsample = 0.95, seed = 2543, sign = F,
+  # Use local parallel processing to fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
+  arc_data_rob_m = fit_pch_robust(data, n = 20, subsample = 0.65, seed = 2543, order_by_side = F,
                                   noc=as.integer(3), delta=0.1, type = "m")
 }, times = 5)
 speed_test_cmq = microbenchmark::microbenchmark({
-  # Use parallel processing on a computing cluster with clustermq to fit the 20 polytopes to subsampled datasets each time looking at 95% of examples.
-  arc_data_rob_cmq = fit_pch_robust(data, n = 100, subsample = 0.95, seed = 2543,
-                                    noc = as.integer(3), sign = F,
+  # Use parallel processing on a computing cluster with clustermq to fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
+  arc_data_rob_cmq = fit_pch_robust(data, n = 200, subsample = 0.65, seed = 2543,
+                                    noc = as.integer(3), order_by_side = F,
                                     delta = 0.1, type = "cmq",
                                     clust_options = list(memory = 1000, n_jobs = 10))
 }, times = 5)
 
-plot_arc(arch_data = arc_data_rob_m, data = data,
-         which_dimensions = 1:3)
-plot_arc(arch_data = arc_data_rob_m, data = data,
+plot_arc(arch_data = arc_data_rob_cmq, data = data,
+         which_dimensions = 1:3, line_size = 1.5)
+plot_arc(arch_data = arc_data_rob_cmq, data = data,
          which_dimensions = 1:2, line_size = 1) +
   theme_bw()
 
@@ -100,7 +100,7 @@ comp_fitness = function(performance) {
 # test fitPCH
 set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
-                          mean = 0, sd = 1, N_dim = 2)
+                          mean = 0, sd = 1)
 data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 
 distance = sqrt(arch_dist(data, archetypes))

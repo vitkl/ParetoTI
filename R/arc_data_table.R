@@ -58,12 +58,3 @@ process_for_plotly = function(arc_data, data){
   aa = unique(aa[, .(c(V1, V2)), by = V3])
   arch_lines[aa$V1,]
 }
-
-.archLinesDT = function(arc_data, archetypes, line_obj_name = "arch_lines_", envir = .GlobalEnv){
-  nrepl = length(archetypes)
-  for (i in 1:nrepl) {
-    var = paste0(line_obj_name, i)
-    val = paste0("archetypes", i)
-    assign(var, archLines(arc_data, label = val), envir = envir)
-  }
-}

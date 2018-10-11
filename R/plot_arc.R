@@ -67,6 +67,7 @@ plot_arc = function(arch_data, data, which_dimensions = as.integer(1:2),
     ly_line_size = line_size
     gg_line_size = line_size
   }
+  # get column names for corresponding dimensions
   if(is.integer(which_dimensions)){
     x = colnames(for_plot)[which_dimensions[1]]
     y = colnames(for_plot)[which_dimensions[2]]

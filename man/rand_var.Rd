@@ -2,23 +2,28 @@
 % Please edit documentation in R/rand_var.R
 \name{rand_var}
 \alias{rand_var}
-\title{Permute each column of a matrix}
+\title{Permute each column of a matrix or sample from it's ECDF (with replacement)}
 \usage{
-rand_var(X)
+rand_var(x, replace = FALSE, prob = NULL)
 }
 \arguments{
-\item{X}{matrix to be permuted}
+\item{x}{matrix to be permuted}
+
+\item{replace}{should sampling be with replacement? Passed to [base](sample.int).}
+
+\item{prob}{a vector of probability weights for obtaining the elements of the vector being sampled. Passed to [base](sample.int).}
 }
 \value{
-matrix of the same dimention as the original matrix but with values in each column permuted
+Matrix of the same dimention as the original matrix but with values in each column permuted.
 }
 \description{
-This function uses permutations to disrupts relationships between variables but keep the distribution of each variable constant. Variables should be in columns.
+This function uses permutations or sampling with replacement to disrupt relationships between variables but keep the distribution of each variable constant. Variables should be in columns of a matrix.
 }
 \examples{
 set.seed(4354)
 N = 1000
-X = matrix(rnorm(N * 10 * N), N * 10, N)
+x = matrix(rnorm(N * 10 * N), N * 10, N)
+
 }
 \seealso{
 \code{\link{}}, \code{\link{}}

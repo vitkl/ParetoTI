@@ -76,6 +76,15 @@ plot_arc(arch_data = arc_data_rob_cmq, data = data,
          which_dimensions = 1:2, line_size = 1) +
   theme_bw()
 
+# test function for different k
+arc_ks = k_fit_pch(data, ks = 1:4, check_installed = T, delta=0.1, order_by_side = F)
+plot_arc(arch_data = arc_ks, data = data,
+         which_dimensions = 1:3, type = "all", arch_size = 2,
+         colors = c("#D62728", "#1F77B4", "#2CA02C", "#17BED0", "grey"))
+plot_arc(arch_data = arc_ks, data = data,
+         which_dimensions = 1:2, type = "all", arch_size = 2,
+         colors = c("#D62728", "#1F77B4", "#2CA02C", "#17BED0", "grey")) +
+  theme_bw()
 
 # comparing RPCHA and R-python inferface
 devtools::install_github("gokceneraslan/RPCHA", dependencies = T)

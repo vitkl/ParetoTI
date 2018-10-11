@@ -20,8 +20,6 @@ process_for_plotly = function(arc_data, data){
   if(is(arc_data, "pch_fit") | is(arc_data, "random_arc")){
     arc_data = as.data.table(t(arc_data$XC))
     arc_data$lab = "archetypes"
-    data = as.data.table(t(data))
-    data$lab = "data"
   }
   if(is(arc_data, "r_pch_fit")){
     arc_data$pch_fits$XC = arc_data$pch_fits$XC[!sapply(arc_data$pch_fits$XC, is.null)]
@@ -31,9 +29,18 @@ process_for_plotly = function(arc_data, data){
       arc_data
     })
     arc_data = rbindlist(arc_data)
-    data = as.data.table(t(data))
-    data$lab = "data"
   }
+  if(is(arc_data, "k_pch_fit")){
+    arc_data$pch_fits$XC = arc_data$pch_fits$XC[!sapply(arc_data$pch_fits$XC, is.null)]
+    arc_data = lapply(seq(1, length(arc_data$pch_fits$XC)), function(i){
+      arc_data = as.data.table(t(arc_data$pch_fits$XC[[i]]))
+      arc_data$lab = paste0("archetypes", nrow(arc_data))
+      arc_data
+    })
+    arc_data = rbindlist(arc_data)
+  }
+  data = as.data.table(t(data))
+  data$lab = "data"
   rbind(arc_data, data)
 }
 ##' add a line between all archetypes

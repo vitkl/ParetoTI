@@ -24,7 +24,6 @@ install_py_pcha = function(method = "auto", conda = "auto",
                            overwrite_env = F) {
   packages = c("pip", "py_pcha", "numpy", "scipy", "datetime")
   if(method == "virtualenv") {
-    packages = c(python_version, packages)
     reticulate::py_install(packages = packages, envname = envname,
                            method = method, conda = conda)
   } else {

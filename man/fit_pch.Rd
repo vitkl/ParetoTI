@@ -2,6 +2,7 @@
 % Please edit documentation in R/fit_pch.R
 \name{fit_pch}
 \alias{fit_pch}
+\alias{k_fit_pch}
 \alias{fit_pch_robust}
 \alias{fit_pch_subsample}
 \title{Fit a polytope (Principal Convex Hull) to data using PCHA algorithm}
@@ -10,6 +11,8 @@ fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
   verbose = FALSE, conv_crit = 1e-06, maxiter = 500,
   check_installed = T, order_by = seq(1, nrow(data)),
   order_by_side = TRUE)
+
+k_fit_pch(data, ks = 2:4, check_installed = T, ...)
 
 fit_pch_robust(data, n = 3, subsample = NULL, check_installed = T,
   type = c("s", "m", "cmq")[1], clust_options = list(), seed = 235,
@@ -28,17 +31,19 @@ fit_pch_subsample(i = 1, data, subsample = NULL, ...)
 
 \item{delta}{TO DO: find definition in matlab code}
 
-\item{verbose}{TO DO: find definition in matlab code, probably "display messages"}
+\item{verbose}{if TRUE display messages}
 
-\item{conv_crit}{TO DO: find definition in matlab code, probably "stop when improvement in each iteraction is < conv_crit"}
+\item{conv_crit}{The convergence criteria (default: 10^-6 relative change in SSE)}
 
-\item{maxiter}{TO DO: find definition in matlab code, probably "max number of iterations"}
+\item{maxiter}{maximum number of iterations (default: 500 iterations)}
 
 \item{check_installed}{if TRUE, check if python module py_pcha is found. Useful to set to FALSE for running analysis or within other functions}
 
 \item{order_by}{integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector.}
 
 \item{order_by_side}{used for ordering. If TRUE use 2 dimentions, cosine distance to c(1,1) and measure to which side of the c(1,1) vector each vertex vector is located. If FALSE use more than 2 dimentions (provided via order_by) and use cosine distance to c(1,1, ..., 1) to order vertices.}
+
+\item{ks}{integer vector, dimensions of polytopes to be fit to data}
 
 \item{n}{number of samples that should be taken}
 
@@ -60,12 +65,16 @@ C - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 SSE - numeric vector (1L), Sum of Squared Errors;
 varexlp - numeric vector (1L), Percent variation explained by the model.
 
+\code{k_fit_pch()} object of class k_pch_fit (list) containing XC (list of length(ks), individual XC matrices), S (list of length(ks), individual S matrices),  C (list of length(ks), individual C matrices), SSE (vector, length(ks)); varexlp - (vector, length(ks)). When length(ks) = 1 returns pch_fit.
+
 \code{fit_pch_robust()} object of class r_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexlp - (vector, length n).
 
 \code{fit_pch_subsample()} object of class pch_fit (list)
 }
 \description{
 \code{fit_pch()} fits a polytope (Principal Convex Hull) to data using PCHA algorithm. All of the listed functions take input matrix dim(variables/dimentions, examples) and return output (XC) of dim(variables/dimentions, archetypes).
+
+\code{k_fit_pch()} finds polytopes of k dimensions in the data. This function applies \code{fit_pch()} to different k-s.
 
 \code{fit_pch_robust()} subsamples the data to find robust positions of vertices of a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch_subsample()}.
 
@@ -92,6 +101,9 @@ arc_data = fit_pch_robust(data, n = 10, subsample = 0.7,
 # Use local parallel processing to fit the 10 polytopes to subsampled datasets each time looking at 70\% of examples.
 arc_data = fit_pch_robust(data, n = 10, subsample = 0.7,
                          noc=as.integer(3), delta=0.1, type = "m")
+
+# Fit polytopes with 2-4 vertices
+arc_ks = k_fit_pch(data, ks = 2:4, check_installed = T, delta=0.1)
 }
 \seealso{
 \code{\link[parallel]{parLapply}}, \code{\link[base]{lapply}}, \code{\link[clustermq]{Q}}

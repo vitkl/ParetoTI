@@ -9,9 +9,9 @@
 ##' @param I vector, entries of data to use for dictionary in C (optional)
 ##' @param U vector, entries of data to model in S (optional)
 ##' @param delta TO DO: find definition in matlab code
-##' @param verbose TO DO: find definition in matlab code, probably "display messages"
-##' @param conv_crit TO DO: find definition in matlab code, probably "stop when improvement in each iteraction is < conv_crit"
-##' @param maxiter TO DO: find definition in matlab code, probably "max number of iterations"
+##' @param verbose if TRUE display messages
+##' @param conv_crit The convergence criteria (default: 10^-6 relative change in SSE)
+##' @param maxiter maximum number of iterations (default: 500 iterations)
 ##' @param check_installed if TRUE, check if python module py_pcha is found. Useful to set to FALSE for running analysis or within other functions
 ##' @param order_by integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector.
 ##' @param order_by_side used for ordering. If TRUE use 2 dimentions, cosine distance to c(1,1) and measure to which side of the c(1,1) vector each vertex vector is located. If FALSE use more than 2 dimentions (provided via order_by) and use cosine distance to c(1,1, ..., 1) to order vertices.
@@ -42,6 +42,9 @@
 ##' # Use local parallel processing to fit the 10 polytopes to subsampled datasets each time looking at 70% of examples.
 ##' arc_data = fit_pch_robust(data, n = 10, subsample = 0.7,
 ##'                          noc=as.integer(3), delta=0.1, type = "m")
+##'
+##' # Fit polytopes with 2-4 vertices
+##' arc_ks = k_fit_pch(data, ks = 2:4, check_installed = T, delta=0.1)
 fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    delta = 0, verbose = FALSE, conv_crit = 1e-6,
                    maxiter = 500, check_installed = T,
@@ -53,14 +56,39 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                      conv_crit = conv_crit, maxiter = maxiter)
   names(res) = c("XC", "S", "C", "SSE", "varexlp")
   # step sorting archetypes to improve reproducibility (archetypes are inherently exchangeable)
-  XC2 = res$XC[order_by,]
-  arch_order = .find_vertex_order(XC2, noc, order_by_side = order_by_side)
-  res$XC = res$XC[, arch_order]
-  res$S = res$S[arch_order, ]
-  res$C = res$C[arch_order, ]
+  if(noc > 1) {
+    XC2 = res$XC[order_by,]
+    arch_order = .find_vertex_order(XC2, noc, order_by_side = order_by_side)
+    res$XC = res$XC[, arch_order]
+    res$S = res$S[arch_order, ]
+    res$C = res$C[arch_order, ]
+  }
 
   res$call = match.call()
   class(res) = "pch_fit"
+  res
+}
+
+##' @rdname fit_pch
+##' @name k_fit_pch
+##' @description \code{k_fit_pch()} finds polytopes of k dimensions in the data. This function applies \code{fit_pch()} to different k-s.
+##' @param ks integer vector, dimensions of polytopes to be fit to data
+##' @return \code{k_fit_pch()} object of class k_pch_fit (list) containing XC (list of length(ks), individual XC matrices), S (list of length(ks), individual S matrices),  C (list of length(ks), individual C matrices), SSE (vector, length(ks)); varexlp - (vector, length(ks)). When length(ks) = 1 returns pch_fit.
+##' @import clustermq
+##' @export k_fit_pch
+k_fit_pch = function(data, ks = 2:4, check_installed = T, ...) {
+  if(check_installed) .py_pcha_installed()
+  # run analysis for all k -----------------------------------------------------
+  res = lapply(ks, function(k) fit_pch(data = data, noc = k,
+                                       ..., check_installed = F))
+  # combine results ------------------------------------------------------------
+  if(length(ks) > 1){
+  res = list(call = match.call(),
+             pch_fits = .c_pch_fit_list(res))
+  class(res) = "k_pch_fit"
+  } else {
+    res = res[[1]]
+  }
   res
 }
 
@@ -112,7 +140,7 @@ fit_pch_robust = function(data, n = 3, subsample = NULL, check_installed = T,
     options = c(default[default_retain], clust_options)
     # run analysis
     res = clustermq::Q(fun = ParetoTI::fit_pch_subsample, i = seq_len(n),
-                       const = list(data = data, subsample = subsample, ...), # figure out how to supply this
+                       const = list(data = data, subsample = subsample, ...),
                        seed = seed,
                        memory = options$memory, template = options$template,
                        n_jobs = options$n_jobs, rettype = "list",
@@ -155,13 +183,14 @@ fit_pch_subsample = function(i = 1, data, subsample = NULL, ...) {
 ## Solution taken from here: https://stackoverflow.com/questions/13221873/determining-if-one-2d-vector-is-to-the-right-or-left-of-another
 ## XC2 is a matrix of dim(dimensions, archetype) that has only 2 dimentions
 .find_vertex_order = function(XC2, noc, order_by_side = TRUE){
-  cosine = vapply(seq(1, noc), function(i){
-    sum(XC2[,i]) / sqrt(2 * sum(XC2[,i]^2))
-  }, FUN.VALUE = numeric(1L))
   if(isTRUE(order_by_side)){
-    order_by_side = sign(vapply(seq(1, noc), function(i) -XC2[1,i] + XC2[2,i],
-                       FUN.VALUE = numeric(1L)))
-    cosine = cosine * order_by_side
+    order_by_side = vapply(seq(1, noc), function(i) -XC2[1,i] + XC2[2,i],
+                           FUN.VALUE = numeric(1L))
+    cosine = order_by_side
+  } else {
+    cosine = vapply(seq(1, noc), function(i){
+      sum(XC2[,i]) / sqrt(2 * sum(XC2[,i]^2))
+    }, FUN.VALUE = numeric(1L))
   }
   order(cosine)
 }

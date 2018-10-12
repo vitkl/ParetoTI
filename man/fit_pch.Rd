@@ -29,7 +29,7 @@ fit_pch_subsample(i = 1, data, subsample = NULL, ...)
 
 \item{U}{vector, entries of data to model in S (optional)}
 
-\item{delta}{TO DO: find definition in matlab code}
+\item{delta}{parameter that inflates original polytope(simplex) fit such that it may contain more points of the dataset}
 
 \item{verbose}{if TRUE display messages}
 

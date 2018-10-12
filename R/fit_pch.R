@@ -64,6 +64,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     res$C = res$C[arch_order, ]
   } else {
     res$XC = matrix(res$XC, length(res$XC), 1)
+    res$S = matrix(res$S, 1, length(res$S))
+    res$C = matrix(res$C, 1, 1)
   }
 
   res$call = match.call()

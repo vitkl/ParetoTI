@@ -8,7 +8,7 @@
 ##' @param noc integer, number of archetypes to find
 ##' @param I vector, entries of data to use for dictionary in C (optional)
 ##' @param U vector, entries of data to model in S (optional)
-##' @param delta TO DO: find definition in matlab code
+##' @param delta parameter that inflates original polytope(simplex) fit such that it may contain more points of the dataset
 ##' @param verbose if TRUE display messages
 ##' @param conv_crit The convergence criteria (default: 10^-6 relative change in SSE)
 ##' @param maxiter maximum number of iterations (default: 500 iterations)
@@ -20,7 +20,7 @@
 ##' S - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 ##' C - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 ##' SSE - numeric vector (1L), Sum of Squared Errors;
-##' varexlp - numeric vector (1L), Percent variation explained by the model.
+##' varexpl - numeric vector (1L), Percent variation explained by the model.
 ##' @export fit_pch
 ##' @export py_PCHA
 ##' @seealso \code{\link[parallel]{parLapply}}, \code{\link[base]{lapply}}, \code{\link[clustermq]{Q}}
@@ -54,7 +54,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
   res = py_PCHA$PCHA(X = data, noc = as.integer(noc), I = I, U = U,
                      delta = delta, verbose = verbose,
                      conv_crit = conv_crit, maxiter = maxiter)
-  names(res) = c("XC", "S", "C", "SSE", "varexlp")
+  names(res) = c("XC", "S", "C", "SSE", "varexpl")
   # step sorting archetypes to improve reproducibility (archetypes are inherently exchangeable)
   if(noc > 1) {
     XC2 = res$XC[order_by,]
@@ -62,6 +62,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     res$XC = res$XC[, arch_order]
     res$S = res$S[arch_order, ]
     res$C = res$C[arch_order, ]
+  } else {
+    res$XC = matrix(res$XC, length(res$XC), 1)
   }
 
   res$call = match.call()
@@ -73,7 +75,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 ##' @name k_fit_pch
 ##' @description \code{k_fit_pch()} finds polytopes of k dimensions in the data. This function applies \code{fit_pch()} to different k-s.
 ##' @param ks integer vector, dimensions of polytopes to be fit to data
-##' @return \code{k_fit_pch()} object of class k_pch_fit (list) containing XC (list of length(ks), individual XC matrices), S (list of length(ks), individual S matrices),  C (list of length(ks), individual C matrices), SSE (vector, length(ks)); varexlp - (vector, length(ks)). When length(ks) = 1 returns pch_fit.
+##' @return \code{k_fit_pch()} object of class k_pch_fit (list) containing XC (list of length(ks), individual XC matrices), S (list of length(ks), individual S matrices),  C (list of length(ks), individual C matrices), SSE (vector, length(ks)); varexpl - (vector, length(ks)). When length(ks) = 1 returns pch_fit.
 ##' @import clustermq
 ##' @export k_fit_pch
 k_fit_pch = function(data, ks = 2:4, check_installed = T, ...) {
@@ -100,7 +102,7 @@ k_fit_pch = function(data, ks = 2:4, check_installed = T, ...) {
 ##' @param type one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package. "See also" for details.
 ##' @param clust_options list of options for parallel processing. The default for "m" is list(cores = parallel::detectCores()-1, cluster_type = "PSOCK"). The default for "cmq" is list(memory = 2000, template = list(), n_jobs = 10, fail_on_error = FALSE). Change these options as required.
 ##' @param seed seed for reproducible random number generation. Works for all types of processing.
-##' @return \code{fit_pch_robust()} object of class r_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexlp - (vector, length n).
+##' @return \code{fit_pch_robust()} object of class r_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexpl - (vector, length n).
 ##' @import clustermq
 ##' @export fit_pch_robust
 fit_pch_robust = function(data, n = 3, subsample = NULL, check_installed = T,
@@ -175,7 +177,7 @@ fit_pch_subsample = function(i = 1, data, subsample = NULL, ...) {
        S = lapply(pch_fit_list, function(pch) pch$S),
        C = lapply(pch_fit_list, function(pch) pch$C),
        SSE = vapply(pch_fit_list, function(pch) pch$SSE, FUN.VALUE = numeric(1L)),
-       varexlp = vapply(pch_fit_list, function(pch) pch$varexlp, FUN.VALUE = numeric(1L)))
+       varexpl = vapply(pch_fit_list, function(pch) pch$varexpl, FUN.VALUE = numeric(1L)))
 }
 
 ## .find_vertex_order orders vertices by cosine relative to the unit vector c(1, 1)

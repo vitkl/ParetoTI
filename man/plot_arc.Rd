@@ -27,7 +27,7 @@ plot_arc(arch_data, data, which_dimensions = as.integer(1:2),
 
 \item{line_size}{width of lines connecting archetypes}
 
-\item{arc_data}{list of matrices storing the position of archetypes,  dim(dimensions, archetypes), class "pch_fit", "r_pch_fit". Each element of a list represents an independent run of the polytope fitting algorithm}
+\item{arc_data}{objects of class "pch_fit", "r_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.}
 }
 \value{
 \code{plot_arc()} ggplot2 (2D) or plotly (3D) plot

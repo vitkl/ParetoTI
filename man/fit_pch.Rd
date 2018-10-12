@@ -63,11 +63,11 @@ XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e
 S - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 C - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 SSE - numeric vector (1L), Sum of Squared Errors;
-varexlp - numeric vector (1L), Percent variation explained by the model.
+varexpl - numeric vector (1L), Percent variation explained by the model.
 
-\code{k_fit_pch()} object of class k_pch_fit (list) containing XC (list of length(ks), individual XC matrices), S (list of length(ks), individual S matrices),  C (list of length(ks), individual C matrices), SSE (vector, length(ks)); varexlp - (vector, length(ks)). When length(ks) = 1 returns pch_fit.
+\code{k_fit_pch()} object of class k_pch_fit (list) containing XC (list of length(ks), individual XC matrices), S (list of length(ks), individual S matrices),  C (list of length(ks), individual C matrices), SSE (vector, length(ks)); varexpl - (vector, length(ks)). When length(ks) = 1 returns pch_fit.
 
-\code{fit_pch_robust()} object of class r_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexlp - (vector, length n).
+\code{fit_pch_robust()} object of class r_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexpl - (vector, length n).
 
 \code{fit_pch_subsample()} object of class pch_fit (list)
 }

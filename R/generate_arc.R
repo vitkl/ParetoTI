@@ -31,7 +31,7 @@ generate_arc = function(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
 
   archetypes = list(XC = t(archetypes),
                     S = NA, C = NA, SSE = NA,
-                    varexlp = NA, call = match.call())
+                    varexpl = NA, call = match.call())
   class(archetypes) = "random_arc"
   archetypes
 }

@@ -1,7 +1,7 @@
 ##'
 ##'
 ##' Project in low dimentions (PCA) and process data and polytopes fits for plotting
-##' @param arc_data list of matrices storing the position of archetypes, class "pch_fit", "r_pch_fit". Each element of a list represents an independent run of the polytope fitting algorithm
+##' @param arc_data objects of class "pch_fit", "r_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.
 ##' @param data matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)
 ##' @examples
 ##' # Random data that fits into the triangle

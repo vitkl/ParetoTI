@@ -48,6 +48,8 @@ plot_arc = function(arch_data, data, which_dimensions = as.integer(1:2),
   lines_for_plot = ParetoTI:::.archLines(for_plot, label = "archetypes", type, average_func)
   if(is(arch_data, "r_pch_fit") & type == "average"){
     for_plot[grepl("archetypes", lab), lab := "archetypes"]
+    for_plot[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
+    setorder(for_plot, lab)
     ly_arch_size = 2
     ly_line_size = 5
     gg_arch_size = 2

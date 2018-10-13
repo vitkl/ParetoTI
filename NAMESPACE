@@ -2,8 +2,8 @@
 
 export(arch_dist)
 export(fit_pch)
-export(fit_pch_robust)
-export(fit_pch_subsample)
+export(fit_pch_bootstrap)
+export(fit_pch_resample)
 export(generate_arc)
 export(generate_data)
 export(install_py_pcha)

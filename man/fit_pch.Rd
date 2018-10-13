@@ -3,8 +3,8 @@
 \name{fit_pch}
 \alias{fit_pch}
 \alias{k_fit_pch}
-\alias{fit_pch_robust}
-\alias{fit_pch_subsample}
+\alias{fit_pch_bootstrap}
+\alias{fit_pch_resample}
 \title{Fit a polytope (Principal Convex Hull) to data using PCHA algorithm}
 \usage{
 fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
@@ -14,11 +14,12 @@ fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
 
 k_fit_pch(data, ks = 2:4, check_installed = T, ...)
 
-fit_pch_robust(data, n = 3, subsample = NULL, check_installed = T,
-  type = c("s", "m", "cmq")[1], clust_options = list(), seed = 235,
-  ...)
+fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
+  check_installed = T, type = c("s", "m", "cmq")[1],
+  clust_options = list(), seed = 235, replace = FALSE, ...)
 
-fit_pch_subsample(i = 1, data, subsample = NULL, ...)
+fit_pch_resample(i = 1, data, sample_prop = NULL, replace = FALSE,
+  ...)
 }
 \arguments{
 \item{data}{numeric matrix in which to find archetypes, variables/dimentions in rows, examples in columns}
@@ -47,13 +48,15 @@ fit_pch_subsample(i = 1, data, subsample = NULL, ...)
 
 \item{n}{number of samples that should be taken}
 
-\item{subsample}{either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times which is usefult for evaluating how often the algorithm gets stuck in local optima}
+\item{sample_prop}{either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times which is usefult for evaluating how often the algorithm gets stuck in local optima}
 
 \item{type}{one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package. "See also" for details.}
 
 \item{clust_options}{list of options for parallel processing. The default for "m" is list(cores = parallel::detectCores()-1, cluster_type = "PSOCK"). The default for "cmq" is list(memory = 2000, template = list(), n_jobs = 10, fail_on_error = FALSE). Change these options as required.}
 
 \item{seed}{seed for reproducible random number generation. Works for all types of processing.}
+
+\item{replace}{should resampling be with replacement? passed to \link[base]{sample.int}}
 
 \item{i}{iteration number}
 }
@@ -67,18 +70,18 @@ varexpl - numeric vector (1L), Percent variation explained by the model.
 
 \code{k_fit_pch()} object of class k_pch_fit (list) containing XC (list of length(ks), individual XC matrices), S (list of length(ks), individual S matrices),  C (list of length(ks), individual C matrices), SSE (vector, length(ks)); varexpl - (vector, length(ks)). When length(ks) = 1 returns pch_fit.
 
-\code{fit_pch_robust()} object of class r_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexpl - (vector, length n).
+\code{fit_pch_bootstrap()} object of class r_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexpl - (vector, length n).
 
-\code{fit_pch_subsample()} object of class pch_fit (list)
+\code{fit_pch_resample()} object of class pch_fit (list)
 }
 \description{
 \code{fit_pch()} fits a polytope (Principal Convex Hull) to data using PCHA algorithm. All of the listed functions take input matrix dim(variables/dimentions, examples) and return output (XC) of dim(variables/dimentions, archetypes).
 
 \code{k_fit_pch()} finds polytopes of k dimensions in the data. This function applies \code{fit_pch()} to different k-s.
 
-\code{fit_pch_robust()} subsamples the data to find robust positions of vertices of a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch_subsample()}.
+\code{fit_pch_bootstrap()} Uses bootstrapping (resampling with) the data to find robust positions of vertices of a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch_resample()}.
 
-\code{fit_pch_subsample()} takes one subsample of the data and fits a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch()}.
+\code{fit_pch_resample()} takes one sample of the data and fits a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch()}.
 }
 \details{
 \code{fit_pch()} provides an R interface to python implementation of PCHA algorithm (Principal Convex Hull Analysis) by Ulf Aslak (https://github.com/ulfaslak/py_pcha) which was originally developed for Archetypal Analysis by Mørup et. al.
@@ -91,15 +94,15 @@ data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 dim(data)
 # Fit a polytope with 3 vertices to data matrix
 arc = fit_pch(data, noc=as.integer(3), delta=0.1)
-# Fit the same polytope 3 times without subsampling to test convergence of the algorithm.
-arc_rob = fit_pch_robust(data, n = 3, subsample = NULL,
+# Fit the same polytope 3 times without resampling to test convergence of the algorithm.
+arc_rob = fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
                          noc=as.integer(3), delta=0.1)
-# Fit the 10 polytopes to subsampled datasets each time looking at 70\% of examples.
-arc_data = fit_pch_robust(data, n = 10, subsample = 0.7,
+# Fit the 10 polytopes to resampled datasets each time looking at 70\% of examples.
+arc_data = fit_pch_bootstrap(data, n = 10, sample_prop = 0.7,
                          noc=as.integer(3), delta=0.1)
 
-# Use local parallel processing to fit the 10 polytopes to subsampled datasets each time looking at 70\% of examples.
-arc_data = fit_pch_robust(data, n = 10, subsample = 0.7,
+# Use local parallel processing to fit the 10 polytopes to resampled datasets each time looking at 70\% of examples.
+arc_data = fit_pch_bootstrap(data, n = 10, sample_prop = 0.7,
                          noc=as.integer(3), delta=0.1, type = "m")
 
 # Fit polytopes with 2-4 vertices

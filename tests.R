@@ -51,20 +51,20 @@ speed_test = microbenchmark::microbenchmark({
   arc = fit_pch(data, noc=as.integer(3), delta=0.1)
 }, {
   # Fit the same polytope 3 times without subsampling to test convergence of the algorithm.
-  arc_rob_conv = fit_pch_robust(data, n = 3, subsample = NULL,
+  arc_rob_conv = fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
                                 noc=as.integer(3), delta=0.1)
 }, {
   # Fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
-  arc_data_rob = fit_pch_robust(data, n = 20, subsample = 0.65, seed = 2543,
+  arc_data_rob = fit_pch_bootstrap(data, n = 20, sample_prop = 0.65, seed = 2543,
                                 noc=as.integer(3), delta=0.1)
 }, {
   # Use local parallel processing to fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
-  arc_data_rob_m = fit_pch_robust(data, n = 20, subsample = 0.65, seed = 2543, order_by_side = F,
+  arc_data_rob_m = fit_pch_bootstrap(data, n = 20, sample_prop = 0.65, seed = 2543, order_by_side = F,
                                   noc=as.integer(3), delta=0.1, type = "m")
 }, times = 5)
 speed_test_cmq = microbenchmark::microbenchmark({
   # Use parallel processing on a computing cluster with clustermq to fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
-  arc_data_rob_cmq = fit_pch_robust(data, n = 200, subsample = 0.65, seed = 2543,
+  arc_data_rob_cmq = fit_pch_bootstrap(data, n = 200, sample_prop = 0.65, seed = 2543,
                                     noc = as.integer(3), order_by_side = F,
                                     delta = 0.1, type = "cmq",
                                     clust_options = list(memory = 1000, n_jobs = 10))

@@ -32,15 +32,15 @@
 ##' dim(data)
 ##' # Fit a polytope with 3 vertices to data matrix
 ##' arc = fit_pch(data, noc=as.integer(3), delta=0.1)
-##' # Fit the same polytope 3 times without subsampling to test convergence of the algorithm.
-##' arc_rob = fit_pch_robust(data, n = 3, subsample = NULL,
+##' # Fit the same polytope 3 times without resampling to test convergence of the algorithm.
+##' arc_rob = fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
 ##'                          noc=as.integer(3), delta=0.1)
-##' # Fit the 10 polytopes to subsampled datasets each time looking at 70% of examples.
-##' arc_data = fit_pch_robust(data, n = 10, subsample = 0.7,
+##' # Fit the 10 polytopes to resampled datasets each time looking at 70% of examples.
+##' arc_data = fit_pch_bootstrap(data, n = 10, sample_prop = 0.7,
 ##'                          noc=as.integer(3), delta=0.1)
 ##'
-##' # Use local parallel processing to fit the 10 polytopes to subsampled datasets each time looking at 70% of examples.
-##' arc_data = fit_pch_robust(data, n = 10, subsample = 0.7,
+##' # Use local parallel processing to fit the 10 polytopes to resampled datasets each time looking at 70% of examples.
+##' arc_data = fit_pch_bootstrap(data, n = 10, sample_prop = 0.7,
 ##'                          noc=as.integer(3), delta=0.1, type = "m")
 ##'
 ##' # Fit polytopes with 2-4 vertices
@@ -55,7 +55,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                      delta = delta, verbose = verbose,
                      conv_crit = conv_crit, maxiter = maxiter)
   names(res) = c("XC", "S", "C", "SSE", "varexpl")
-  # step sorting archetypes to improve reproducibility (archetypes are inherently exchangeable)
+  # step sorting archetypes to improve reproducibility
+  # (archetypes are inherently exchangeable)
   if(noc > 1) {
     XC2 = res$XC[order_by,]
     arch_order = .find_vertex_order(XC2, noc, order_by_side = order_by_side)
@@ -87,9 +88,9 @@ k_fit_pch = function(data, ks = 2:4, check_installed = T, ...) {
                                        ..., check_installed = F))
   # combine results ------------------------------------------------------------
   if(length(ks) > 1){
-  res = list(call = match.call(),
-             pch_fits = .c_pch_fit_list(res))
-  class(res) = "k_pch_fit"
+    res = list(call = match.call(),
+               pch_fits = .c_pch_fit_list(res))
+    class(res) = "k_pch_fit"
   } else {
     res = res[[1]]
   }
@@ -97,24 +98,26 @@ k_fit_pch = function(data, ks = 2:4, check_installed = T, ...) {
 }
 
 ##' @rdname fit_pch
-##' @name fit_pch_robust
-##' @description \code{fit_pch_robust()} subsamples the data to find robust positions of vertices of a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch_subsample()}.
+##' @name fit_pch_bootstrap
+##' @description \code{fit_pch_bootstrap()} Uses bootstrapping (resampling with) the data to find robust positions of vertices of a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch_resample()}.
 ##' @param n number of samples that should be taken
-##' @param subsample either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times which is usefult for evaluating how often the algorithm gets stuck in local optima
+##' @param sample_prop either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times which is usefult for evaluating how often the algorithm gets stuck in local optima
 ##' @param type one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package. "See also" for details.
 ##' @param clust_options list of options for parallel processing. The default for "m" is list(cores = parallel::detectCores()-1, cluster_type = "PSOCK"). The default for "cmq" is list(memory = 2000, template = list(), n_jobs = 10, fail_on_error = FALSE). Change these options as required.
 ##' @param seed seed for reproducible random number generation. Works for all types of processing.
-##' @return \code{fit_pch_robust()} object of class r_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexpl - (vector, length n).
+##' @param replace should resampling be with replacement? passed to \link[base]{sample.int}
+##' @return \code{fit_pch_bootstrap()} object of class r_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexpl - (vector, length n).
 ##' @import clustermq
-##' @export fit_pch_robust
-fit_pch_robust = function(data, n = 3, subsample = NULL, check_installed = T,
+##' @export fit_pch_bootstrap
+fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = T,
                           type = c("s", "m", "cmq")[1], clust_options = list(),
-                          seed = 235, ...) {
+                          seed = 235, replace = FALSE, ...) {
   if(check_installed) .py_pcha_installed()
   # single process -------------------------------------------------------------
   if(type == "s"){
     set.seed(seed)
-    res = lapply(seq_len(n), fit_pch_subsample, data, subsample, ...)
+    res = lapply(seq_len(n), fit_pch_resample, data, sample_prop,
+                 replace = replace, ...)
   }
   # multi-process --------------------------------------------------------------
   if(type == "m"){
@@ -130,8 +133,8 @@ fit_pch_robust = function(data, n = 3, subsample = NULL, check_installed = T,
     # parallel::clusterExport(cl, ls(envir = environment()), envir=environment())
     # set seed
     parallel::clusterSetRNGStream(cl, iseed = seed)
-    res = parallel::parLapply(cl, seq_len(n), ParetoTI::fit_pch_subsample, data,
-                              subsample, ...)
+    res = parallel::parLapply(cl, seq_len(n), ParetoTI::fit_pch_resample, data,
+                              sample_prop, replace = replace, ...)
     # stop cluster
     parallel::stopCluster(cl)
   }
@@ -143,8 +146,9 @@ fit_pch_robust = function(data, n = 3, subsample = NULL, check_installed = T,
     default_retain = !names(default) %in% names(clust_options)
     options = c(default[default_retain], clust_options)
     # run analysis
-    res = clustermq::Q(fun = ParetoTI::fit_pch_subsample, i = seq_len(n),
-                       const = list(data = data, subsample = subsample, ...),
+    res = clustermq::Q(fun = ParetoTI::fit_pch_resample, i = seq_len(n),
+                       const = list(data = data, sample_prop = sample_prop,
+                                    replace = replace, ...),
                        seed = seed,
                        memory = options$memory, template = options$template,
                        n_jobs = options$n_jobs, rettype = "list",
@@ -159,17 +163,18 @@ fit_pch_robust = function(data, n = 3, subsample = NULL, check_installed = T,
 }
 
 ##' @rdname fit_pch
-##' @name fit_pch_subsample
-##' @description \code{fit_pch_subsample()} takes one subsample of the data and fits a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch()}.
+##' @name fit_pch_resample
+##' @description \code{fit_pch_resample()} takes one sample of the data and fits a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch()}.
 ##' @param i iteration number
-##' @return \code{fit_pch_subsample()} object of class pch_fit (list)
-##' @export fit_pch_subsample
-fit_pch_subsample = function(i = 1, data, subsample = NULL, ...) {
-  if(!is.null(subsample)){
-    if(data.table::between(subsample[1], 0, 1)){
-      col_ind = sample.int(ncol(data), round(ncol(data) * subsample[1], digits = 0))
+##' @return \code{fit_pch_resample()} object of class pch_fit (list)
+##' @export fit_pch_resample
+fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE, ...) {
+  if(!is.null(sample_prop)){
+    if(data.table::between(sample_prop[1], 0, 1)){
+      col_ind = sample.int(ncol(data), round(ncol(data) * sample_prop[1], digits = 0),
+                           replace = replace)
       data = data[, col_ind]
-    } else stop("subsample should be NULL or a number between 0 and 1")
+    } else stop("sample_prop should be NULL or a number between 0 and 1")
   }
   ParetoTI::fit_pch(data = data, ..., check_installed = F)
 }

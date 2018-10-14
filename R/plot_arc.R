@@ -42,7 +42,7 @@
 plot_arc = function(arch_data, data, which_dimensions = as.integer(1:2),
                     type = c("average", "all")[1], average_func = mean,
                     geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
-                    colors = c("#D62728", "#1F77B4", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"),
+                    colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"),
                     arch_size = NULL, line_size = NULL) {
   for_plot = ParetoTI:::.arc_data_table(arch_data, data)
   lines_for_plot = ParetoTI:::.archLines(for_plot, label = "archetypes", type, average_func)
@@ -55,6 +55,8 @@ plot_arc = function(arch_data, data, which_dimensions = as.integer(1:2),
     gg_arch_size = 2
     gg_line_size = 1.5
   } else {
+    for_plot[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
+    setorder(for_plot, lab)
     ly_arch_size = 10
     ly_line_size = 5
     gg_arch_size = 5
@@ -101,6 +103,8 @@ plot_arc = function(arch_data, data, which_dimensions = as.integer(1:2),
     x = as.formula(paste0("~", x))
     y = as.formula(paste0("~", y))
     z = as.formula(paste0("~", z))
+    colors = colors[seq(1, uniqueN(for_plot$lab))]
+    names(colors) = as.character(unique(for_plot$lab))
     plot = plot_ly(for_plot, x = x, y = y, z = z,
                    color = ~ lab, colors = colors,
                    marker = list(size = 2)) %>%

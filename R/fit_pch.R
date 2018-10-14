@@ -198,7 +198,7 @@ randomise_fit_pch1 = function(i = 1, data, true_fit = NULL,
                               return_data = FALSE, return_arc = FALSE, ...) {
   # randomise variables
   set.seed(seed)
-  data = rand_var(data, replace = replace, prob = prob)
+  data = ParetoTI::rand_var(data, replace = replace, prob = prob)
   # fit polytope
   if(isTRUE(bootstrap_N <= 1)) { # single
     arc_data = ParetoTI::fit_pch(data = data, ..., check_installed = F)

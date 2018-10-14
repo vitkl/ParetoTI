@@ -7,7 +7,7 @@
 plot_arc(arch_data, data, which_dimensions = as.integer(1:2),
   type = c("average", "all")[1], average_func = mean,
   geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
-  colors = c("#D62728", "#1F77B4", "#2CA02C", "#17BED0", "#006400",
+  colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400",
   "#FF7E0F"), arch_size = NULL, line_size = NULL)
 }
 \arguments{

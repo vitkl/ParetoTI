@@ -23,8 +23,9 @@ fit_pch_resample(i = 1, data, sample_prop = NULL, replace = FALSE,
   ...)
 
 randomise_fit_pch1(i = 1, data, true_fit = NULL, replace = FALSE,
-  prob = NULL, bootstrap_N = 0, seed = 435, bootstrap_type = c("s",
-  "m", "cmq")[1], return_data = FALSE, return_arc = FALSE, ...)
+  prob = NULL, bootstrap_N = NA, seed = 435,
+  bootstrap_type = c("s", "m", "cmq")[1], return_data = FALSE,
+  return_arc = FALSE, ...)
 }
 \arguments{
 \item{data}{numeric matrix in which to find archetypes, variables/dimentions in rows, examples in columns}

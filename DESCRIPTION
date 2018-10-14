@@ -4,6 +4,7 @@ Title: Pareto Task Inference In R (based on ParTI)
 Version: 0.1.0
 Author: Vitalii Kleshchevnikov
 Maintainer: Vitalii Kleshchevnikov <vk7@sanger.ac.uk>
+Authors@R: c(person("Vitalii", "Kleshchevnikov",, "vk7@sanger.ac.uk", role = c("aut", "cre")))
 Description: This package allows you to perform Pareto Task Inference in R as described in
     Yuval Hart & Uri Alon paper in Nature Methods (2015):
     Inferring biological tasks using Pareto analysis of high-dimensional data.

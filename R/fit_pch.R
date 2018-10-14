@@ -193,16 +193,16 @@ fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE, ..
 ##' @export randomise_fit_pch1
 randomise_fit_pch1 = function(i = 1, data, true_fit = NULL,
                               replace = FALSE, prob = NULL,
-                              bootstrap_N = 0, seed = 435,
+                              bootstrap_N = NA, seed = 435,
                               bootstrap_type = c("s", "m", "cmq")[1],
                               return_data = FALSE, return_arc = FALSE, ...) {
   # randomise variables
   set.seed(seed)
   data = ParetoTI::rand_var(data, replace = replace, prob = prob)
   # fit polytope
-  if(isTRUE(bootstrap_N <= 1)) { # single
+  if(is.na(bootstrap_N)) { # single
     arc_data = ParetoTI::fit_pch(data = data, ..., check_installed = F)
-  } else if(isTRUE(is.integer(bootstrap_N))) { # with bootstrap
+  } else if(isTRUE(as.integer(bootstrap_N) > 1)) { # with bootstrap
     arc_data = ParetoTI::fit_pch_bootstrap(data, n = bootstrap_N,
                                            check_installed = F, type = bootstrap_type,
                                            seed = seed,

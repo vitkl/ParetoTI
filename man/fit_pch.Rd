@@ -17,15 +17,14 @@ k_fit_pch(data, ks = 2:4, check_installed = T, ...)
 
 fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
   check_installed = T, type = c("s", "m", "cmq")[1],
-  clust_options = list(), seed = 235, replace = FALSE,
-  sample_type = c("resample", "rand_shape")[1], ...)
+  clust_options = list(), seed = 235, replace = FALSE, ...)
 
 fit_pch_resample(i = 1, data, sample_prop = NULL, replace = FALSE,
-  sample_type = c("resample", "rand_shape")[1], ...)
+  ...)
 
 randomise_fit_pch1(i = 1, data, true_fit = NULL, replace = FALSE,
-  prob = NULL, bootstrap_N = 0, bootstrap_seed = NULL,
-  return_data = FALSE, return_arc = FALSE, ...)
+  prob = NULL, bootstrap_N = 0, seed = 435, bootstrap_type = c("s",
+  "m", "cmq")[1], return_data = FALSE, return_arc = FALSE, ...)
 }
 \arguments{
 \item{data}{numeric matrix in which to find archetypes, variables/dimentions in rows, examples in columns}
@@ -52,9 +51,9 @@ randomise_fit_pch1(i = 1, data, true_fit = NULL, replace = FALSE,
 
 \item{ks}{integer vector, dimensions of polytopes to be fit to data}
 
-\item{n}{number of samples that should be taken}
+\item{n}{number of samples to be taken when bootstraping}
 
-\item{sample_prop}{either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times on the same data which is useful for evaluating how often the algorithm gets stuck in local optima. Not used when sample_type is "rand_shape".}
+\item{sample_prop}{either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times on the same data which is useful for evaluating how often the algorithm gets stuck in local optima.}
 
 \item{type}{one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package. "See also" for details.}
 
@@ -64,15 +63,13 @@ randomise_fit_pch1(i = 1, data, true_fit = NULL, replace = FALSE,
 
 \item{replace}{should resampling be with replacement? passed to \link[base]{sample.int}}
 
-\item{sample_type}{resample the data as is ("resample") or disrupt the relationships between variables keeping the distribution of each variable constant ("rand_shape")?}
-
 \item{i}{iteration number}
 
 \item{prob}{a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{(sample.int}}.}
 
 \item{bootstrap_N}{integer, number of bootstrap samples on random data to measure variability in vertex positions. When this option is chosen bootstrap_seed and sample_prop must be provided}
 
-\item{bootstrap_seed}{seed for random number generation in bootstraping}
+\item{bootstrap_type}{\code{randomise_fit_pch1()}: parallel processing type when bootstraping. Caution: avoid nested parallel processing, do not use "m" and "cmq" inside other parallel functions}
 
 \item{return_data}{return randomised data?}
 

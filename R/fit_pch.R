@@ -100,26 +100,24 @@ k_fit_pch = function(data, ks = 2:4, check_installed = T, ...) {
 ##' @rdname fit_pch
 ##' @name fit_pch_bootstrap
 ##' @description \code{fit_pch_bootstrap()} Uses bootstrapping (resampling with) the data to find robust positions of vertices of a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch_resample()}.
-##' @param n number of samples that should be taken
-##' @param sample_prop either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times on the same data which is useful for evaluating how often the algorithm gets stuck in local optima. Not used when sample_type is "rand_shape".
+##' @param n number of samples to be taken when bootstraping
+##' @param sample_prop either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times on the same data which is useful for evaluating how often the algorithm gets stuck in local optima.
 ##' @param type one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package. "See also" for details.
 ##' @param clust_options list of options for parallel processing. The default for "m" is list(cores = parallel::detectCores()-1, cluster_type = "PSOCK"). The default for "cmq" is list(memory = 2000, template = list(), n_jobs = 10, fail_on_error = FALSE). Change these options as required.
 ##' @param seed seed for reproducible random number generation. Works for all types of processing.
 ##' @param replace should resampling be with replacement? passed to \link[base]{sample.int}
-##' @param sample_type resample the data as is ("resample") or disrupt the relationships between variables keeping the distribution of each variable constant ("rand_shape")?
 ##' @return \code{fit_pch_bootstrap()} object of class b_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexpl - (vector, length n).
 ##' @import clustermq
 ##' @export fit_pch_bootstrap
 fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = T,
                              type = c("s", "m", "cmq")[1], clust_options = list(),
-                             seed = 235, replace = FALSE,
-                             sample_type = c("resample", "rand_shape")[1], ...) {
+                             seed = 235, replace = FALSE, ...) {
   if(check_installed) .py_pcha_installed()
   # single process -------------------------------------------------------------
   if(type == "s"){
     set.seed(seed)
     res = lapply(seq_len(n), fit_pch_resample, data, sample_prop,
-                 replace = replace, sample_type = sample_type, ...)
+                 replace = replace, ...)
   }
   # multi-process --------------------------------------------------------------
   if(type == "m"){
@@ -136,8 +134,7 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
     # set seed
     parallel::clusterSetRNGStream(cl, iseed = seed)
     res = parallel::parLapply(cl, seq_len(n), ParetoTI::fit_pch_resample, data,
-                              sample_prop, replace = replace,
-                              sample_type = sample_type, ...)
+                              sample_prop, replace = replace, ...)
     # stop cluster
     parallel::stopCluster(cl)
   }
@@ -151,8 +148,7 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
     # run analysis
     res = clustermq::Q(fun = ParetoTI::fit_pch_resample, i = seq_len(n),
                        const = list(data = data, sample_prop = sample_prop,
-                                    replace = replace, sample_type = sample_type,
-                                    ...),
+                                    replace = replace, ...),
                        seed = seed,
                        memory = options$memory, template = options$template,
                        n_jobs = options$n_jobs, rettype = "list",
@@ -172,20 +168,15 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
 ##' @param i iteration number
 ##' @return \code{fit_pch_resample()} object of class pch_fit (list)
 ##' @export fit_pch_resample
-fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE,
-                            sample_type = c("resample", "rand_shape")[1], ...) {
-  # do resampling / randomising the shape of the data
-  if(isTRUE(sample_type == "resample")){
-    if(!is.null(sample_prop)){
-      if(data.table::between(sample_prop[1], 0, 1)){
-        col_ind = sample.int(ncol(data), round(ncol(data) * sample_prop[1], digits = 0),
-                             replace = replace)
-        data = data[, col_ind]
-      } else stop("sample_prop should be NULL or a number between 0 and 1")
-    }
-  } else if(isTRUE(sample_type == "rand_shape")){
-    data = rand_var(data, replace = replace, prob = NULL)
-  } else stop("sample_type should be one of: resample / rand_shape")
+fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE, ...) {
+  # do resampling of the data
+  if(!is.null(sample_prop)){
+    if(data.table::between(sample_prop[1], 0, 1)){
+      col_ind = sample.int(ncol(data), round(ncol(data) * sample_prop[1], digits = 0),
+                           replace = replace)
+      data = data[, col_ind]
+    } else stop("sample_prop should be NULL or a number between 0 and 1")
+  }
   # fit polytope
   ParetoTI::fit_pch(data = data, ..., check_installed = F)
 }
@@ -195,29 +186,33 @@ fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE,
 ##' @description \code{randomise_fit_pch1()} helps answer the question "how likely you are to obtain the observed shape of the data given no relationship between variables?" disrupts the relationships between variables (one sample of the data), keeping the distribution of each variable constant, and fits a polytope (Principal Convex Hull) to data. This function uses \code{\link[ParetoTI]{rand_var}} and \code{fit_pch()}.
 ##' @param prob a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{(sample.int}}.
 ##' @param bootstrap_N integer, number of bootstrap samples on random data to measure variability in vertex positions. When this option is chosen bootstrap_seed and sample_prop must be provided
-##' @param bootstrap_seed seed for random number generation in bootstraping
+##' @param bootstrap_type \code{randomise_fit_pch1()}: parallel processing type when bootstraping. Caution: avoid nested parallel processing, do not use "m" and "cmq" inside other parallel functions
 ##' @param return_data return randomised data?
 ##' @param return_arc return archetype positions in randomised data?
 ##' @return \code{randomise_fit_pch1()} object of class pch_fit (list)
 ##' @export randomise_fit_pch1
 randomise_fit_pch1 = function(i = 1, data, true_fit = NULL,
                               replace = FALSE, prob = NULL,
-                              bootstrap_N = 0, bootstrap_seed = NULL,
+                              bootstrap_N = 0, seed = 435,
+                              bootstrap_type = c("s", "m", "cmq")[1],
                               return_data = FALSE, return_arc = FALSE, ...) {
   # randomise variables
+  set.seed(seed)
   data = rand_var(data, replace = replace, prob = prob)
   # fit polytope
-  if(isTRUE(bootstrap_N == 0)) { # single
+  if(isTRUE(bootstrap_N <= 1)) { # single
     arc_data = ParetoTI::fit_pch(data = data, ..., check_installed = F)
   } else if(isTRUE(is.integer(bootstrap_N))) { # with bootstrap
     arc_data = ParetoTI::fit_pch_bootstrap(data, n = bootstrap_N,
-                                           check_installed = F, type = "s",
-                                           seed = seed, replace = replace, ...)
+                                           check_installed = F, type = bootstrap_type,
+                                           seed = seed,
+                                           replace = replace, ...)
   }
   # compare to true_fit
 
   # return
   res = list()
+  res$call = match.call()
   if(isTRUE(return_data)) res$data = data else res$data = NULL
   if(isTRUE(return_arc)) res$arc_data = arc_data else res$arc_data = NULL
   res

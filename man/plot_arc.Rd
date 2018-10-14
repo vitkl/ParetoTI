@@ -15,9 +15,9 @@ plot_arc(arch_data, data, which_dimensions = as.integer(1:2),
 
 \item{which_dimensions}{indices or character vector specifying dimension names}
 
-\item{type}{used when arc_data is "r_pch_fit", one of "average", "all"}
+\item{type}{used when arc_data is "b_pch_fit", one of "average", "all"}
 
-\item{average_func}{used when arc_data is "r_pch_fit", function telling how to find average position of vertices}
+\item{average_func}{used when arc_data is "b_pch_fit", function telling how to find average position of vertices}
 
 \item{geom}{plotting function to plot data in 2D, useful options are ggplot2::geom_point (scatterplot) and ggplot2::geom_bin2d (density)}
 
@@ -27,13 +27,13 @@ plot_arc(arch_data, data, which_dimensions = as.integer(1:2),
 
 \item{line_size}{width of lines connecting archetypes}
 
-\item{arc_data}{objects of class "pch_fit", "r_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.}
+\item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.}
 }
 \value{
 \code{plot_arc()} ggplot2 (2D) or plotly (3D) plot
 }
 \description{
-\code{plot_arc()} plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "r_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").
+\code{plot_arc()} plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "b_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").
 }
 \examples{
 library(ParetoTI)

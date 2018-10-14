@@ -5,6 +5,7 @@
 \alias{k_fit_pch}
 \alias{fit_pch_bootstrap}
 \alias{fit_pch_resample}
+\alias{randomise_fit_pch1}
 \title{Fit a polytope (Principal Convex Hull) to data using PCHA algorithm}
 \usage{
 fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
@@ -16,10 +17,15 @@ k_fit_pch(data, ks = 2:4, check_installed = T, ...)
 
 fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
   check_installed = T, type = c("s", "m", "cmq")[1],
-  clust_options = list(), seed = 235, replace = FALSE, ...)
+  clust_options = list(), seed = 235, replace = FALSE,
+  sample_type = c("resample", "rand_shape")[1], ...)
 
 fit_pch_resample(i = 1, data, sample_prop = NULL, replace = FALSE,
-  ...)
+  sample_type = c("resample", "rand_shape")[1], ...)
+
+randomise_fit_pch1(i = 1, data, true_fit = NULL, replace = FALSE,
+  prob = NULL, bootstrap_N = 0, bootstrap_seed = NULL,
+  return_data = FALSE, return_arc = FALSE, ...)
 }
 \arguments{
 \item{data}{numeric matrix in which to find archetypes, variables/dimentions in rows, examples in columns}
@@ -48,7 +54,7 @@ fit_pch_resample(i = 1, data, sample_prop = NULL, replace = FALSE,
 
 \item{n}{number of samples that should be taken}
 
-\item{sample_prop}{either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times which is usefult for evaluating how often the algorithm gets stuck in local optima}
+\item{sample_prop}{either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times on the same data which is useful for evaluating how often the algorithm gets stuck in local optima. Not used when sample_type is "rand_shape".}
 
 \item{type}{one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package. "See also" for details.}
 
@@ -58,7 +64,19 @@ fit_pch_resample(i = 1, data, sample_prop = NULL, replace = FALSE,
 
 \item{replace}{should resampling be with replacement? passed to \link[base]{sample.int}}
 
+\item{sample_type}{resample the data as is ("resample") or disrupt the relationships between variables keeping the distribution of each variable constant ("rand_shape")?}
+
 \item{i}{iteration number}
+
+\item{prob}{a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{(sample.int}}.}
+
+\item{bootstrap_N}{integer, number of bootstrap samples on random data to measure variability in vertex positions. When this option is chosen bootstrap_seed and sample_prop must be provided}
+
+\item{bootstrap_seed}{seed for random number generation in bootstraping}
+
+\item{return_data}{return randomised data?}
+
+\item{return_arc}{return archetype positions in randomised data?}
 }
 \value{
 \code{fit_pch()} object of class pch_fit (list) containing the following elements:
@@ -70,9 +88,11 @@ varexpl - numeric vector (1L), Percent variation explained by the model.
 
 \code{k_fit_pch()} object of class k_pch_fit (list) containing XC (list of length(ks), individual XC matrices), S (list of length(ks), individual S matrices),  C (list of length(ks), individual C matrices), SSE (vector, length(ks)); varexpl - (vector, length(ks)). When length(ks) = 1 returns pch_fit.
 
-\code{fit_pch_bootstrap()} object of class r_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexpl - (vector, length n).
+\code{fit_pch_bootstrap()} object of class b_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexpl - (vector, length n).
 
 \code{fit_pch_resample()} object of class pch_fit (list)
+
+\code{randomise_fit_pch1()} object of class pch_fit (list)
 }
 \description{
 \code{fit_pch()} fits a polytope (Principal Convex Hull) to data using PCHA algorithm. All of the listed functions take input matrix dim(variables/dimentions, examples) and return output (XC) of dim(variables/dimentions, archetypes).
@@ -82,6 +102,8 @@ varexpl - numeric vector (1L), Percent variation explained by the model.
 \code{fit_pch_bootstrap()} Uses bootstrapping (resampling with) the data to find robust positions of vertices of a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch_resample()}.
 
 \code{fit_pch_resample()} takes one sample of the data and fits a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch()}.
+
+\code{randomise_fit_pch1()} helps answer the question "how likely you are to obtain the observed shape of the data given no relationship between variables?" disrupts the relationships between variables (one sample of the data), keeping the distribution of each variable constant, and fits a polytope (Principal Convex Hull) to data. This function uses \code{\link[ParetoTI]{rand_var}} and \code{fit_pch()}.
 }
 \details{
 \code{fit_pch()} provides an R interface to python implementation of PCHA algorithm (Principal Convex Hull Analysis) by Ulf Aslak (https://github.com/ulfaslak/py_pcha) which was originally developed for Archetypal Analysis by Mørup et. al.

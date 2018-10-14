@@ -9,9 +9,9 @@ rand_var(x, replace = FALSE, prob = NULL)
 \arguments{
 \item{x}{matrix to be permuted}
 
-\item{replace}{should sampling be with replacement? Passed to [base](sample.int).}
+\item{replace}{should sampling be with replacement? Passed to \code{\link[base]{sample.int}}.}
 
-\item{prob}{a vector of probability weights for obtaining the elements of the vector being sampled. Passed to [base](sample.int).}
+\item{prob}{a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{(sample.int}}.}
 }
 \value{
 Matrix of the same dimention as the original matrix but with values in each column permuted.

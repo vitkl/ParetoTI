@@ -2,12 +2,12 @@
 ##' @rdname plot_arc
 ##' @name plot_arc
 ##' @author Vitalii Kleshchevnikov
-##' @description \code{plot_arc()} plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "r_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").
-##' @param arc_data objects of class "pch_fit", "r_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.
+##' @description \code{plot_arc()} plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "b_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").
+##' @param arc_data objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.
 ##' @param data matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)
 ##' @param which_dimensions indices or character vector specifying dimension names
-##' @param type used when arc_data is "r_pch_fit", one of "average", "all"
-##' @param average_func used when arc_data is "r_pch_fit", function telling how to find average position of vertices
+##' @param type used when arc_data is "b_pch_fit", one of "average", "all"
+##' @param average_func used when arc_data is "b_pch_fit", function telling how to find average position of vertices
 ##' @param geom plotting function to plot data in 2D, useful options are ggplot2::geom_point (scatterplot) and ggplot2::geom_bin2d (density)
 ##' @param colors character vector giving color palette for different archetype fits and the data (both 3D and 2D plot)
 ##' @param arch_size size of archetype point
@@ -46,7 +46,7 @@ plot_arc = function(arch_data, data, which_dimensions = as.integer(1:2),
                     arch_size = NULL, line_size = NULL) {
   for_plot = ParetoTI:::.arc_data_table(arch_data, data)
   lines_for_plot = ParetoTI:::.archLines(for_plot, label = "archetypes", type, average_func)
-  if(is(arch_data, "r_pch_fit") & type == "average"){
+  if(is(arch_data, "b_pch_fit") & type == "average"){
     for_plot[grepl("archetypes", lab), lab := "archetypes"]
     for_plot[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
     setorder(for_plot, lab)

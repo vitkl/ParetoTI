@@ -4,8 +4,8 @@
 ##' @author Vitalii Kleshchevnikov
 ##' @description This function uses permutations or sampling with replacement to disrupt relationships between variables but keep the distribution of each variable constant. Variables should be in columns of a matrix.
 ##' @param x matrix to be permuted
-##' @param replace should sampling be with replacement? Passed to [base](sample.int).
-##' @param prob a vector of probability weights for obtaining the elements of the vector being sampled. Passed to [base](sample.int).
+##' @param replace should sampling be with replacement? Passed to \code{\link[base]{sample.int}}.
+##' @param prob a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{(sample.int}}.
 ##' @return Matrix of the same dimention as the original matrix but with values in each column permuted.
 ##' @export rand_var
 ##' @seealso \code{\link{}}, \code{\link{}}

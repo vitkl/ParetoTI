@@ -1,7 +1,7 @@
 ##'
 ##'
 ##' Project in low dimentions (PCA) and process data and polytopes fits for plotting
-##' @param arc_data objects of class "pch_fit", "r_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.
+##' @param arc_data objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.
 ##' @param data matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)
 ##' @examples
 ##' # Random data that fits into the triangle
@@ -21,7 +21,7 @@ process_for_plotly = function(arc_data, data){
     arc_data = as.data.table(t(arc_data$XC))
     arc_data$lab = "archetypes"
   }
-  if(is(arc_data, "r_pch_fit")){
+  if(is(arc_data, "b_pch_fit")){
     arc_data$pch_fits$XC = arc_data$pch_fits$XC[!sapply(arc_data$pch_fits$XC, is.null)]
     arc_data = lapply(seq(1, length(arc_data$pch_fits$XC)), function(i){
       arc_data = as.data.table(t(arc_data$pch_fits$XC[[i]]))

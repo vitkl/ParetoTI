@@ -15,6 +15,7 @@
 ##' @param check_installed if TRUE, check if python module py_pcha is found. Useful to set to FALSE for running analysis or within other functions
 ##' @param order_by integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector.
 ##' @param order_by_side used for ordering. If TRUE use 2 dimentions, cosine distance to c(1,1) and measure to which side of the c(1,1) vector each vertex vector is located. If FALSE use more than 2 dimentions (provided via order_by) and use cosine distance to c(1,1, ..., 1) to order vertices.
+##' @param convex_hull find volume of the convex hull of the data and the t-ratio? Caution. Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions. Geometric figure should be at least simplex: qhull algorhirm will fail to find convel hull of flat 2D shapes in 3D, 3D shapes in 4D and so on.
 ##' @return \code{fit_pch()} object of class pch_fit (list) containing the following elements:
 ##' XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes);
 ##' S - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
@@ -48,7 +49,8 @@
 fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    delta = 0, verbose = FALSE, conv_crit = 1e-6,
                    maxiter = 500, check_installed = T,
-                   order_by = seq(1, nrow(data)), order_by_side = TRUE) {
+                   order_by = seq(1, nrow(data)), order_by_side = TRUE,
+                   convex_hull = FALSE) {
   if(check_installed) .py_pcha_installed()
   # run PCHA
   res = py_PCHA$PCHA(X = data, noc = as.integer(noc), I = I, U = U,
@@ -64,11 +66,30 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     res$S = res$S[arch_order, ]
     res$C = res$C[arch_order, ]
   } else {
+    # when only one vertex make sure data is still in the matrix form
     res$XC = matrix(res$XC, length(res$XC), 1)
     res$S = matrix(res$S, 1, length(res$S))
     res$C = matrix(res$C, 1, 1)
   }
 
+  if(isTRUE(convex_hull)){
+    # find volume of the convex hull of the data
+    hull_vol = fit_convhulln(data, positions = FALSE)
+    # find volume of the polytope fit, qhull requires at least 4 points in 2D
+    # and more in higher dimensions so we have to add 10 points within
+    # PCHA-fit polytope
+    archetypes = res$XC
+    data_arc = cbind(archetypes, generate_data(archetypes, N_examples = 10,
+                                               jiiter = 0, size = 1))
+    arc_vol = fit_convhulln(t(data_arc), positions = FALSE)
+    res$hull_vol = hull_vol$vol
+    res$arc_vol = arc_vol$vol
+    res$t_ratio = res$arc_vol / res$hull_vol
+  } else {
+    res$hull_vol = NA
+    res$arc_vol = NA
+    res$t_ratio = NA
+  }
   res$call = match.call()
   class(res) = "pch_fit"
   res
@@ -106,12 +127,13 @@ k_fit_pch = function(data, ks = 2:4, check_installed = T, ...) {
 ##' @param clust_options list of options for parallel processing. The default for "m" is list(cores = parallel::detectCores()-1, cluster_type = "PSOCK"). The default for "cmq" is list(memory = 2000, template = list(), n_jobs = 10, fail_on_error = FALSE). Change these options as required.
 ##' @param seed seed for reproducible random number generation. Works for all types of processing.
 ##' @param replace should resampling be with replacement? passed to \link[base]{sample.int}
+##' @param average average archetype positions and varexpl? By default NULL, return all fits to resampled data. Provide funtion such as mean() and median() to average those.
 ##' @return \code{fit_pch_bootstrap()} object of class b_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexpl - (vector, length n).
 ##' @import clustermq
 ##' @export fit_pch_bootstrap
 fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = T,
                              type = c("s", "m", "cmq")[1], clust_options = list(),
-                             seed = 235, replace = FALSE, ...) {
+                             seed = 235, replace = FALSE, average = NULL,  ...) {
   if(check_installed) .py_pcha_installed()
   # single process -------------------------------------------------------------
   if(type == "s"){
@@ -158,6 +180,22 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
   # combine results ------------------------------------------------------------
   res = list(call = match.call(),
              pch_fits = .c_pch_fit_list(res))
+  # average results ------------------------------------------------------------
+  if(!is.null(average)){
+    if(is.function(average)){
+      # calculate average XC matrix, set other S and C to NA
+      XC_array = simplify2array(arc_data4$pch_fits$XC)
+      arc_data3$pch_fits$XC = list(rowMeans(XC_array, dims = 2))
+      # calculate variance in positions - add option that returns mean positions and put that inside k_fit (this lets to output variances and varexpl in the same object)
+      dim. = c(dim(XC_array)[1] * dim(XC_array)[2], dim(XC_array)[3])
+      var = matrix(matrixStats::rowVars(XC_array,dim. = dim.),
+                   dim(XC_array)[1], dim(XC_array)[2])
+      matrix(matrixStats::rowMeans2(XC_array, dim. = dim.),
+             dim(XC_array)[1], dim(XC_array)[2])
+      # sum up variances for all vertices to get a single number - put this into fit_pch_bootstrap
+      # calculate mean varexpl and t_ratio
+    } else stop("average neither function nor NULL")
+  }
   class(res) = "b_pch_fit"
   res
 }
@@ -198,7 +236,7 @@ randomise_fit_pch1 = function(i = 1, data, true_fit = NULL,
                               return_data = FALSE, return_arc = FALSE, ...) {
   # randomise variables
   set.seed(seed)
-  data = ParetoTI::rand_var(data, replace = replace, prob = prob)
+  data = ParetoTI::rand_var(data, MARGIN = 1, replace = replace, prob = prob)
   # fit polytope
   if(is.na(bootstrap_N)) { # single
     arc_data = ParetoTI::fit_pch(data = data, ..., check_installed = F)
@@ -209,13 +247,33 @@ randomise_fit_pch1 = function(i = 1, data, true_fit = NULL,
                                            replace = replace, ...)
   }
   # compare to true_fit
-
-  # return
   res = list()
+  res$rand_varexpl = arc_data$varexpl
+  res$rand_t_ratio = arc_data$t_ratio
+  # return
   res$call = match.call()
   if(isTRUE(return_data)) res$data = data else res$data = NULL
   if(isTRUE(return_arc)) res$arc_data = arc_data else res$arc_data = NULL
   res
+}
+
+##' @rdname fit_pch
+##' @name fit_convhulln
+##' @description \code{fit_convhulln()} computes smallest convex hull that encloses a set of points using \code{\link[geometry]{convhulln}} and returns positions of convex hull points (positions = TRUE).
+##' @param positions return positions of convex hull points?
+##' @return \code{fit_convhulln()} list with 3 elements: hull - matrix storing positions of points dim(points, dimensions)); area - surface area for 3D or higher and perimeter for 2D; vol - volume for 3D and surface area for 2D.
+##' @export fit_convhulln
+fit_convhulln = function(data, positions = TRUE) {
+  # convhulln requires dim(examples, variables/dimentions)
+  # in contrast to all other functions and PCHA
+  hull = geometry::convhulln(t(data), options = "FA")
+  if(isTRUE(positions)){
+    hull$hull = vapply(seq(1, ncol(hull$hull)), function(i){
+      data[hull$hull,i]
+    }, FUN.VALUE = numeric(nrow(hull$hull) * 2))
+    hull$hull = unique(hull$hull)
+  } else hull$hull = NA
+  hull
 }
 
 .c_pch_fit_list = function(pch_fit_list){
@@ -223,7 +281,10 @@ randomise_fit_pch1 = function(i = 1, data, true_fit = NULL,
        S = lapply(pch_fit_list, function(pch) pch$S),
        C = lapply(pch_fit_list, function(pch) pch$C),
        SSE = vapply(pch_fit_list, function(pch) pch$SSE, FUN.VALUE = numeric(1L)),
-       varexpl = vapply(pch_fit_list, function(pch) pch$varexpl, FUN.VALUE = numeric(1L)))
+       varexpl = vapply(pch_fit_list, function(pch) pch$varexpl, FUN.VALUE = numeric(1L)),
+       hull_vol = vapply(pch_fit_list, function(pch) pch$hull_vol, FUN.VALUE = numeric(1L)),
+       arc_vol = vapply(pch_fit_list, function(pch) pch$arc_vol, FUN.VALUE = numeric(1L)),
+       t_ratio = vapply(pch_fit_list, function(pch) pch$t_ratio, FUN.VALUE = numeric(1L)))
 }
 
 ## .find_vertex_order orders vertices by cosine relative to the unit vector c(1, 1)

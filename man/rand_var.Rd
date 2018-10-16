@@ -4,10 +4,12 @@
 \alias{rand_var}
 \title{Permute each column of a matrix or sample from it's ECDF (with replacement)}
 \usage{
-rand_var(x, replace = FALSE, prob = NULL)
+rand_var(x, MARGIN = 2, replace = FALSE, prob = NULL)
 }
 \arguments{
 \item{x}{matrix to be permuted}
+
+\item{MARGIN}{which dimension of a matrix to permute? Passed to \code{\link[base]{apply}}.}
 
 \item{replace}{should sampling be with replacement? Passed to \code{\link[base]{sample.int}}.}
 
@@ -23,10 +25,7 @@ This function uses permutations or sampling with replacement to disrupt relation
 set.seed(4354)
 N = 1000
 x = matrix(rnorm(N * 10 * N), N * 10, N)
-
-}
-\seealso{
-\code{\link{}}, \code{\link{}}
+x_rand = rand_var(x, MARGIN = 2, replace = FALSE, prob = NULL)
 }
 \author{
 Vitalii Kleshchevnikov

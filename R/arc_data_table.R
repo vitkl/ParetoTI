@@ -12,15 +12,15 @@
 project = function(arc_data, data){
 
 }
-process_for_plotly = function(arc_data, data){
-
-}
 
 .arc_data_table = function(arc_data, data, type = c("average", "all")[1], average_func = mean){
+  # if single fit just add label column
   if(is(arc_data, "pch_fit") | is(arc_data, "random_arc")){
     arc_data = as.data.table(t(arc_data$XC))
     arc_data$lab = "archetypes"
   }
+  # if multiple fits from bootstrap or different k - combine all matrices
+  # in one data.table with each matrix getting unique label
   if(is(arc_data, "b_pch_fit")){
     arc_data$pch_fits$XC = arc_data$pch_fits$XC[!sapply(arc_data$pch_fits$XC, is.null)]
     arc_data = lapply(seq(1, length(arc_data$pch_fits$XC)), function(i){
@@ -34,6 +34,7 @@ process_for_plotly = function(arc_data, data){
     arc_data$pch_fits$XC = arc_data$pch_fits$XC[!sapply(arc_data$pch_fits$XC, is.null)]
     arc_data = lapply(seq(1, length(arc_data$pch_fits$XC)), function(i){
       arc_data = as.data.table(t(arc_data$pch_fits$XC[[i]]))
+      # label by number of archetypes rather than iteration
       arc_data$lab = paste0("archetypes", nrow(arc_data))
       arc_data
     })

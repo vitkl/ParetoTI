@@ -6,29 +6,38 @@
 \alias{fit_pch_bootstrap}
 \alias{fit_pch_resample}
 \alias{randomise_fit_pch1}
+\alias{fit_convhulln}
+\alias{print.pch_fit}
 \title{Fit a polytope (Principal Convex Hull) to data using PCHA algorithm}
 \usage{
 fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
   verbose = FALSE, conv_crit = 1e-06, maxiter = 500,
   check_installed = T, order_by = seq(1, nrow(data)),
-  order_by_side = TRUE)
+  order_type = c("cosine", "side", "align")[1], convex_hull = FALSE)
 
-k_fit_pch(data, ks = 2:4, check_installed = T, ...)
+k_fit_pch(data, ks = 2:4, check_installed = TRUE, bootstrap = FALSE,
+  bootstrap_N = 10, bootstrap_type = c("s", "m", "cmq")[1],
+  seed = 345, ...)
 
 fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
   check_installed = T, type = c("s", "m", "cmq")[1],
-  clust_options = list(), seed = 235, replace = FALSE, ...)
+  clust_options = list(), seed = 235, replace = FALSE,
+  average = FALSE, order_type = c("cosine", "side", "align")[1], ...)
 
 fit_pch_resample(i = 1, data, sample_prop = NULL, replace = FALSE,
   ...)
 
-randomise_fit_pch1(i = 1, data, true_fit = NULL, replace = FALSE,
-  prob = NULL, bootstrap_N = NA, seed = 435,
-  bootstrap_type = c("s", "m", "cmq")[1], return_data = FALSE,
-  return_arc = FALSE, ...)
+randomise_fit_pch1(i = 1, data, replace = FALSE, prob = NULL,
+  bootstrap_N = NA, seed = 435, bootstrap_type = c("s", "m",
+  "cmq")[1], return_data = FALSE, return_arc = FALSE,
+  bootstrap_average = FALSE, convex_hull = TRUE, ...)
+
+fit_convhulln(data, positions = TRUE)
+
+\method{print}{pch_fit}(res)
 }
 \arguments{
-\item{data}{numeric matrix in which to find archetypes, variables/dimentions in rows, examples in columns}
+\item{data}{numeric matrix in which to find archetypes, dim(variables/dimentions, examples)}
 
 \item{noc}{integer, number of archetypes to find}
 
@@ -46,11 +55,21 @@ randomise_fit_pch1(i = 1, data, true_fit = NULL, replace = FALSE,
 
 \item{check_installed}{if TRUE, check if python module py_pcha is found. Useful to set to FALSE for running analysis or within other functions}
 
-\item{order_by}{integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector.}
+\item{order_by}{integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector. When bootstraping vertices can be aligned to reference and ordered (order_type == "align") by these dimensions.}
 
-\item{order_by_side}{used for ordering. If TRUE use 2 dimentions, cosine distance to c(1,1) and measure to which side of the c(1,1) vector each vertex vector is located. If FALSE use more than 2 dimentions (provided via order_by) and use cosine distance to c(1,1, ..., 1) to order vertices.}
+\item{order_type}{order archetypes by: cosine distance from c(1,1, ..., 1) vector ("cosine"), dot product that measures position to each side of the c(1,1) vector ("side"), align positions to reference when bootstraping(fit using all data, "align"). See \link[ParetoTI]{align_arc} When order_type is "align" vertices are ordered by "cosine" first.}
+
+\item{convex_hull}{find volume of the convex hull of the data and the t-ratio? Caution. Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions. Geometric figure should be at least simplex: qhull algorhirm will fail to find convel hull of flat 2D shapes in 3D, 3D shapes in 4D and so on.}
 
 \item{ks}{integer vector, dimensions of polytopes to be fit to data}
+
+\item{bootstrap}{\code{k_fit_pch()}: use bootstrap to find average positions for each k? Also returns variability in vertex position to aid the selection of k. At excessive k position vary more.}
+
+\item{bootstrap_N}{randomise_fit_pch1() and k_fit_pch(): integer, number of bootstrap samples on random data to measure variability in vertex positions. When this option is chosen bootstrap_seed and sample_prop must be provided}
+
+\item{bootstrap_type}{\code{randomise_fit_pch1()} and \code{k_fit_pch()}: parallel processing type when bootstraping. Caution: avoid nested parallel processing, do not use "m" and "cmq" inside other parallel functions.}
+
+\item{seed}{seed for reproducible random number generation. Works for all types of processing.}
 
 \item{n}{number of samples to be taken when bootstraping}
 
@@ -60,40 +79,48 @@ randomise_fit_pch1(i = 1, data, true_fit = NULL, replace = FALSE,
 
 \item{clust_options}{list of options for parallel processing. The default for "m" is list(cores = parallel::detectCores()-1, cluster_type = "PSOCK"). The default for "cmq" is list(memory = 2000, template = list(), n_jobs = 10, fail_on_error = FALSE). Change these options as required.}
 
-\item{seed}{seed for reproducible random number generation. Works for all types of processing.}
-
 \item{replace}{should resampling be with replacement? passed to \link[base]{sample.int}}
+
+\item{average}{average archetype positions and varexpl? By default FALSE, return all fits to resampled data.}
 
 \item{i}{iteration number}
 
 \item{prob}{a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{(sample.int}}.}
 
-\item{bootstrap_N}{integer, number of bootstrap samples on random data to measure variability in vertex positions. When this option is chosen bootstrap_seed and sample_prop must be provided}
-
-\item{bootstrap_type}{\code{randomise_fit_pch1()}: parallel processing type when bootstraping. Caution: avoid nested parallel processing, do not use "m" and "cmq" inside other parallel functions}
-
 \item{return_data}{return randomised data?}
 
 \item{return_arc}{return archetype positions in randomised data?}
+
+\item{bootstrap_average}{\code{randomise_fit_pch1()}: average positions and summary statistics when bootstraping? Passed to \code{average} argument of \code{fit_pch_bootstrap()}.}
+
+\item{positions}{return positions of convex hull points?}
 }
 \value{
-\code{fit_pch()} object of class pch_fit (list) containing the following elements:
+\code{fit_pch()}: object of class pch_fit (list) containing the following elements:
 XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes);
 S - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 C - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 SSE - numeric vector (1L), Sum of Squared Errors;
 varexpl - numeric vector (1L), Percent variation explained by the model.
+hull_vol - numeric vector (1L), Volume of convex hull of the data.
+arc_vol - numeric vector (1L), Volume of polytope enclosed by vertices.
+t_ratio - numeric vector (1L), Ratio of \code{arc_vol} to \code{hull_vol}
+var - numeric vector (noc L), Variance in position of each vertex.
+total_var - numeric vector (1L), Mean variance in position of all vertices.
+call - function call.
 
-\code{k_fit_pch()} object of class k_pch_fit (list) containing XC (list of length(ks), individual XC matrices), S (list of length(ks), individual S matrices),  C (list of length(ks), individual C matrices), SSE (vector, length(ks)); varexpl - (vector, length(ks)). When length(ks) = 1 returns pch_fit.
+\code{k_fit_pch()}: object of class k_pch_fit (list) containing the same elements as pch_fit, but each is either a list of pch_fit elements (e.g. list of ks number of XC matrices) or a vector (which pch_fit element is one number). When length(ks) = 1 returns pch_fit.
 
-\code{fit_pch_bootstrap()} object of class b_pch_fit (list) containing XC (list of length n, individual XC matrices), S (list of length n, individual S matrices),  C (list of length n, individual C matrices), SSE (vector, length n); varexpl - (vector, length n).
+\code{fit_pch_bootstrap()} object of class b_pch_fit (list) containing the same elements as pch_fit, but each is either a list of pch_fit elements (e.g. list of n number of XC matrices) or a vector (which pch_fit element is one number).
 
-\code{fit_pch_resample()} object of class pch_fit (list)
+\code{fit_pch_resample()} object of class pch_fit
 
-\code{randomise_fit_pch1()} object of class pch_fit (list)
+\code{randomise_fit_pch1()}: list containing function call, summary of the sample, optional data and optional position of vertices/archetypes.
+
+\code{fit_convhulln()} list with 3 elements: hull - matrix storing positions of points dim(points, dimensions)); area - surface area for 3D or higher and perimeter for 2D; vol - volume for 3D and surface area for 2D.
 }
 \description{
-\code{fit_pch()} fits a polytope (Principal Convex Hull) to data using PCHA algorithm. All of the listed functions take input matrix dim(variables/dimentions, examples) and return output (XC) of dim(variables/dimentions, archetypes).
+\code{fit_pch()} fits a polytope (Principal Convex Hull) to data using PCHA algorithm. All of the listed functions take input matrix dim(variables/dimentions, examples) and return archetype positions (XC) of dim(variables/dimentions, archetypes).
 
 \code{k_fit_pch()} finds polytopes of k dimensions in the data. This function applies \code{fit_pch()} to different k-s.
 
@@ -102,6 +129,8 @@ varexpl - numeric vector (1L), Percent variation explained by the model.
 \code{fit_pch_resample()} takes one sample of the data and fits a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch()}.
 
 \code{randomise_fit_pch1()} helps answer the question "how likely you are to obtain the observed shape of the data given no relationship between variables?" disrupts the relationships between variables (one sample of the data), keeping the distribution of each variable constant, and fits a polytope (Principal Convex Hull) to data. This function uses \code{\link[ParetoTI]{rand_var}} and \code{fit_pch()}.
+
+\code{fit_convhulln()} computes smallest convex hull that encloses a set of points using \code{\link[geometry]{convhulln}} and returns positions of convex hull points (positions = TRUE).
 }
 \details{
 \code{fit_pch()} provides an R interface to python implementation of PCHA algorithm (Principal Convex Hull Analysis) by Ulf Aslak (https://github.com/ulfaslak/py_pcha) which was originally developed for Archetypal Analysis by Mørup et. al.
@@ -113,20 +142,39 @@ archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
 data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 dim(data)
 # Fit a polytope with 3 vertices to data matrix
-arc = fit_pch(data, noc=as.integer(3), delta=0.1)
+arc = fit_pch(data, noc=as.integer(3), delta=0)
 # Fit the same polytope 3 times without resampling to test convergence of the algorithm.
 arc_rob = fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
-                         noc=as.integer(3), delta=0.1)
+                         noc=as.integer(3), delta=0)
 # Fit the 10 polytopes to resampled datasets each time looking at 70\% of examples.
 arc_data = fit_pch_bootstrap(data, n = 10, sample_prop = 0.7,
-                         noc=as.integer(3), delta=0.1)
+                         noc=as.integer(3), delta=0)
 
 # Use local parallel processing to fit the 10 polytopes to resampled datasets each time looking at 70\% of examples.
 arc_data = fit_pch_bootstrap(data, n = 10, sample_prop = 0.7,
-                         noc=as.integer(3), delta=0.1, type = "m")
+                         noc=as.integer(3), delta=0, type = "m")
 
 # Fit polytopes with 2-4 vertices
-arc_ks = k_fit_pch(data, ks = 2:4, check_installed = T, delta=0.1)
+arc_ks = k_fit_pch(data, ks = 2:4, check_installed = T, delta=0)
+
+# Evaluate how much vertices vary in randomised data, (variable shuffled
+# without replacement)
+rand3 = randomise_fit_pch1(i = 1, data, true_fit = NULL,
+    replace = FALSE, bootstrap_N = 200, seed = 2543,
+    return_data = T, return_arc = T, sample_prop = 0.65,
+    order_type = "align", noc = as.integer(3),
+    delta = 0.1, bootstrap_type = "cmq")
+p = plot_arc(arc_data, data, which_dimensions = 1:2, line_size = 1)
+# plot fits to data and randomised data side-by-side using cowplot
+library(cowplot)
+# create compound plot
+p_all = plot_grid(plotlist = list(p + theme(legend.position = "none"),
+                                  plot_arc(rand3$arc_data, rand3$data,
+                                    which_dimensions = 1:2, line_size = 1) +
+                                    theme(legend.position = "none")))
+legend = get_legend(p)
+# add legend to plot
+plot_grid(p_all, legend, rel_widths = c(3.2, .6))
 }
 \seealso{
 \code{\link[parallel]{parLapply}}, \code{\link[base]{lapply}}, \code{\link[clustermq]{Q}}

@@ -7,15 +7,15 @@
 arch_dist(data, archetypes)
 }
 \arguments{
-\item{data}{matrix of dim(examples, dimensions)}
+\item{data}{matrix of dim(variables/dimentions, examples)}
 
-\item{archetypes}{matrix of dim(archetypes, dimensions)}
+\item{archetypes}{matrix of dim(variables/dimentions, archetypes)}
 }
 \value{
 matrix of distances to archetypes of dim(examples, archetypes)
 }
 \description{
-\code{arch_dist()} calculates distance from every point to every archetype give matrices that contain this data.
+\code{arch_dist()} calculates Euclidian distance from every point to every archetype give matrices that contain this data.
 }
 \examples{
 # Triangle with sides of 3,4,5 units length
@@ -26,9 +26,9 @@ archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
                           mean = 0, sd = 1, N_dim = 2)
 data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 # Find Euclidian distance between data points and archetypes
-distance = sqrt(arch_dist(data, archetypes))
+distance = arch_dist(data, archetypes)
 # Find Euclidian distance between archetypes
-arc_distance = sqrt(arch_dist(archetypes, archetypes))
+arc_distance = arch_dist(archetypes, archetypes)
 }
 \seealso{
 \code{\link[ParetoTI]{fit_pch}}, \code{\link[ParetoTI]{generate_arc}}, \code{\link[ParetoTI]{generate_data}}

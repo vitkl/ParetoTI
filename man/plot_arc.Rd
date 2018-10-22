@@ -4,11 +4,12 @@
 \alias{plot_arc}
 \title{Plot data with archetypes in 2D and 3D}
 \usage{
-plot_arc(arch_data, data, which_dimensions = as.integer(1:2),
+plot_arc(arch_data = NULL, data, which_dimensions = as.integer(1:2),
   type = c("average", "all")[1], average_func = mean,
   geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
   colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400",
-  "#FF7E0F"), arch_size = NULL, line_size = NULL)
+  "#FF7E0F"), arch_size = NULL, line_size = NULL, data_lab = "data",
+  arc_lab = "archetypes")
 }
 \arguments{
 \item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}
@@ -27,7 +28,11 @@ plot_arc(arch_data, data, which_dimensions = as.integer(1:2),
 
 \item{line_size}{width of lines connecting archetypes}
 
-\item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.}
+\item{data_lab}{vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label}
+
+\item{arc_lab}{vector, 1L or nrow(arc_data$XC)/noc, label vertices/archetypes (points) with a qualitative or quantitative label}
+
+\item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm. Set to NULL if you want to show data alone.}
 }
 \value{
 \code{plot_arc()} ggplot2 (2D) or plotly (3D) plot

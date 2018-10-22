@@ -10,6 +10,8 @@ project(arc_data, data)
 \item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.}
 
 \item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}
+
+\item{data_lab}{character vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label}
 }
 \description{
 Project in low dimentions (PCA) and process data and polytopes fits for plotting

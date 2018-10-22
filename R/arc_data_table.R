@@ -3,6 +3,7 @@
 ##' Project in low dimentions (PCA) and process data and polytopes fits for plotting
 ##' @param arc_data objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.
 ##' @param data matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)
+##' @param data_lab character vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label
 ##' @examples
 ##' # Random data that fits into the triangle
 ##' set.seed(4355)
@@ -13,7 +14,7 @@ project = function(arc_data, data){
 
 }
 
-.arc_data_table = function(arc_data, data, type = c("average", "all")[1], average_func = mean){
+.arc_data_table = function(arc_data, data, data_lab = "data"){
   # if single fit just add label column
   if(is(arc_data, "pch_fit") | is(arc_data, "random_arc")){
     arc_data = as.data.table(t(arc_data$XC))
@@ -41,14 +42,14 @@ project = function(arc_data, data){
     arc_data = rbindlist(arc_data)
   }
   data = as.data.table(t(data))
-  data$lab = "data"
+  data$lab = data_lab
   rbind(arc_data, data)
 }
 ##' add a line between all archetypes
 ##'@param arc_data data.table that contains positions of data points and archetypes
 ##'@param label character specifying which data point to connect (when multiple replicates of fitted polytopes)
-.archLines = function(arc_data, label = "archetypes1", type = c("average", "all")[1], average_func = mean){
-  arch_lines = arc_data[grepl(label, arc_data$lab)]
+.archLines = function(arc_data, arc_lab = "archetypes", type = c("average", "all")[1], average_func = mean){
+  arch_lines = arc_data[grepl("archetypes", arc_data$lab)]
   if(type == "average"){
     arch_lines[, arch_id := seq(1, .N), by = lab]
     col_names = colnames(arch_lines)
@@ -56,7 +57,7 @@ project = function(arc_data, data){
     for (col_name in col_names) {
       arch_lines[, c(col_name) := average_func(get(col_name)), by = "arch_id"]
     }
-    arch_lines$lab = label
+    arch_lines$lab = arc_lab
     arch_lines = unique(arch_lines)
   }
   aa = data.table(1:nrow(arch_lines))

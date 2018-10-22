@@ -4,7 +4,7 @@
 \alias{.archLines}
 \title{add a line between all archetypes}
 \usage{
-.archLines(arc_data, label = "archetypes1", type = c("average",
+.archLines(arc_data, arc_lab = "archetypes", type = c("average",
   "all")[1], average_func = mean)
 }
 \arguments{

@@ -27,15 +27,17 @@
 ##' # Show variance explained by a polytope with each k
 ##' plot_arc_var(arc_data, type = c("varexpl", "SSE", "res_varexpl")[1],
 ##'              point_size = 2, line_size = 1.5) + theme_bw()
-plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl")[1],
+plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl", "total_var")[1],
                         point_size = 2, line_size = 1.5){
-  type_lab = c("Variance explained", "Sum of squared errors", "Variance explained on top of k-1 model")
-  names(type_lab) = c("varexpl", "SSE", "res_varexpl")
+  type_lab = c("Variance explained", "Sum of squared errors", "Variance explained on top of k-1 model", "total variance in position of vertices", "T-ratio, volume of polytope by volume of convex hull")
+  names(type_lab) = c("varexpl", "SSE", "res_varexpl", "total_var", "t_ratio")
   type_lab = type_lab[type]
   k_var = data.table(varexpl = arc_data$pch_fits$varexpl, SSE = arc_data$pch_fits$SSE,
-                     k = sapply(arc_data$pch_fits$XC, ncol))
-  k_var[k == 1, res_varexpl := varexpl]
-  for (i in seq(2, max(k_var$k))) {
+                     k = sapply(arc_data$pch_fits$XC, ncol),
+                     total_var = arc_data$pch_fits$total_var)
+  setorder(k_var, k)
+  k_var[k == min(k), res_varexpl := varexpl]
+  for (i in seq(min(k_var$k)+1, max(k_var$k))) {
     k_var[k == i, res_varexpl := varexpl - k_var[k == i - 1, varexpl]]
   }
   ggplot2::ggplot(k_var, ggplot2::aes(x = k, y = get(type))) +

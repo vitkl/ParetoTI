@@ -4,6 +4,7 @@
 \alias{fit_pch}
 \alias{k_fit_pch}
 \alias{fit_pch_bootstrap}
+\alias{average_pch_fits}
 \alias{fit_pch_resample}
 \alias{randomise_fit_pch1}
 \alias{fit_convhulln}
@@ -23,6 +24,8 @@ fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
   check_installed = T, type = c("s", "m", "cmq")[1],
   clust_options = list(), seed = 235, replace = FALSE,
   average = FALSE, order_type = c("cosine", "side", "align")[1], ...)
+
+average_pch_fits(res, XC_array = NULL)
 
 fit_pch_resample(i = 1, data, sample_prop = NULL, replace = FALSE,
   ...)
@@ -83,6 +86,8 @@ fit_convhulln(data, positions = TRUE)
 
 \item{average}{average archetype positions and varexpl? By default FALSE, return all fits to resampled data.}
 
+\item{XC_array}{Used by average_pch_fits() inside fit_pch_bootstrap(). You should not to use it in most cases.}
+
 \item{i}{iteration number}
 
 \item{prob}{a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{(sample.int}}.}
@@ -113,6 +118,8 @@ call - function call.
 
 \code{fit_pch_bootstrap()} object of class b_pch_fit (list) containing the same elements as pch_fit, but each is either a list of pch_fit elements (e.g. list of n number of XC matrices) or a vector (which pch_fit element is one number).
 
+\code{average_pch_fits()} object of class pch_fit
+
 \code{fit_pch_resample()} object of class pch_fit
 
 \code{randomise_fit_pch1()}: list containing function call, summary of the sample, optional data and optional position of vertices/archetypes.
@@ -125,6 +132,8 @@ call - function call.
 \code{k_fit_pch()} finds polytopes of k dimensions in the data. This function applies \code{fit_pch()} to different k-s.
 
 \code{fit_pch_bootstrap()} Uses bootstrapping (resampling with) the data to find robust positions of vertices of a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch_resample()}.
+
+\code{average_pch_fits()} averages archetypes positions and relevant metrics across polytope fit obtained using bootstraping. Uses output of fit_pch_bootstrap() directly.
 
 \code{fit_pch_resample()} takes one sample of the data and fits a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch()}.
 

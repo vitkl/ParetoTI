@@ -22,8 +22,10 @@
 ##' arc_distance = arch_dist(archetypes, archetypes)
 arch_dist = function(data, archetypes){
   archetypes = lapply(seq_len(ncol(archetypes)), function(i) archetypes[, i])
-  vapply(archetypes, function(arc, data){
+  archetypes = vapply(archetypes, function(arc, data){
     diff = arc - data
     sqrt(colSums(diff^2))
   }, FUN.VALUE = numeric(ncol(data)), data)
+  colnames(archetypes) = paste0("archetype_", seq_len(ncol(archetypes)))
+  archetypes
 }

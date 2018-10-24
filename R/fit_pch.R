@@ -118,6 +118,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     res$arc_vol = NA
     res$t_ratio = NA
   }
+  rownames(res$XC) = rownames(data)
   res$var = NA
   res$total_var = NA
   res$call = match.call()
@@ -240,19 +241,7 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
   XC_array = simplify2array(res$pch_fits$XC)
   # average results ------------------------------------------------------------
   if(isTRUE(average)){
-    res_aver = list(call = match.call())
-    # calculate average XC matrix, set other S and C to NA
-    res_aver$XC = rowMeans(XC_array, dims = 2)
-    res_aver$S = NA
-    res_aver$C = NA
-    # calculate mean varexpl and t_ratio
-    res_aver$SSE = mean(res$pch_fits$SSE)
-    res_aver$varexpl = mean(res$pch_fits$varexpl)
-    res_aver$hull_vol = mean(res$pch_fits$hull_vol)
-    res_aver$arc_vol = mean(res$pch_fits$arc_vol)
-    res_aver$t_ratio = mean(res$pch_fits$t_ratio)
-    res = res_aver
-    class(res) = "pch_fit"
+    res = average_pch_fits(res = res, XC_array = XC_array)
   }
   # calculate and include variance in positions ------------------------------
   dim. = c(dim(XC_array)[1] * dim(XC_array)[2], dim(XC_array)[3])
@@ -263,6 +252,32 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
   # find mean of variances of all vertices to get a single number
   res$total_var = mean(res$var)
   res
+}
+
+##' @rdname fit_pch
+##' @name average_pch_fits
+##' @description \code{average_pch_fits()} averages archetypes positions and relevant metrics across polytope fit obtained using bootstraping. Uses output of fit_pch_bootstrap() directly.
+##' @param XC_array Used by average_pch_fits() inside fit_pch_bootstrap(). You should not to use it in most cases.
+##' @return \code{average_pch_fits()} object of class pch_fit
+##' @export average_pch_fits
+average_pch_fits = function(res, XC_array = NULL){
+  if(!is(res, "b_pch_fit")) stop("average_pch_fits(): res object provided is not b_pch_fit")
+  if(is.null(XC_array)) XC_array = simplify2array(res$pch_fits$XC)
+  res_aver = list(call = match.call())
+  # calculate average XC matrix, set other S and C to NA
+  res_aver$XC = rowMeans(XC_array, dims = 2)
+  res_aver$S = NA
+  res_aver$C = NA
+  # calculate mean varexpl and t_ratio
+  res_aver$SSE = mean(res$pch_fits$SSE)
+  res_aver$varexpl = mean(res$pch_fits$varexpl)
+  res_aver$hull_vol = mean(res$pch_fits$hull_vol)
+  res_aver$arc_vol = mean(res$pch_fits$arc_vol)
+  res_aver$t_ratio = mean(res$pch_fits$t_ratio)
+  res_aver$var = res$var
+  res_aver$total_var = res$total_var
+  class(res_aver) = "pch_fit"
+  res_aver
 }
 
 ##' @rdname fit_pch

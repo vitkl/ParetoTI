@@ -1,7 +1,7 @@
 Package: ParetoTI
 Type: Package
 Title: Pareto Task Inference In R (based on ParTI)
-Version: 0.1.1
+Version: 0.1.2
 Author: Vitalii Kleshchevnikov
 Maintainer: Vitalii Kleshchevnikov <vk7@sanger.ac.uk>
 Authors@R: c(person("Vitalii", "Kleshchevnikov",, "vk7@sanger.ac.uk", role = c("aut", "cre")))
@@ -10,16 +10,17 @@ Description: This package allows you to perform Pareto Task Inference in R as de
     Inferring biological tasks using Pareto analysis of high-dimensional data.
     This package realises polytope dimentionality and
     polytope position fitting using a python 2.7 implementation of PCHA algorithm. 
-    This algorithm was originally implemented in Matlab by Morten Mørup (http://www.mortenmorup.dk/MMhomepageUpdated_files/Page327.htm)
+    PCHA algorithm was originally implemented in Matlab by Morten Mørup (http://www.mortenmorup.dk/MMhomepageUpdated_files/Page327.htm)
     and re-implemented in python by Ulf Aslak Jensen.    
     Statistical significance of this fit is determined using permutations of the dataset 
-    that disrupt relationships between variables but keep the distribution of each variable constant.
-    It is currently under development and enables only polytope fitting and statistical significance tests.
-    Other analyses, in particular, models of feature enrichment at archetype will be included later.
+    that disrupt relationships between variables but keep the distribution of each variable constant (not implemented yet).
+    CAUTION! Package is currently under development! It enables only polytope fitting, bootstrap and visualisations.
+    Other analyses, in particular, statistical significance by disrupting relationships between variable, 
+    models of feature enrichment at archetype and currently being developed.
     Alternative methods for polytope fitting will be considered such as SPAMS implemented in c++ and using R interface: https://www.stat.berkeley.edu/~yuansi.chen/demo/demo.html, https://arxiv.org/pdf/1405.6472.pdf, http://spams-devel.gforge.inria.fr/downloads.html
 License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.0
 Depends: reticulate, data.table
-Imports: parallel, clustermq, plotly, downloader, progress, geometry
+Imports: parallel, clustermq, plotly, downloader, progress, geometry, voxel, ggplot2, cowplot, AnnotationHub, GO.db, ontologyIndex

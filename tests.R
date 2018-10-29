@@ -52,22 +52,22 @@ speed_test = microbenchmark::microbenchmark({
 }, {
   # Fit the same polytope 3 times without subsampling to test convergence of the algorithm.
   arc_rob_conv = fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
-                                noc=as.integer(3), delta=0.1)
+                                   noc=as.integer(3), delta=0.1)
 }, {
   # Fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
   arc_data_rob = fit_pch_bootstrap(data, n = 20, sample_prop = 0.65, seed = 2543,
-                                noc=as.integer(3), delta=0.1)
+                                   noc=as.integer(3), delta=0.1)
 }, {
   # Use local parallel processing to fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
   arc_data_rob_m = fit_pch_bootstrap(data, n = 20, sample_prop = 0.65, seed = 2543, order_by_side = F,
-                                  noc=as.integer(3), delta=0.1, type = "m")
+                                     noc=as.integer(3), delta=0.1, type = "m")
 }, times = 5)
 speed_test_cmq = microbenchmark::microbenchmark({
   # Use parallel processing on a computing cluster with clustermq to fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
   arc_data_rob_cmq = fit_pch_bootstrap(data, n = 200, sample_prop = 0.65, seed = 2543,
-                                    noc = as.integer(3), order_by_side = F,
-                                    delta = 0.1, type = "cmq",
-                                    clust_options = list(memory = 1000, n_jobs = 10))
+                                       noc = as.integer(3), order_by_side = F,
+                                       delta = 0.1, type = "cmq",
+                                       clust_options = list(memory = 1000, n_jobs = 10))
 }, times = 5)
 
 plot_arc(arch_data = arc_data_rob_cmq, data = data,
@@ -158,3 +158,10 @@ devtools::load_all()
 #export PYTHONUSERBASE=$vk7/software/python_libs/
 #python -m pip install --user -i https://pypi.python.org/simple -U pip distribute
 #python -m pip install --user -i https://pypi.python.org/simple --upgrade pip setuptools wheel virtualenv -U pip --user distribute
+
+library(AnnotationHub)
+hub = AnnotationHub()
+selected_name = names(query(hub, "OrgDb"))[mcols(query(hub, "OrgDb"))$taxonomyid == 9606]
+org_db = hub[[selected_name]]
+org_db
+

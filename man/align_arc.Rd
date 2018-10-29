@@ -18,6 +18,8 @@ align_arc_opt(arc1, arc2, control = list(maxit = 10000, temp = 2000,
 
 \item{arc2}{matrix of archetype positions dim(dimensions, archetypes) to be aligned with arc1}
 
+\item{n}{number of element to permute}
+
 \item{control}{options for SANN methods. See \link[stats]{optim}}
 }
 \value{

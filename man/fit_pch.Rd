@@ -14,11 +14,12 @@
 fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
   verbose = FALSE, conv_crit = 1e-06, maxiter = 500,
   check_installed = T, order_by = seq(1, nrow(data)),
-  order_type = c("cosine", "side", "align")[1], convex_hull = FALSE)
+  order_type = c("cosine", "side", "align")[3], convex_hull = FALSE,
+  converge_else_fail = TRUE)
 
 k_fit_pch(data, ks = 2:4, check_installed = TRUE, bootstrap = FALSE,
   bootstrap_N = 10, bootstrap_type = c("s", "m", "cmq")[1],
-  seed = 345, ...)
+  seed = 345, match_dims = list(FALSE, "simplex", "all")[[2]], ...)
 
 fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
   check_installed = T, type = c("s", "m", "cmq")[1],
@@ -64,6 +65,8 @@ fit_convhulln(data, positions = TRUE)
 
 \item{convex_hull}{find volume of the convex hull of the data and the t-ratio? Caution. Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions. Geometric figure should be at least simplex: qhull algorhirm will fail to find convel hull of flat 2D shapes in 3D, 3D shapes in 4D and so on.}
 
+\item{converge_else_fail}{throw an error and stop execution if PCHA did not converge in \code{maxiter} steps.}
+
 \item{ks}{integer vector, dimensions of polytopes to be fit to data}
 
 \item{bootstrap}{\code{k_fit_pch()}: use bootstrap to find average positions for each k? Also returns variability in vertex position to aid the selection of k. At excessive k position vary more.}
@@ -73,6 +76,8 @@ fit_convhulln(data, positions = TRUE)
 \item{bootstrap_type}{\code{randomise_fit_pch1()} and \code{k_fit_pch()}: parallel processing type when bootstraping. Caution: avoid nested parallel processing, do not use "m" and "cmq" inside other parallel functions.}
 
 \item{seed}{seed for reproducible random number generation. Works for all types of processing.}
+
+\item{match_dims}{when testing multiple k using \code{k_fit_pch()} match dimensions to the number of archetypes? If FALSE try all k for full data. If "simplex" (default) test only simples shapes (k=3 in 2D, k=4 in 3D, k=5 in 4D...). If all test simplex shapes + all other k for each dimensionality (k=3, k=4, k=5 ...k=N in 2D, k=4+ in 3D). This assumes order of columns which is valid for principal components but may not be valid for untransformed data.}
 
 \item{n}{number of samples to be taken when bootstraping}
 

@@ -21,7 +21,7 @@ align_arc = function(arc1, arc2) {
 ##' @rdname align_arc
 ##' @name gen_permut
 ##' @description \code{gen_permut()} used for exhaustive search generates a matrix of all possible permutations of n elements. Each row is a different permutation.
-##' @param n
+##' @param n number of element to permute
 ##' @details \code{gen_permut()} function is taken from https://stackoverflow.com/questions/11095992/generating-all-distinct-permutations-of-a-list-in-r
 ##' @return \code{gen_permut()} a matrix of all possible gen_permut (in rows)
 ##' @export gen_permut

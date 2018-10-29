@@ -4,23 +4,25 @@
 \alias{plot_gam}
 \title{Plot gam model fit for multiple genes and archetypes (Generalised Additive Model, mgcv)}
 \usage{
-plot_gam(gam_fit, data, y = "y", smooth.cov = "x", groupCovs = NULL,
-  color = NULL, color_val = c("#868686FF", "#0073C2FF"))
+plot_gam(gam_deriv = NULL, gam_fit, data, feature = "Alb",
+  groupCovs = NULL, title_size = 10)
 }
 \arguments{
+\item{gam_deriv}{object with multiple gam fits (many arhetypes, many features). Either gam_deriv or gam_fit must be provided.}
+
 \item{gam_fit}{a fitted gam object as produced by gam().}
 
-\item{x}{numeric vector where to evaluate derivatives}
+\item{data}{data.table dim(examples, dimensions) that includes distance of each example to archetype in columns given by \code{arc_col} and feature values given by \code{feature}. Must be provided.}
 
-\item{N_smooths}{number of curves for each predictor in the model}
+\item{feature}{character vector (1L), column than containg feature values}
 
-\item{d}{numeric vector (1L), finite difference interval}
+\item{groupCovs}{argument for \link[voxel]{plotGAM}}
 }
 \value{
 \code{plot_gam()} list (S3 object, plot_gam) containing data.table-s for each predictor in gam model
 }
 \description{
-\code{plot_gam()} Finds a derivative with standard errors of smooth curves from gam model fit by finite differencing. Crucially it computes the probability that derivative is negative at each point.
+\code{plot_gam()} plots gam model fit for multiple features (genes) and archetypes
 }
 \details{
 Plotting of multiple gam fits is inspired by https://stackoverflow.com/questions/49471300/gam-plots-with-ggplot

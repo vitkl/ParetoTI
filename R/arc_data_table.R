@@ -1,23 +1,8 @@
-##'
-##'
-##' Project in low dimentions (PCA) and process data and polytopes fits for plotting
-##' @param arc_data objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.
-##' @param data matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)
-##' @param data_lab character vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label
-##' @examples
-##' # Random data that fits into the triangle
-##' set.seed(4355)
-##' arc_data = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
-##'                           mean = 0, sd = 1, N_dim = 2)
-##' data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
-project = function(arc_data, data){
-
-}
-
-.arc_data_table = function(arc_data, data, data_lab = "data"){
+.arc_data_table = function(arc_data, data, data_lab = "data",
+                           which_dimensions = 1:2){
   # if single fit just add label column
   if(is(arc_data, "pch_fit") | is(arc_data, "random_arc")){
-    arc_data = as.data.table(t(arc_data$XC))
+    arc_data = as.data.table(t(arc_data$XC[which_dimensions,]))
     arc_data$lab = "archetypes"
   }
   # if multiple fits from bootstrap or different k - combine all matrices
@@ -25,7 +10,7 @@ project = function(arc_data, data){
   if(is(arc_data, "b_pch_fit")){
     arc_data$pch_fits$XC = arc_data$pch_fits$XC[!sapply(arc_data$pch_fits$XC, is.null)]
     arc_data = lapply(seq(1, length(arc_data$pch_fits$XC)), function(i){
-      arc_data = as.data.table(t(arc_data$pch_fits$XC[[i]]))
+      arc_data = as.data.table(t(arc_data$pch_fits$XC[[i]][which_dimensions,]))
       arc_data$lab = paste0("archetypes", i)
       arc_data
     })
@@ -34,14 +19,16 @@ project = function(arc_data, data){
   if(is(arc_data, "k_pch_fit")){
     arc_data$pch_fits$XC = arc_data$pch_fits$XC[!sapply(arc_data$pch_fits$XC, is.null)]
     arc_data = lapply(seq(1, length(arc_data$pch_fits$XC)), function(i){
-      arc_data = as.data.table(t(arc_data$pch_fits$XC[[i]]))
+      if(nrow(arc_data$pch_fits$XC[[i]]) < length(which_dimensions)) return(NULL)
+      arc_data = as.data.table(t(arc_data$pch_fits$XC[[i]][which_dimensions,]))
       # label by number of archetypes rather than iteration
       arc_data$lab = paste0("archetypes", nrow(arc_data))
       arc_data
     })
+    arc_data = arc_data[!sapply(arc_data, is.null)]
     arc_data = rbindlist(arc_data)
   }
-  data = as.data.table(t(data))
+  data = as.data.table(t(data[which_dimensions,]))
   data$lab = data_lab
   rbind(arc_data, data)
 }

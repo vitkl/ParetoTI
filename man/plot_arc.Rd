@@ -14,7 +14,7 @@ plot_arc(arch_data = NULL, data, which_dimensions = as.integer(1:2),
 \arguments{
 \item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}
 
-\item{which_dimensions}{indices or character vector specifying dimension names}
+\item{which_dimensions}{indices or character vector specifying dimension names. When \code{which_dimensions} exceeds the number of dimensions in arc_data these archetypes will be omitted. This can happen when fitting simplexes: lines and triangles are only 2D, so will be omitted from 3D plots.}
 
 \item{type}{used when arc_data is "b_pch_fit", one of "average", "all"}
 

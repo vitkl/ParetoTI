@@ -4,7 +4,7 @@ library(devtools)
 document()
 install()
 
-devtools::load_all()
+devtools::load_all("../ParetoTI/")
 
 devtools::install_github("vitkl/ParetoTI", dependencies = T)
 library(ParetoTI)

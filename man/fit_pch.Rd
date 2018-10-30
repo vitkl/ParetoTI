@@ -19,7 +19,7 @@ fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
 
 k_fit_pch(data, ks = 2:4, check_installed = TRUE, bootstrap = FALSE,
   bootstrap_N = 10, bootstrap_type = c("s", "m", "cmq")[1],
-  seed = 345, match_dims = list(FALSE, "simplex", "all")[[2]], ...)
+  seed = 345, simplex = c(FALSE, TRUE), ...)
 
 fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
   check_installed = T, type = c("s", "m", "cmq")[1],
@@ -63,7 +63,7 @@ fit_convhulln(data, positions = TRUE)
 
 \item{order_type}{order archetypes by: cosine distance from c(1,1, ..., 1) vector ("cosine"), dot product that measures position to each side of the c(1,1) vector ("side"), align positions to reference when bootstraping(fit using all data, "align"). See \link[ParetoTI]{align_arc} When order_type is "align" vertices are ordered by "cosine" first.}
 
-\item{convex_hull}{find volume of the convex hull of the data and the t-ratio? Caution. Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions. Geometric figure should be at least simplex: qhull algorhirm will fail to find convel hull of flat 2D shapes in 3D, 3D shapes in 4D and so on.}
+\item{convex_hull}{find volume of the convex hull of the data and the t-ratio? Caution! Dimesnsions for calculation are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions. Geometric figure should be at least simplex: qhull algorhirm will fail to find convel hull of flat 2D shapes in 3D, 3D shapes in 4D and so on.}
 
 \item{converge_else_fail}{throw an error and stop execution if PCHA did not converge in \code{maxiter} steps.}
 
@@ -77,7 +77,7 @@ fit_convhulln(data, positions = TRUE)
 
 \item{seed}{seed for reproducible random number generation. Works for all types of processing.}
 
-\item{match_dims}{when testing multiple k using \code{k_fit_pch()} match dimensions to the number of archetypes? If FALSE try all k for full data. If "simplex" (default) test only simples shapes (k=3 in 2D, k=4 in 3D, k=5 in 4D...). If all test simplex shapes + all other k for each dimensionality (k=3, k=4, k=5 ...k=N in 2D, k=4+ in 3D). This assumes order of columns which is valid for principal components but may not be valid for untransformed data.}
+\item{simplex}{when testing multiple k using \code{k_fit_pch()} match dimensions to the number of archetypes? Use only on ordered principal components. If FALSE try all k for all dimensions in data. If simplex == TRUE test only simplex shapes (k=3 in 2D, k=4 in 3D, k=5 in 4D...). This assumes order of columns which is valid for principal components but may not be valid for untransformed data.}
 
 \item{n}{number of samples to be taken when bootstraping}
 

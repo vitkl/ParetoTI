@@ -5,7 +5,7 @@
 ##' @description \code{plot_arc()} plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "b_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").
 ##' @param arc_data objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm. Set to NULL if you want to show data alone.
 ##' @param data matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)
-##' @param which_dimensions indices or character vector specifying dimension names
+##' @param which_dimensions indices or character vector specifying dimension names. When \code{which_dimensions} exceeds the number of dimensions in arc_data these archetypes will be omitted. This can happen when fitting simplexes: lines and triangles are only 2D, so will be omitted from 3D plots.
 ##' @param type used when arc_data is "b_pch_fit", one of "average", "all"
 ##' @param average_func used when arc_data is "b_pch_fit", function telling how to find average position of vertices
 ##' @param geom plotting function to plot data in 2D, useful options are ggplot2::geom_point (scatterplot) and ggplot2::geom_bin2d (density)
@@ -48,7 +48,8 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                     arch_size = NULL, line_size = NULL,
                     data_lab = "data", arc_lab = "archetypes") {
   if(!is.null(arch_data)){
-    for_plot = ParetoTI:::.arc_data_table(arch_data, data, data_lab = data_lab)
+    for_plot = ParetoTI:::.arc_data_table(arch_data, data, data_lab = data_lab,
+                                          which_dimensions = which_dimensions)
     lines_for_plot = ParetoTI:::.archLines(for_plot, arc_lab = arc_lab,
                                            type, average_func)
   } else {
@@ -82,8 +83,8 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
   }
   # get column names for corresponding dimensions
   if(is.integer(which_dimensions)){
-    x = colnames(for_plot)[which_dimensions[1]]
-    y = colnames(for_plot)[which_dimensions[2]]
+    x = colnames(for_plot)[1]
+    y = colnames(for_plot)[2]
   } else if (is.character(which_dimensions)) {
     x = which_dimensions[1]
     y = which_dimensions[2]
@@ -102,12 +103,11 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                             ggplot2::aes(x = get(x), y = get(y),
                                          color = lab, group = lab), size = gg_arch_size) # add separate step for plotting archetype positions
     }
-    plot = plot + ggplot2::xlab(colnames(for_plot)[which_dimensions[1]]) +
-      ggplot2::ylab(colnames(for_plot)[which_dimensions[2]])
+    plot = plot + ggplot2::xlab(x) + ggplot2::ylab(y)
     ## 3D plot ===================================================================##
   } else if(length(which_dimensions) == 3 & nrow(data) >= 3) {
     if(is.integer(which_dimensions)){
-      z = colnames(for_plot)[which_dimensions[3]]
+      z = colnames(for_plot)[3]
     } else if (is.character(which_dimensions)) {
       z = which_dimensions[3]
     } else stop("which_dimensions is neither integer nor character vector")

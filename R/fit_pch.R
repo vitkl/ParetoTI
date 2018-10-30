@@ -15,7 +15,7 @@
 ##' @param check_installed if TRUE, check if python module py_pcha is found. Useful to set to FALSE for running analysis or within other functions
 ##' @param order_by integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector. When bootstraping vertices can be aligned to reference and ordered (order_type == "align") by these dimensions.
 ##' @param order_type order archetypes by: cosine distance from c(1,1, ..., 1) vector ("cosine"), dot product that measures position to each side of the c(1,1) vector ("side"), align positions to reference when bootstraping(fit using all data, "align"). See \link[ParetoTI]{align_arc} When order_type is "align" vertices are ordered by "cosine" first.
-##' @param convex_hull find volume of the convex hull of the data and the t-ratio? Caution. Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions. Geometric figure should be at least simplex: qhull algorhirm will fail to find convel hull of flat 2D shapes in 3D, 3D shapes in 4D and so on.
+##' @param convex_hull find volume of the convex hull of the data and the t-ratio? Caution! Dimesnsions for calculation are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions. Geometric figure should be at least simplex: qhull algorhirm will fail to find convel hull of flat 2D shapes in 3D, 3D shapes in 4D and so on.
 ##' @param converge_else_fail throw an error and stop execution if PCHA did not converge in \code{maxiter} steps.
 ##' @return \code{fit_pch()}: object of class pch_fit (list) containing the following elements:
 ##' XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes);
@@ -82,8 +82,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
   # run PCHA
   res = tryCatch({
     res = py_PCHA$PCHA(X = data, noc = as.integer(noc), I = I, U = U,
-                 delta = delta, verbose = verbose,
-                 conv_crit = conv_crit, maxiter = maxiter)
+                       delta = delta, verbose = verbose,
+                       conv_crit = conv_crit, maxiter = maxiter)
     names(res) = c("XC", "S", "C", "SSE", "varexpl")
     res
   }, error = function(err) {
@@ -107,22 +107,25 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     res$C = matrix(res$C, 1, 1)
   }
 
-  if(isTRUE(convex_hull) & noc > nrow(data)){
-    # calculate volume or area of the polytope only when number of vertices (noc) > number of dimenstions
+  # when calculating convex hull and volume of the data
+  # adjust number of dimensions to noc
+  data_dim = seq(1, noc-1)
+  if(isTRUE(convex_hull) & nrow(data) >= length(data_dim) & noc > 2){
+    # calculate volume or area of the polytope only when number of vertices (noc) > number of dimenstions which means
     # find volume of the convex hull of the data
-    hull_vol = fit_convhulln(data, positions = FALSE)
+    hull_vol = fit_convhulln(data[data_dim, ], positions = FALSE)
     # find volume of the polytope fit, qhull requires at least 4 points in 2D
-    # and more in higher dimensions so we have to add 10 points within
+    # and more in higher dimensions so we have to add 20 points within
     # PCHA-fit polytope
-    archetypes = res$XC
-    data_arc = cbind(archetypes, generate_data(archetypes, N_examples = 10,
+    archetypes = res$XC[data_dim, ]
+    data_arc = cbind(archetypes, generate_data(archetypes, N_examples = 20,
                                                jiiter = 0, size = 1))
     arc_vol = fit_convhulln(data_arc, positions = FALSE)
     res$hull_vol = hull_vol$vol
     res$arc_vol = arc_vol$vol
     res$t_ratio = res$arc_vol / res$hull_vol
   } else {
-    if(isTRUE(convex_hull)) message(paste0("Convex hull and t-ratio not computed for noc: ", noc," and nrow(data) = ", nrow(data),". fit_pch() can calculate volume or area of the polytope only when\nthe number of vertices (noc) > the number of dimensions (when polytope is convex):\ncheck that noc > nrow(data),\nselect only revelant dimensions or increase noc"))
+    if(isTRUE(convex_hull) & isTRUE(converge_else_fail)) message(paste0("Convex hull and t-ratio not computed for noc: ", noc," and nrow(data) = ", nrow(data),". fit_pch() can calculate volume or area of the polytope only when\nthe number of vertices (noc) > the number of dimensions (when polytope is convex):\ncheck that noc > nrow(data),\nselect only revelant dimensions or increase noc"))
     res$hull_vol = NA
     res$arc_vol = NA
     res$t_ratio = NA
@@ -140,26 +143,43 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 ##' @description \code{k_fit_pch()} finds polytopes of k dimensions in the data. This function applies \code{fit_pch()} to different k-s.
 ##' @param ks integer vector, dimensions of polytopes to be fit to data
 ##' @param bootstrap \code{k_fit_pch()}: use bootstrap to find average positions for each k? Also returns variability in vertex position to aid the selection of k. At excessive k position vary more.
-##' @param match_dims when testing multiple k using \code{k_fit_pch()} match dimensions to the number of archetypes? If FALSE try all k for full data. If "simplex" (default) test only simples shapes (k=3 in 2D, k=4 in 3D, k=5 in 4D...). If all test simplex shapes + all other k for each dimensionality (k=3, k=4, k=5 ...k=N in 2D, k=4+ in 3D). This assumes order of columns which is valid for principal components but may not be valid for untransformed data.
+##' @param simplex when testing multiple k using \code{k_fit_pch()} match dimensions to the number of archetypes? Use only on ordered principal components. If FALSE try all k for all dimensions in data. If simplex == TRUE test only simplex shapes (k=3 in 2D, k=4 in 3D, k=5 in 4D...). This assumes order of columns which is valid for principal components but may not be valid for untransformed data.
 ##' @return \code{k_fit_pch()}: object of class k_pch_fit (list) containing the same elements as pch_fit, but each is either a list of pch_fit elements (e.g. list of ks number of XC matrices) or a vector (which pch_fit element is one number). When length(ks) = 1 returns pch_fit.
 ##' @import clustermq
 ##' @export k_fit_pch
 k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
                      bootstrap = FALSE, bootstrap_N = 10,
                      bootstrap_type = c("s", "m", "cmq")[1], seed = 345,
-                     match_dims = list(FALSE, "simplex", "all")[[2]], ...) {
+                     simplex = c(FALSE, TRUE), ...) {
   if(check_installed) .py_pcha_installed()
+  # check that ks do not exceed dimensions when simplex is true
+  if(nrow(data) < (max(ks) - 1)) stop("simplex = TRUE but number of vertices (",
+                                      max(ks),") exceeds number of dimensions - 1 (", nrow(data),")")
   # run analysis for all k -----------------------------------------------------
   if(isTRUE(bootstrap)){
     res = lapply(ks, function(k) {
-      fit_pch_bootstrap(data, noc = k, n = bootstrap_N,
+      # adjust number of dimensions to k
+      if(isTRUE(simplex)) {
+        data_dim = seq(1, k-1)
+        if(k %in% c(1,2)) data_dim = seq(1, 2)
+      } else data_dim = seq(1, nrow(data))
+      # fit models
+      fit_pch_bootstrap(data[data_dim,], noc = k, n = bootstrap_N,
                         check_installed = FALSE, type = bootstrap_type,
                         seed = seed, average = TRUE, ...)
     })
   } else {
-    res = lapply(ks, function(k) fit_pch(data = data, noc = k,
-                                         ..., check_installed = FALSE,
-                                         converge_else_fail = TRUE))
+    res = lapply(ks, function(k) {
+      # adjust number of dimensions to k
+      if(isTRUE(simplex)) {
+        data_dim = seq(1, k-1)
+        if(k %in% c(1,2)) data_dim = seq(1, 2)
+      } else data_dim = seq(1, nrow(data))
+      # fit models
+      fit_pch(data = data[data_dim,], noc = k,
+              ..., check_installed = FALSE,
+              converge_else_fail = TRUE)
+    })
   }
   # combine results ------------------------------------------------------------
   if(length(ks) > 1){
@@ -207,8 +227,6 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
     cl <- parallel::makeCluster(options$cores, type = options$cluster_type)
     # get library support needed to run the code
     parallel::clusterEvalQ(cl, {library(ParetoTI)})
-    # put objects in place that might be needed for the code
-    # parallel::clusterExport(cl, ls(envir = environment()), envir=environment())
     # set seed
     parallel::clusterSetRNGStream(cl, iseed = seed)
     res = parallel::parLapply(cl, seq_len(n), ParetoTI::fit_pch_resample, data,
@@ -243,8 +261,10 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
   class(res) = "b_pch_fit"
   # match archetypes and reorder results ---------------------------------------
   if(isTRUE(order_type == "align")){
-    ref = fit_pch(data = data, order_type = order_type,
-                  converge_else_fail = TRUE, ...)$XC
+    suppressMessages({
+      ref = fit_pch(data = data, order_type = order_type,
+                    converge_else_fail = TRUE, ...)$XC
+    })
     for (i in seq_len(n)) {
       ind = align_arc(ref, res$pch_fits$XC[[i]])$ind
       res$pch_fits$XC[[i]] = res$pch_fits$XC[[i]][, ind]
@@ -350,7 +370,7 @@ randomise_fit_pch1 = function(i = 1, data, replace = FALSE, prob = NULL,
   res$call = match.call()
   # if bootstrapped results not averaged return summary as NA - but results is still accessible in arc_data
   if(isTRUE(as.integer(bootstrap_N) > 1) & !bootstrap_average){
-    res$summary = c(NA, NA, NA)
+    res$summary = c(NA, NA, arc_data$total_var)
   } else {
     res$summary = c(arc_data$varexpl, arc_data$t_ratio, arc_data$total_var)
   }
@@ -382,7 +402,7 @@ fit_convhulln = function(data, positions = TRUE) {
 .c_pch_fit_list = function(pch_fit_list){
   # remove failed fits
   pch_fit_list = pch_fit_list[!vapply(pch_fit_list, is.null,
-                                     FUN.VALUE = logical(1))]
+                                      FUN.VALUE = logical(1))]
   # combine results
   list(XC = lapply(pch_fit_list, function(pch) pch$XC),
        S = lapply(pch_fit_list, function(pch) pch$S),

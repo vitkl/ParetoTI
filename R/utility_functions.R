@@ -9,6 +9,8 @@
 ##' @param python_version version to be installed into environment that is compatible with py_pcha module.
 ##' @param envname name of the conda enviroment where PCHA should be installed. If that enviroment doesn't exist it will be created. If it contains incorrect python_version the function will give an error.
 ##' @param overwrite_env It TRUE overwrites conda environment.
+##' @param extra_packages specify python libraries not needed for ParetoTI to work but desirable in the same conda environment
+##' @param packages specify python libraries needed for ParetoTI to work. Normally do not need changing.
 ##' @details If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution: "Older versions of pip and distribute default to http://pypi.python.org/simple, which no longer works. A solution is to install an up-to-date pip and distribute using pip install -i https://pypi.python.org/simple -U pip distribute into the virtual environment before running the rest of the build process."
 ##' # use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir
 ##' export PYTHONUSERBASE=/some_dir/python_libs/
@@ -19,10 +21,11 @@
 ##' @export select_conda
 ##' @seealso \code{\link{}}, \code{\link{}}
 install_py_pcha = function(method = "auto", conda = "auto",
-                           python_version = "python 2.7.10",
-                           envname = "reticulate_PCHA",
-                           overwrite_env = F) {
-  packages = c("pip", "py_pcha", "numpy", "scipy", "datetime")
+                           python_version = c("python 2.7.10", "python 3.6.4")[1],
+                           envname = c("reticulate_PCHA", "reticulate_PCHA_36")[1],
+                           overwrite_env = F, extra_packages = character(0),
+                           packages = c("pip", "py_pcha", "numpy", "scipy", "datetime")) {
+  packages = c(packages, extra_packages)
   if(method == "virtualenv") {
     reticulate::py_install(packages = packages, envname = envname,
                            method = method, conda = conda)

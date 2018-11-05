@@ -14,6 +14,7 @@
 ##' @param line_size width of lines connecting archetypes
 ##' @param data_lab vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label
 ##' @param arc_lab vector, 1L or nrow(arc_data$XC)/noc, label vertices/archetypes (points) with a qualitative or quantitative label
+##' @param text_size archetype label text size
 ##' @return \code{plot_arc()} ggplot2 (2D) or plotly (3D) plot
 ##' @export plot_arc
 ##' @import plotly
@@ -46,27 +47,29 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                     geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
                     colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"),
                     arch_size = NULL, line_size = NULL,
-                    data_lab = "data", arc_lab = "archetypes") {
+                    data_lab = "data", arc_lab = "archetypes",
+                    text_size = NULL, nudge = c(0.05, 0.1)) {
   if(!is.null(arch_data)){
     for_plot = ParetoTI:::.arc_data_table(arch_data, data, data_lab = data_lab,
                                           which_dimensions = which_dimensions)
-    lines_for_plot = ParetoTI:::.archLines(for_plot, arc_lab = arc_lab,
+    lines_for_plot = ParetoTI:::.archLines(for_plot$arc_data, arc_lab = arc_lab,
                                            type, average_func)
   } else {
-    for_plot = as.data.table(t(data))
-    for_plot$lab = data_lab
+    for_plot = list()
+    for_plot$data = as.data.table(t(data))
+    for_plot$data$lab = data_lab
   }
   if(is(arch_data, "b_pch_fit") & type == "average"){
-    for_plot[grepl("archetypes", lab), lab := "archetypes"]
-    for_plot[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
-    setorder(for_plot, lab)
+    for_plot$arc_data[grepl("archetypes", lab), lab := "archetypes"]
+    for_plot$arc_data[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
+    setorder(for_plot$arc_data, lab)
     ly_arch_size = 2
     ly_line_size = 5
     gg_arch_size = 2
     gg_line_size = 1.5
   } else {
-    for_plot[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
-    setorder(for_plot, lab)
+    for_plot$arc_data[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
+    setorder(for_plot$arc_data, lab)
     ly_arch_size = 10
     ly_line_size = 5
     gg_arch_size = 5
@@ -81,51 +84,105 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     ly_line_size = line_size
     gg_line_size = line_size
   }
+  if(!is.null(text_size)){
+    ly_text_size = text_size
+    gg_text_size = text_size
+  } else {
+    ly_text_size = 20
+    gg_text_size = 8
+  }
   # get column names for corresponding dimensions
   if(is.integer(which_dimensions)){
-    x = colnames(for_plot)[1]
-    y = colnames(for_plot)[2]
+    x = colnames(for_plot$arc_data)[1]
+    y = colnames(for_plot$arc_data)[2]
   } else if (is.character(which_dimensions)) {
     x = which_dimensions[1]
     y = which_dimensions[2]
   } else stop("which_dimensions is neither integer nor character vector")
+
+  # assign color to data
+  if(is.numeric(for_plot$data$lab)){
+    n_data_lab = 1
+    names_data_lab = NULL
+  } else {
+    n_data_lab = uniqueN(for_plot$data$lab)
+    names_data_lab = as.character(unique(for_plot$data$lab))
+  }
+  data_colors = colors[seq(1, n_data_lab)]
+  names(data_colors) = names_data_lab
+  arc_colors = colors[seq(n_data_lab + 1,
+                          n_data_lab + uniqueN(for_plot$arc_data$lab))]
+  names(arc_colors) = as.character(unique(for_plot$arc_data$lab))
+
   ## 2D plot ===================================================================##
   if(length(which_dimensions) == 2){
-    plot = ggplot2::ggplot(for_plot, ggplot2::aes(x = get(x), y = get(y),
-                                                  color = lab, group = lab)) +
-      geom() # use this to plot quantitavite color of data, define separate color map
+    plot = ggplot2::ggplot(for_plot$data, ggplot2::aes(x = get(x), y = get(y),
+                                                       color = lab)) +
+      geom() # use this to plot quantitavite color of data, define separate color map - color by different aes(color) and specify that in scale_color
     if("lines_for_plot" %in% ls()) {
-      plot = plot + ggplot2::geom_path(data = lines_for_plot, inherit.aes = FALSE,
-                                       ggplot2::aes(x = get(x), y = get(y),
-                                                    color = lab, group = lab), size = gg_line_size) +
-        ggplot2::scale_color_manual(values = colors) +
+      # calculate nudge by distance for text labels
+      nd_x = for_plot$arc_data[, range(get(x))]
+      nd_x = abs(nd_x[1] - nd_x[2]) * nudge[1]
+      nd_y = for_plot$arc_data[, range(get(y))]
+      nd_y = abs(nd_y[1] - nd_y[2]) * nudge[2]
+      # plot archetypes
+      plot = plot +
+        ggplot2::geom_point(data = for_plot$arc_data, inherit.aes = FALSE,
+                            ggplot2::aes(x = get(x), y = get(y),
+                                         group = lab), size = gg_arch_size,
+                            color = arc_colors) +
+        ggplot2::geom_path(data = lines_for_plot, inherit.aes = FALSE,
+                           ggplot2::aes(x = get(x), y = get(y),
+                                        group = lab), size = gg_line_size,
+                           color = arc_colors) +
+        #ggplot2::scale_color_manual(values = colors) +
         ggplot2::geom_point(data = lines_for_plot, inherit.aes = FALSE,
                             ggplot2::aes(x = get(x), y = get(y),
-                                         color = lab, group = lab), size = gg_arch_size) # add separate step for plotting archetype positions
+                                         group = lab), size = gg_arch_size,
+                            color = arc_colors) +
+        ggplot2::geom_text(data = unique(lines_for_plot), inherit.aes = FALSE,
+                           ggplot2::aes(x = get(x), y = get(y), label = arch_id,
+                                        group = lab),
+                           color = arc_colors,
+                           show.legend = FALSE, size = gg_text_size,
+                           nudge_x = nd_x, nudge_y = nd_y) # add separate step for plotting archetype positions
     }
     plot = plot + ggplot2::xlab(x) + ggplot2::ylab(y)
     ## 3D plot ===================================================================##
   } else if(length(which_dimensions) == 3 & nrow(data) >= 3) {
     if(is.integer(which_dimensions)){
-      z = colnames(for_plot)[3]
+      z = colnames(for_plot$arc_data)[3]
     } else if (is.character(which_dimensions)) {
       z = which_dimensions[3]
     } else stop("which_dimensions is neither integer nor character vector")
     x = as.formula(paste0("~", x))
     y = as.formula(paste0("~", y))
     z = as.formula(paste0("~", z))
-    colors = colors[seq(1, uniqueN(for_plot$lab))]
-    names(colors) = as.character(unique(for_plot$lab))
-    plot = plot_ly(for_plot, x = x, y = y, z = z,
-                   color = ~ lab, colors = colors,
-                   marker = list(size = 2)) %>%
-      add_markers()
+
+    if(is.numeric(for_plot$data$lab)){
+      marker = list(size = 2, colorbar = list(title = "data"))
+    } else {
+      marker = list(size = 2, color = data_colors)
+    }
+    plot = plot_ly(for_plot$data) %>%
+      add_markers(x = x, y = y, z = z, showlegend = TRUE, mode = "markers",
+                  color = ~ lab,  name = 'data',
+                  marker = marker)
     if("lines_for_plot" %in% ls()) {
-      plot = add_trace(p = plot, x = x, y = y, z = z, mode = 'lines',
-                       data = lines_for_plot,
-                       marker = list(size = ly_arch_size),
-                       line = list(width = ly_line_size),
-                       inherit = TRUE)
+      plot = add_markers(p = plot, x = x, y = y, z = z, showlegend = FALSE,
+                         mode = "markers", color = ~ lab,
+                         marker = list(color = arc_colors, size = 2), data = for_plot$arc_data,
+                         inherit = TRUE) %>%
+        add_trace(x = x, y = y, z = z, mode = 'lines',
+                  data = lines_for_plot, color = ~ lab,
+                  showlegend = TRUE,
+                  marker = list(size = ly_arch_size, color = arc_colors),
+                  line = list(width = ly_line_size, color = arc_colors),
+                  inherit = TRUE) %>%
+        add_text(mode = "markers", marker = list(size = 0, color = arc_colors),
+                 x = x, y = y, z = z, textposition = "top center", color = ~ lab,
+                 data = unique(lines_for_plot), inherit = TRUE, showlegend = FALSE,
+                 textfont = list(color = arc_colors, size = ly_text_size), text = ~ arch_id)
     }
   } else stop("asked to plot < 2 or > 3 dimensions, or dataset has less dimensions than specified by which_dimensions")
   plot

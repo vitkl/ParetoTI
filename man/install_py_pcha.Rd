@@ -5,8 +5,10 @@
 \title{Install python module py_pcha and numpy}
 \usage{
 install_py_pcha(method = "auto", conda = "auto",
-  python_version = "python 2.7.10", envname = "reticulate_PCHA",
-  overwrite_env = F)
+  python_version = c("python 2.7.10", "python 3.6.4")[1],
+  envname = c("reticulate_PCHA", "reticulate_PCHA_36")[1],
+  overwrite_env = F, extra_packages = character(0),
+  packages = c("pip", "py_pcha", "numpy", "scipy", "datetime"))
 }
 \arguments{
 \item{method}{paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases. Use virtualenv if you don't want to install anaconda but virtualenv doesn't work on Windows. For conda method to work anaconda should be installed as described here: https://conda.io/docs/user-guide/install/index.html.}
@@ -18,6 +20,10 @@ install_py_pcha(method = "auto", conda = "auto",
 \item{envname}{name of the conda enviroment where PCHA should be installed. If that enviroment doesn't exist it will be created. If it contains incorrect python_version the function will give an error.}
 
 \item{overwrite_env}{It TRUE overwrites conda environment.}
+
+\item{extra_packages}{specify python libraries not needed for ParetoTI to work but desirable in the same conda environment}
+
+\item{packages}{specify python libraries needed for ParetoTI to work. Normally do not need changing.}
 }
 \value{
 path to python enviroment with py_pcha module installed

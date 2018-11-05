@@ -85,6 +85,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                        delta = delta, verbose = verbose,
                        conv_crit = conv_crit, maxiter = maxiter)
     names(res) = c("XC", "S", "C", "SSE", "varexpl")
+    if(!is.null(rownames(data))) rownames(res$XC) = rownames(data)
     res
   }, error = function(err) {
     if(isTRUE(converge_else_fail)) stop(paste0("fit_pch(noc = ",noc,") error: ", err))
@@ -153,7 +154,7 @@ k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
                      simplex = c(FALSE, TRUE), ...) {
   if(check_installed) .py_pcha_installed()
   # check that ks do not exceed dimensions when simplex is true
-  if(nrow(data) < (max(ks) - 1)) stop("simplex = TRUE but number of vertices (",
+  if(nrow(data) < (max(ks) - 1) & isTRUE(simplex)) stop("simplex = TRUE but number of vertices (",
                                       max(ks),") exceeds number of dimensions - 1 (", nrow(data),")")
   # run analysis for all k -----------------------------------------------------
   if(isTRUE(bootstrap)){
@@ -265,7 +266,7 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
       ref = fit_pch(data = data, order_type = order_type,
                     converge_else_fail = TRUE, ...)$XC
     })
-    for (i in seq_len(n)) {
+    for (i in seq_len(length(res$pch_fits$XC))) {
       ind = align_arc(ref, res$pch_fits$XC[[i]])$ind
       res$pch_fits$XC[[i]] = res$pch_fits$XC[[i]][, ind]
       res$pch_fits$S[[i]] = res$pch_fits$S[[i]][ind, ]
@@ -397,6 +398,37 @@ fit_convhulln = function(data, positions = TRUE) {
     hull$hull = unique(hull$hull)
   } else hull$hull = NA
   hull
+}
+
+##' @rdname fit_pch
+##' @name merge_arch_dist
+##' @description \code{merge_arch_dist()} Calculates distance to archtypes and merges it to data used to identify archetypes and other features of data points.
+##' @param feature_data matrix with dim(dimensions, examples) where rownames are feature names and colnames are sample_id.
+##' @param colData annotations of examples in feature_data, e.g. colData in SingleCellExperiment object.
+##' @param colData_id column in colData that contains values matching colnames of feature_data.
+##' @return \code{merge_arch_dist()} list: data.table with samples in columns and features in rows (speficied by sample_id column) and column names specifying archetypes
+##' @export merge_arch_dist
+##' @import data.table
+merge_arch_dist = function(arch_data, data, feature_data,
+                           colData = NULL, colData_id){
+  if(!is(arch_data, "pch_fit")) stop("arch_data should contain a single fit (pch_fit object): use fit_pch() or fit_pch_bootstrap() followed by average_pch_fits()")
+  dist = arch_dist(data, arch_data$XC)
+  arc_col = colnames(dist)
+  dist = as.data.table(dist, keep.rownames = "sample_id")
+  # convert distances to ranks and scale between 0 and 1 (max rank for min distance)
+  for (col in arc_col) {
+    dist[, c(col) := frank(get(col), ties.method=c("average")) / .N]
+  }
+  # merge gene expression data
+  features = as.data.table(t(feature_data), keep.rownames = "sample_id")
+  features = merge(dist, features, by = "sample_id", all.x = T, all.y = F)
+  # merge column annotations of gene expression data
+  if(!is.null(colData)) {
+    features = merge(features, colData, by.x = "sample_id", by.y = colData_id,
+                     all.x = T, all.y = F)
+  }
+  list(data = features,
+       arc_col = arc_col)
 }
 
 .c_pch_fit_list = function(pch_fit_list){

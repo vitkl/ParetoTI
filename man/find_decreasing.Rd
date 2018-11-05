@@ -2,16 +2,17 @@
 % Please edit documentation in R/find_decreasing.R
 \name{find_decreasing}
 \alias{find_decreasing}
-\alias{fit_arc_gam1}
+\alias{fit_arc_gam_1}
 \title{Find features that are decreasing functions of distance from archetype}
 \usage{
-find_decreasing()
-
-fit_arc_gam1(data_attr, arc_col, features = c("Gpx1", "Alb", "Cyp2e1",
+find_decreasing(data_attr, arc_col, features = c("Gpx1", "Alb", "Cyp2e1",
   "Apoa2")[3], min.sp = c(60), N_smooths = 4, n_points = 200,
   d = 1/n_points, weights = c(rep(1, each = n_points), rep(c(1, 0),
   each = n_points/2))[1], return_only_summary = FALSE,
-  stop_at_10 = TRUE, ...)
+  stop_at_10 = TRUE, one_arc_per_model = TRUE, ...)
+
+fit_arc_gam_1(feature, col, N_smooths, data_attr, min.sp, ..., d, n_points,
+  weights)
 }
 \arguments{
 \item{data_attr}{data.table dim(examples, dimensions) that includes distance of each example to archetype in columns given by \code{arc_col} and feature values given by \code{features}}
@@ -22,28 +23,6 @@ fit_arc_gam1(data_attr, arc_col, features = c("Gpx1", "Alb", "Cyp2e1",
 
 \item{min.sp}{lower bound for the smoothing parameter, details: \link[mgcv]{gam}. Default value of 60 works well to stabilise curve shape near min and max distance}
 
-\item{N_smooths}{number of curves for each predictor in the model}
-
-\item{n_points}{number of points at which to evaluate derivative}
-
-\item{d}{numeric vector (1L), finite difference interval}
-
-\item{weights}{how to weight points along x axis when calculating mean (integral) probability}
-
-\item{return_only_summary}{set to TRUE when using inside other function to fit multiple features}
-
-\item{stop_at_10}{prevents \code{fit_arc_gam1()} from fitting too many features}
-
-\item{...}{arguments passed to \link[mgcv]{gam}}
-
-\item{gam_fit}{a fitted gam object as produced by gam().}
-
-\item{x}{numeric vector where to evaluate derivatives}
-
-\item{return_derivs}{return derivative and SD of derivative values? By default only summary p-values are returned}
-
-\item{return_gam}{return gam model as well? By default only summary p-values are returned}
-
 \item{N_smooths}{number of bases used to represent the smooth term (\link[mgcv]{s}), 4 for cubic splines}
 
 \item{n_points}{number of points at which to evaluate derivative}
@@ -51,14 +30,22 @@ fit_arc_gam1(data_attr, arc_col, features = c("Gpx1", "Alb", "Cyp2e1",
 \item{d}{numeric vector (1L), finite difference interval}
 
 \item{weights}{how to weight points along x axis when calculating mean (integral) probability. Useful if you care that the function is decreasing near the archetype but not far away. Two defaults suggest to weight point equally or discard bottom 50%.}
+
+\item{return_only_summary}{set to TRUE when using inside other function to fit multiple features}
+
+\item{stop_at_10}{prevents \code{find_decreasing()} from fitting too many features}
+
+\item{one_arc_per_model}{If TRUE fit separate gam models for each archetype. If FALSE combine all archetypes in one model: feature ~ s(arc1) + s(arc2) + ... + s(arcN).}
+
+\item{...}{arguments passed to \link[mgcv]{gam}}
 }
 \value{
-\code{find_decreasing()}
+\code{find_decreasing()} list (S3 object, gam_deriv) containing summary p-values for features and each archetype, function call and (optionally) a data.table with values of the first derivative
 
-\code{fit_arc_gam1()} list (S3 object, gam_deriv) containing summary p-values for features and each archetype, function call and (optionally) a data.table with values of the first derivative and gam model fit
+\code{fit_arc_gam_1()} list containing function call, 1st derivative values of GAM model (derivs), summary of GAM model (p-value and r^2, gam_sm)
 }
 \description{
-\code{find_decreasing()} Finds
+\code{find_decreasing()} Fits gam models to find if features are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.
 
-\code{fit_arc_gam1()} Fits gam models one by one to find if a small number of features are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.
+\code{fit_arc_gam_1()} Finds single GAM model fit and it's first derivative for a single feature and one or several archetypes.
 }

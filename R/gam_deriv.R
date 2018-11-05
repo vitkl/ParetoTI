@@ -9,17 +9,16 @@
 ##' @param N_smooths number of bases used to represent the smooth term (\link[mgcv]{s}), 4 for cubic splines
 ##' @param weights how to weight points along x axis when calculating mean (integral) probability
 ##' @param d numeric vector (1L), finite difference interval
-##' @param return_derivs return derivative and SD of derivative values? By default only summary p-values are returned
-##' @param return_gam return gam model as well? By default only summary p-values are returned
-##' @return \code{find_gam_deriv()} list (S3 object, find_gam_deriv) containing summary p-values for a feature and each archetype, function call and (optionally) a data.table with values of the first derivative and gam model fit
+##' @param return_gam return gam model as well? By default only only the first derivative at n_points
+##' @return \code{find_gam_deriv()} list (S3 object, find_gam_deriv) containing function call, a data.table with values of the first derivative, GAM model fit summary (gam_sm) and (optionally) gam model fit; summary entry is NA.
 ##' @export find_gam_deriv
 ##' @import data.table
 find_gam_deriv = function(gam_fit,
-                     n_points = 200, x = NULL,
-                     N_smooths = 9,
-                     weights = list(rep(1, 200), sqrt(seq(1, 0, length.out = 200)),
-                                    1 / (1 + seq(1, 0, length.out = 200)^3))[[1]],
-                     d = 1 / n_points, return_derivs = FALSE, return_gam = FALSE){
+                          n_points = 200, x = NULL,
+                          N_smooths = 9,
+                          weights = list(rep(1, 200), sqrt(seq(1, 0, length.out = 200)),
+                                         1 / (1 + seq(1, 0, length.out = 200)^3))[[1]],
+                          d = 1 / n_points, return_gam = FALSE){
 
   ## evaluate derivatives of smooths with associated standard
   ## errors, by finite differencing...
@@ -62,13 +61,26 @@ find_gam_deriv = function(gam_fit,
                x_lab = paste0(x_name,",\ntotal p(der < 0): ", signif(mean(prob_neg), 2)),
                prob_neg = prob_neg, weights = weights)
   })
-  derivs = list(call = match.call(),
-                derivs = rbindlist(derivs),
-                gam_fit = gam_fit)
+  # Combine results of iterations over predictors of GAM model (distance from vertices)
+  derivs = rbindlist(derivs)
+  # generate summary of gam fit
+  gam_sm = summary(gam_fit)
+  gam_sm = data.table(smooth_term_p_val = gam_sm$s.pv, r_sq =  gam_sm$r.sq,
+                      y_name = as.character(gam_fit$formula[[2]]),
+                      x_name = unique(derivs$x_name))
+  # combine results into list are return
+  if(!isTRUE(return_gam)) {
+    derivs = list(call = match.call(),
+                  derivs = derivs,
+                  gam_fit = NA,
+                  gam_sm = gam_sm, summary = NA)
+  } else {
+    derivs = list(call = match.call(),
+                  derivs = derivs,
+                  gam_fit = gam_fit,
+                  gam_sm = gam_sm, summary = NA)
+  }
   derivs$derivs$y_name = as.character(gam_fit$formula[[2]])
-  derivs$summary = summary.gam_deriv(derivs)
-  if(!isTRUE(return_derivs)) derivs$derivs = NA
-  if(!isTRUE(return_gam)) derivs$gam_fit = NA
   class(derivs) = "gam_deriv"
   derivs
 }
@@ -78,31 +90,50 @@ find_gam_deriv = function(gam_fit,
 ##' @export summary.gam_deriv
 ##' @import data.table
 summary.gam_deriv = function(derivs){
-  # add summary with mean probability for each archetype
-  mean_prob = derivs$derivs[, .(p = weighted.mean(prob_neg, weights),
-                                metric = "mean_prob"), by = .(x_name)]
-  # add summary with product of probability for each archetype
-  prod_prob = derivs$derivs[, .(p = prod(prob_neg), metric = "prod_prob"), by = .(x_name)]
-  # calculate p(p_arc1(der < 0) and p_arc2(der > 0)):
-  # generate a matrix of p_arc1(der < 0) and p_arc2(der > 0) ... p_arcN(der > 0)
-  mean_prob_excl = dcast.data.table(mean_prob, x_name ~ x_name, value.var = "p")
-  cols = unique(derivs$derivs$x_name)
-  for (col in cols) {
-    mean_prob_excl[is.na(get(col)), c(col) :=
-                     mean_prob_excl[x_name == col, 1 - get(col)]]
+  summary = lapply(unique(derivs$derivs$y_name), function(yname){
+    der = derivs$derivs[y_name %in% yname]
+
+    # find average derivative values for 100%, top 50% and top 20% data points
+    effect_size = der[, .(deriv100 = weighted.mean(deriv, weights),
+                          deriv50 = weighted.mean(deriv,
+                                                  weights * c(rep(1, .N/2),
+                                                              rep(0, .N/2))),
+                          deriv20 = weighted.mean(deriv,
+                                                  weights * c(rep(1, .N/5),
+                                                              rep(0, .N/5*4)))), by = .(x_name)]
+    # add summary with mean probability for each archetype
+    mean_prob = der[, .(p = weighted.mean(prob_neg, weights),
+                        metric = "mean_prob"), by = .(x_name)]
+    # add summary with product of probability for each archetype
+    prod_prob = der[, .(p = prod(prob_neg), metric = "prod_prob"), by = .(x_name)]
+    # calculate p(p_arc1(der < 0) and p_arc2(der > 0)):
+    # generate a matrix of p_arc1(der < 0) and p_arc2(der > 0) ... p_arcN(der > 0)
+    mean_prob_excl = copy(dcast.data.table(mean_prob, x_name ~ x_name, value.var = "p"))
+    cols = unique(der$x_name)
+    for (col in cols) {
+      mean_prob_excl[is.na(get(col)), c(col) :=
+                       mean_prob_excl[x_name == col, 1 - get(col)]]
+    }
+    mean_prob_excl = as.matrix(mean_prob_excl, rownames = "x_name")
+    # multiply and average probabilities
+    prod_prob_excl = apply(mean_prob_excl, 1, prod)
+    mean_prob_excl = rowMeans(mean_prob_excl)
+    prod_prob_excl = data.table(p = prod_prob_excl, x_name = names(prod_prob_excl),
+                                metric = "prod_prob_excl")
+    mean_prob_excl = data.table(p = mean_prob_excl, x_name = names(mean_prob_excl),
+                                metric = "mean_prob_excl")
+    # merge summaries together
+    summary = rbindlist(list(mean_prob, prod_prob,
+                             mean_prob_excl, prod_prob_excl), use.names = TRUE)
+    summary$y_name = unique(der$y_name)
+    merge(summary, effect_size, by = "x_name")
+  })
+  # rbind iterations over y_name
+  summary = rbindlist(summary)
+  # merge gam fit summary
+  if(!isTRUE(is.na(derivs$gam_sm))) {
+    summary = merge(summary, derivs$gam_sm, by = c("y_name", "x_name"), all = TRUE)
   }
-  mean_prob_excl = as.matrix(mean_prob_excl, rownames = "x_name")
-  # multiply and average probabilities
-  prod_prob_excl = apply(mean_prob_excl, 1, prod)
-  mean_prob_excl = rowMeans(mean_prob_excl)
-  prod_prob_excl = data.table(p = prod_prob_excl, x_name = names(prod_prob_excl),
-                              metric = "prod_prob_excl")
-  mean_prob_excl = data.table(p = mean_prob_excl, x_name = names(mean_prob_excl),
-                              metric = "mean_prob_excl")
-  # merge summaries together
-  summary = rbindlist(list(mean_prob, prod_prob,
-                           mean_prob_excl, prod_prob_excl), use.names = TRUE)
-  summary$y_name = unique(derivs$derivs$y_name)
   summary
 }
 
@@ -111,14 +142,15 @@ summary.gam_deriv = function(derivs){
 ##' @name plot.gam_deriv
 ##' @export plot.gam_deriv
 ##' @import data.table
-plot.gam_deriv = function(derivs) {
+plot.gam_deriv = function(derivs, features = derivs$derivs$y_name) {
   n_der = uniqueN(derivs$derivs$x_name)
   der = derivs$derivs
+  der = der[y_name %in% features]
   ggplot2::ggplot(der, ggplot2::aes(x, deriv)) +
     ggplot2::geom_line(ggplot2::aes(x, deriv)) +
     ggplot2::geom_line(ggplot2::aes(x, y = deriv + 2 * deriv_sd), linetype = 2) +
     ggplot2::geom_line(ggplot2::aes(x, y =  deriv - 2 * deriv_sd), linetype = 2) +
     ggplot2::ylim(min(der$deriv - 2 * der$deriv_sd),
                   max(der$deriv + 2 * der$deriv_sd)) +
-    ggplot2::facet_grid(derivs$derivs$y_name ~ x_name)
+    ggplot2::facet_grid(y_name ~ x_name)
 }

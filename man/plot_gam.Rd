@@ -4,7 +4,7 @@
 \alias{plot_gam}
 \title{Plot gam model fit for multiple genes and archetypes (Generalised Additive Model, mgcv)}
 \usage{
-plot_gam(gam_deriv = NULL, gam_fit, data, feature = "Alb",
+plot_gam(gam_deriv = NULL, gam_fit, data, feature = NULL,
   groupCovs = NULL, title_size = 10)
 }
 \arguments{

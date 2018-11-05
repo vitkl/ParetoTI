@@ -8,6 +8,7 @@
 \alias{fit_pch_resample}
 \alias{randomise_fit_pch1}
 \alias{fit_convhulln}
+\alias{merge_arch_dist}
 \alias{print.pch_fit}
 \title{Fit a polytope (Principal Convex Hull) to data using PCHA algorithm}
 \usage{
@@ -37,6 +38,9 @@ randomise_fit_pch1(i = 1, data, replace = FALSE, prob = NULL,
   bootstrap_average = FALSE, convex_hull = TRUE, ...)
 
 fit_convhulln(data, positions = TRUE)
+
+merge_arch_dist(arch_data, data, feature_data, colData = NULL,
+  colData_id)
 
 \method{print}{pch_fit}(res)
 }
@@ -104,6 +108,12 @@ fit_convhulln(data, positions = TRUE)
 \item{bootstrap_average}{\code{randomise_fit_pch1()}: average positions and summary statistics when bootstraping? Passed to \code{average} argument of \code{fit_pch_bootstrap()}.}
 
 \item{positions}{return positions of convex hull points?}
+
+\item{feature_data}{matrix with dim(dimensions, examples) where rownames are feature names and colnames are sample_id.}
+
+\item{colData}{annotations of examples in feature_data, e.g. colData in SingleCellExperiment object.}
+
+\item{colData_id}{column in colData that contains values matching colnames of feature_data.}
 }
 \value{
 \code{fit_pch()}: object of class pch_fit (list) containing the following elements:
@@ -130,6 +140,8 @@ call - function call.
 \code{randomise_fit_pch1()}: list containing function call, summary of the sample, optional data and optional position of vertices/archetypes.
 
 \code{fit_convhulln()} list with 3 elements: hull - matrix storing positions of points dim(points, dimensions)); area - surface area for 3D or higher and perimeter for 2D; vol - volume for 3D and surface area for 2D.
+
+\code{merge_arch_dist()} list: data.table with samples in columns and features in rows (speficied by sample_id column) and column names specifying archetypes
 }
 \description{
 \code{fit_pch()} fits a polytope (Principal Convex Hull) to data using PCHA algorithm. All of the listed functions take input matrix dim(variables/dimentions, examples) and return archetype positions (XC) of dim(variables/dimentions, archetypes).
@@ -145,6 +157,8 @@ call - function call.
 \code{randomise_fit_pch1()} helps answer the question "how likely you are to obtain the observed shape of the data given no relationship between variables?" disrupts the relationships between variables (one sample of the data), keeping the distribution of each variable constant, and fits a polytope (Principal Convex Hull) to data. This function uses \code{\link[ParetoTI]{rand_var}} and \code{fit_pch()}.
 
 \code{fit_convhulln()} computes smallest convex hull that encloses a set of points using \code{\link[geometry]{convhulln}} and returns positions of convex hull points (positions = TRUE).
+
+\code{merge_arch_dist()} Calculates distance to archtypes and merges it to data used to identify archetypes and other features of data points.
 }
 \details{
 \code{fit_pch()} provides an R interface to python implementation of PCHA algorithm (Principal Convex Hull Analysis) by Ulf Aslak (https://github.com/ulfaslak/py_pcha) which was originally developed for Archetypal Analysis by Mørup et. al.

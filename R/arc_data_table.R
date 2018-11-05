@@ -30,15 +30,16 @@
   }
   data = as.data.table(t(data[which_dimensions,]))
   data$lab = data_lab
-  rbind(arc_data, data)
+  list(arc_data = arc_data, # archetypes
+       data = data) # data points
 }
 ##' add a line between all archetypes
-##'@param arc_data data.table that contains positions of data points and archetypes
+##'@param arc_data data.table that contains positions of archetypes
 ##'@param label character specifying which data point to connect (when multiple replicates of fitted polytopes)
 .archLines = function(arc_data, arc_lab = "archetypes", type = c("average", "all")[1], average_func = mean){
   arch_lines = arc_data[grepl("archetypes", arc_data$lab)]
+  arch_lines[, arch_id := seq(1, .N), by = lab]
   if(type == "average"){
-    arch_lines[, arch_id := seq(1, .N), by = lab]
     col_names = colnames(arch_lines)
     col_names = col_names[!col_names %in% c("lab", "arch_id")]
     for (col_name in col_names) {

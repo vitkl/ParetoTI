@@ -8,7 +8,7 @@
   "all")[1], average_func = mean)
 }
 \arguments{
-\item{arc_data}{data.table that contains positions of data points and archetypes}
+\item{arc_data}{data.table that contains positions of archetypes}
 
 \item{label}{character specifying which data point to connect (when multiple replicates of fitted polytopes)}
 }

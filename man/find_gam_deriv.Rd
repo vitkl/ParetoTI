@@ -9,11 +9,11 @@
 find_gam_deriv(gam_fit, n_points = 200, x = NULL, N_smooths = 9,
   weights = list(rep(1, 200), sqrt(seq(1, 0, length.out = 200)), 1/(1 +
   seq(1, 0, length.out = 200)^3))[[1]], d = 1/n_points,
-  return_derivs = FALSE, return_gam = FALSE)
+  return_gam = FALSE)
 
 \method{summary}{gam_deriv}(derivs)
 
-\method{plot}{gam_deriv}(derivs)
+\method{plot}{gam_deriv}(derivs, features = derivs$derivs$y_name)
 }
 \arguments{
 \item{gam_fit}{a fitted gam object as produced by gam().}
@@ -28,12 +28,10 @@ find_gam_deriv(gam_fit, n_points = 200, x = NULL, N_smooths = 9,
 
 \item{d}{numeric vector (1L), finite difference interval}
 
-\item{return_derivs}{return derivative and SD of derivative values? By default only summary p-values are returned}
-
-\item{return_gam}{return gam model as well? By default only summary p-values are returned}
+\item{return_gam}{return gam model as well? By default only only the first derivative at n_points}
 }
 \value{
-\code{find_gam_deriv()} list (S3 object, find_gam_deriv) containing summary p-values for a feature and each archetype, function call and (optionally) a data.table with values of the first derivative and gam model fit
+\code{find_gam_deriv()} list (S3 object, find_gam_deriv) containing function call, a data.table with values of the first derivative, GAM model fit summary (gam_sm) and (optionally) gam model fit; summary entry is NA.
 }
 \description{
 \code{find_gam_deriv()} Finds a derivative with standard errors of smooth curves from gam model fit by finite differencing. Crucially it computes the probability that derivative is negative at each point.

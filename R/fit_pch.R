@@ -404,7 +404,7 @@ fit_convhulln = function(data, positions = TRUE) {
 ##' @name merge_arch_dist
 ##' @description \code{merge_arch_dist()} Calculates distance to archtypes and merges it to data used to identify archetypes and other features of data points.
 ##' @param feature_data matrix with dim(dimensions, examples) where rownames are feature names and colnames are sample_id.
-##' @param colData annotations of examples in feature_data, e.g. colData in SingleCellExperiment object.
+##' @param colData annotations of examples in feature_data - dim(examples, dimensions), e.g. colData in SingleCellExperiment object or output of \link[ParetoTI]{find_set_activity_AUCell}.
 ##' @param colData_id column in colData that contains values matching colnames of feature_data.
 ##' @return \code{merge_arch_dist()} list: data.table with samples in columns and features in rows (speficied by sample_id column) and column names specifying archetypes
 ##' @export merge_arch_dist

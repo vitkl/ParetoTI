@@ -111,7 +111,7 @@ merge_arch_dist(arch_data, data, feature_data, colData = NULL,
 
 \item{feature_data}{matrix with dim(dimensions, examples) where rownames are feature names and colnames are sample_id.}
 
-\item{colData}{annotations of examples in feature_data, e.g. colData in SingleCellExperiment object.}
+\item{colData}{annotations of examples in feature_data - dim(examples, dimensions), e.g. colData in SingleCellExperiment object or output of \link[ParetoTI]{find_set_activity_AUCell}.}
 
 \item{colData_id}{column in colData that contains values matching colnames of feature_data.}
 }

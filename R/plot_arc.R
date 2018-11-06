@@ -117,8 +117,12 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
   ## 2D plot ===================================================================##
   if(length(which_dimensions) == 2){
     plot = ggplot2::ggplot(for_plot$data, ggplot2::aes(x = get(x), y = get(y),
-                                                       color = lab)) +
-      geom() # use this to plot quantitavite color of data, define separate color map - color by different aes(color) and specify that in scale_color
+                                                       color = lab))
+    if(is.numeric(for_plot$data$lab)){
+      plot = plot + geom()
+    } else {
+      plot = plot + geom(color = data_colors)
+    }
     if("lines_for_plot" %in% ls()) {
       # calculate nudge by distance for text labels
       nd_x = for_plot$arc_data[, range(get(x))]

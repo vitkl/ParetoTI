@@ -13,7 +13,7 @@ find_gam_deriv(gam_fit, n_points = 200, x = NULL, N_smooths = 9,
 
 \method{summary}{gam_deriv}(derivs)
 
-\method{plot}{gam_deriv}(derivs, features = derivs$derivs$y_name)
+plot.gam_deriv(derivs, features = derivs$derivs$y_name)
 }
 \arguments{
 \item{gam_fit}{a fitted gam object as produced by gam().}

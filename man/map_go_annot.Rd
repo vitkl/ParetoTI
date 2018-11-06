@@ -9,7 +9,7 @@ map_go_annot(taxonomy_id = 9606, keys = c("TP53", "ALB"),
   columns = c("GOALL"), keytype = "ALIAS", ontology_type = c("BP",
   "MF", "CC"), evidence_code = "all", localHub = FALSE,
   return_org_db = FALSE,
-  ann_hub_cache = getAnnotationHubOption("CACHE"))
+  ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"))
 
 filter_go_annot(annot, ontology_file = NULL, lower = 1, upper = Inf,
   ontology_type = c("BP", "MF", "CC"))
@@ -42,7 +42,7 @@ filter_go_annot(annot, ontology_file = NULL, lower = 1, upper = Inf,
 \item{upper}{upper limit on size of gene sets (exclusive)}
 }
 \value{
-list (S3 class ParetoTI_go_annot) containing GO annotations in list and data.table formats, and OrgDb database link.
+list (S3 class ParetoTI_annot) containing GO annotations in list and data.table formats, and OrgDb database link.
 }
 \description{
 map_go_annot() annotates genes with Gene Ontology terms including less specific terms. It automatically loads correct OrgDb package given \code{taxonomy_id}. Then it selects GOALL annotations for genes provided in \code{keys}, filter by ontology branch and evidence codes. Finally it maps GO term names using GO.db and returns annotations in list and data.table formats. This function can be used to retrieve other gene annotations from OrgDb (e.g OMIM, PFAM) but those will not be mapped to readable names.

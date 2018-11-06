@@ -3,7 +3,7 @@
 ##' @name map_go_annot
 ##' @description map_go_annot() annotates genes with Gene Ontology terms including less specific terms. It automatically loads correct OrgDb package given \code{taxonomy_id}. Then it selects GOALL annotations for genes provided in \code{keys}, filter by ontology branch and evidence codes. Finally it maps GO term names using GO.db and returns annotations in list and data.table formats. This function can be used to retrieve other gene annotations from OrgDb (e.g OMIM, PFAM) but those will not be mapped to readable names.
 ##' @details GO consortium annotates genes with the most specific terms so there is a need to propagate annotations to less specific parent terms. For example, "apoptotic process in response to mitochondrial fragmentation" (GO:0140208) is an "apoptotic process" (GO:0006915). Conceptually, if gene functions in the first it also functions in the second but it is only directly annotated by the first term. So, using GO annotations for functional enrichment requires propagating annotations to less specific terms.
-##' @return list (S3 class ParetoTI_go_annot) containing GO annotations in list and data.table formats, and OrgDb database link.
+##' @return list (S3 class ParetoTI_annot) containing GO annotations in list and data.table formats, and OrgDb database link.
 ##' @param taxonomy_id Taxonomy id of your species. 9606 is human, 10090 is mouse. Find your species id using taxonomy search by UniProt: https://www.uniprot.org/taxonomy/.
 ##' @param keys gene or protein identifiers of \code{keytype}
 ##' @param columns columns to retrieve. Default is GOALL: GO Identifiers (includes less specific terms), \link[AnnotationDbi]{colsAndKeytypes}.
@@ -20,7 +20,7 @@ map_go_annot = function(taxonomy_id = 9606, keys = c("TP53", "ALB"),
                         ontology_type = c("BP", "MF", "CC"),
                         evidence_code = "all",
                         localHub = FALSE, return_org_db = FALSE,
-                        ann_hub_cache = getAnnotationHubOption("CACHE")) {
+                        ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE")) {
   # find annotation data base for taxonomy_id
   setAnnotationHubOption("CACHE", ann_hub_cache)
   hub = AnnotationHub(localHub = localHub)
@@ -29,8 +29,9 @@ map_go_annot = function(taxonomy_id = 9606, keys = c("TP53", "ALB"),
   org_db = hub[[names(record)]]
   if(isTRUE(return_org_db)) return(org_db)
   suppressMessages({
-    annot = as.data.table(select(org_db, keys = keys, columns = c(keytype, columns),
-                                 keytype = keytype))
+    annot = as.data.table(AnnotationDbi::select(org_db, keys = keys,
+                                                columns = c(keytype, columns),
+                                                keytype = keytype))
   })
 
   # filter by ontology branch/type:
@@ -50,21 +51,19 @@ map_go_annot = function(taxonomy_id = 9606, keys = c("TP53", "ALB"),
   # add GO term names
   if(sum(c("GO", "GOALL") %in% columns[1]) >= 1){
     suppressMessages({
-      annot_names = as.data.table(select(GO.db::GO.db, keys = annot[, unique(GOALL)],
-                                         keytype = "GOID", columns = c("GOID", "TERM"),
-                                         verbose = F))
+      annot_names = as.data.table(AnnotationDbi::select(GO.db::GO.db,
+                                                        keys = annot[, unique(GOALL)],
+                                                        keytype = "GOID",
+                                                        columns = c("GOID", "TERM"),
+                                                        verbose = F))
     })
     annot = merge(annot, annot_names, by.x = columns[1], by.y = "GOID", all = TRUE)
-    # generate list format and return:
-    return(structure(list(annot_list = split(annot[, get(keytype)],
-                                             annot[, get(columns[1])]),
-                          annot_dt = annot, org_db = org_db),
-                     class = "ParetoTI_go_annot"))
-  } else {
-    return(list(annot_list = split(annot[, get(keytype)],
-                                   annot[, get(columns[1])]),
-                annot_dt = annot, org_db = org_db))
   }
+  # generate list format and return:
+  structure(list(annot_list = split(annot[, get(keytype)],
+                                    annot[, get(columns[1])]),
+                 annot_dt = annot, org_db = org_db),
+            class = "ParetoTI_annot")
 }
 
 
@@ -87,7 +86,9 @@ map_go_annot = function(taxonomy_id = 9606, keys = c("TP53", "ALB"),
 ##'            lower = 50, upper = 2000, ontology_type = "BP")
 filter_go_annot = function(annot, ontology_file = NULL, lower = 1, upper = Inf,
                            ontology_type = c("BP", "MF", "CC")){
-  if(!is(annot, "ParetoTI_go_annot")) stop("filter_go_annot(): annot should be the output of map_go_annot() containing GO annotations")
+  if(!is(annot, "ParetoTI_annot")) {
+    if(sum(colnames(annot$annot_dt) %in% c("GO", "GOALL")) == 0) stop("filter_go_annot(): annot should be the output of map_go_annot() containing GO annotations (GO or GOALL)")
+    }
   colname = colnames(annot$annot_dt)
   go_colname = colname[colname %in% c("GO", "GOALL")]
   ont_colname = colname[colname %in% c("ONTOLOGY", "ONTOLOGYALL")]
@@ -98,7 +99,7 @@ filter_go_annot = function(annot, ontology_file = NULL, lower = 1, upper = Inf,
                                           extract_tags = "minimal")$id
     ont_ids = ont_ids[grepl("GO", ont_ids)]
     # filter by ontology
-    annot$annot_dt = annot$annot_dt[get(go_colname) %in% ids]
+    annot$annot_dt = annot$annot_dt[get(go_colname) %in% ont_ids]
   }
   # filter by number of annotated genes
   annot$annot_dt[, N := .N, by = go_colname]

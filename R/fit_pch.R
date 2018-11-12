@@ -349,6 +349,7 @@ fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE, ..
 ##' @param return_arc return archetype positions in randomised data?
 ##' @param bootstrap_average \code{randomise_fit_pch1()}: average positions and summary statistics when bootstraping? Passed to \code{average} argument of \code{fit_pch_bootstrap()}. When multiple ks this defaults to TRUE.
 ##' @return \code{randomise_fit_pch1()}: list containing function call, summary of the sample, optional data and optional position of vertices/archetypes.
+##' @import data.table
 ##' @export randomise_fit_pch1
 randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
                               replace = FALSE, prob = NULL,
@@ -527,6 +528,7 @@ print.pch_fit = function(res){
 ##' @param n_rand number of randomisation samples
 ##' @return \code{randomise_fit_pch()} S3 "r_pch_fit" object (list) containing: 1. data table with columns variance explained (rand_varexpl), t-ratio (rand_t_ratio), variance in positions of vertices (total_var) and number of vertices (k) for \code{n_rand} samples; 2. empirical p-value for those parameters for each number of vertices.
 ##' @import clustermq
+##' @import data.table
 ##' @export randomise_fit_pch
 randomise_fit_pch = function(data, arc_data, n_rand = 3, ks = 2:6, replace = FALSE,
                              bootstrap_N = c(NA, 50)[1], seed = 435,

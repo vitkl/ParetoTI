@@ -134,7 +134,11 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
   }
   rownames(res$XC) = rownames(data)
   res$var_vert = NA
-  res$var_dim = NA
+  res$var_dim = data.table::data.table(matrix(nrow = 0, ncol = nrow(data)))
+  if(!is.null(rownames(data))) {
+    data.table::setnames(res$var_dim, colnames(res$var_dim), rownames(data))
+  }
+  res$var_dim$k = integer(0)
   res$total_var = NA
   res$call = match.call()
   class(res) = "pch_fit"
@@ -204,13 +208,15 @@ k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
 ##' @param seed seed for reproducible random number generation. Works for all types of processing.
 ##' @param replace should resampling be with replacement? passed to \link[base]{sample.int}
 ##' @param average average archetype positions and varexpl? By default FALSE, return all fits to resampled data.
+##' @param cacl_var_in_dims calculate variance in dimensions across vertices in addition to variance in vertices.
 ##' @return \code{fit_pch_bootstrap()} object of class b_pch_fit (list) containing the same elements as pch_fit, but each is either a list of pch_fit elements (e.g. list of n number of XC matrices) or a vector (which pch_fit element is one number).
 ##' @import clustermq
 ##' @export fit_pch_bootstrap
 fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = T,
                              type = c("s", "m", "cmq")[1], clust_options = list(),
                              seed = 235, replace = FALSE, average = FALSE,
-                             order_type = c("cosine", "side", "align")[1],  ...) {
+                             order_type = c("cosine", "side", "align")[1],
+                             cacl_var_in_dims = TRUE, ...) {
   if(check_installed) .py_pcha_installed()
   # single process -------------------------------------------------------------
   if(type == "s"){
@@ -287,7 +293,18 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
                    dim(XC_array)[1], dim(XC_array)[2])
   # sum variance in position of each vertex across dimensions
   res$var_vert = colSums(res$var)
-  res$var_dim = rowSums(res$var)
+  # sum variance in position for each dimension across vertices
+  if(isTRUE(cacl_var_in_dims)){
+    res$var_dim = data.table::data.table(matrix(rowSums(res$var), nrow = 1,
+                                                ncol = nrow(data)))
+    res$var_dim$k = ncol(res$var)
+  } else {
+    res$var_dim = data.table::data.table(matrix(nrow = 0, ncol = nrow(data)))
+    if(!is.null(rownames(data))) {
+      data.table::setnames(res$var_dim, colnames(res$var_dim), rownames(data))
+    }
+    res$var_dim$k = integer(0)
+  }
   # find mean of variances of all vertices to get a single number
   res$total_var = mean(res$var_vert)
   res
@@ -404,10 +421,10 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
   }
   if(isTRUE(as.integer(bootstrap_N) > 1) & (!bootstrap_average & ks_1)){
     res$summary = data.table::data.table(rand_varexpl = NA, rand_t_ratio = NA,
-                             total_var = total_var, k = ks)
+                                         total_var = total_var, k = ks)
   } else {
     res$summary = data.table::data.table(rand_varexpl = varexpl, rand_t_ratio = t_ratio,
-                             total_var = total_var, k = ks)
+                                         total_var = total_var, k = ks)
   }
   ## choose to return data and archetype positions -----------------------------
   if(isTRUE(return_data)) res$data = data else res$data = NULL
@@ -436,7 +453,7 @@ fit_convhulln = function(data, positions = TRUE) {
 
 ##' @rdname fit_pch
 ##' @name merge_arch_dist
-##' @description \code{merge_arch_dist()} Calculates distance to archtypes and merges it to data used to identify archetypes and other features of data points.
+##' @description \code{merge_arch_dist()} calculates distance to archtypes, and merges distance matrix to data that was used to identify archetypes, optionally adds other features of data points (through colData).
 ##' @param feature_data matrix with dim(dimensions, examples) where rownames are feature names and colnames are sample_id.
 ##' @param colData annotations of examples in feature_data - dim(examples, dimensions), e.g. colData in SingleCellExperiment object or output of \link[ParetoTI]{find_set_activity_AUCell}.
 ##' @param colData_id column in colData that contains values matching colnames of feature_data.
@@ -482,7 +499,7 @@ merge_arch_dist = function(arch_data, data, feature_data,
        arc_vol = vapply(pch_fit_list, function(pch) pch$arc_vol, FUN.VALUE = numeric(1L)),
        t_ratio = vapply(pch_fit_list, function(pch) pch$t_ratio, FUN.VALUE = numeric(1L)),
        var_vert = lapply(pch_fit_list, function(pch) pch$var_vert),
-       var_dim = lapply(pch_fit_list, function(pch) pch$var_dim),
+       var_dim = data.table::rbindlist(lapply(pch_fit_list, function(pch) pch$var_dim)),
        total_var = vapply(pch_fit_list, function(pch) pch$total_var, FUN.VALUE = numeric(1L)))
 }
 
@@ -599,6 +616,8 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, ks = 2:6, replace = FAL
   rand_dist = lapply(res, function(x) x$summary)
   rand_dist = rbindlist(rand_dist)
   var_dim = lapply(res, function(x) x$var_dim)
+  var_dim = rbindlist(var_dim)
+  setnames(var_dim, colnames(var_dim), paste0("rand_", colnames(var_dim)))
   # match observed to randomised archetypes ------------------------------------
 
   # return ---------------------------------------------------------------------

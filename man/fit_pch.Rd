@@ -26,7 +26,8 @@ k_fit_pch(data, ks = 2:4, check_installed = TRUE, bootstrap = FALSE,
 fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
   check_installed = T, type = c("s", "m", "cmq")[1],
   clust_options = list(), seed = 235, replace = FALSE,
-  average = FALSE, order_type = c("cosine", "side", "align")[1], ...)
+  average = FALSE, order_type = c("cosine", "side", "align")[1],
+  cacl_var_in_dims = TRUE, ...)
 
 average_pch_fits(res, XC_array = NULL)
 
@@ -102,6 +103,8 @@ randomise_fit_pch(data, arc_data, n_rand = 3, ks = 2:6,
 \item{replace}{should resampling be with replacement? passed to \link[base]{sample.int}}
 
 \item{average}{average archetype positions and varexpl? By default FALSE, return all fits to resampled data.}
+
+\item{cacl_var_in_dims}{calculate variance in dimensions across vertices in addition to variance in vertices.}
 
 \item{XC_array}{Used by average_pch_fits() inside fit_pch_bootstrap(). You should not to use it in most cases.}
 

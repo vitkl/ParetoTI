@@ -9,7 +9,7 @@
 ##' @param N_smooths number of bases used to represent the smooth term (\link[mgcv]{s}), 4 for cubic splines
 ##' @param n_points number of points at which to evaluate derivative
 ##' @param d numeric vector (1L), finite difference interval
-##' @param weights how to weight points along x axis when calculating mean (integral) probability. Useful if you care that the function is decreasing near the archetype but not far away. Two defaults suggest to weight point equally or discard bottom 50%.
+##' @param weights how to weight points along x axis when calculating mean (integral) probability. Useful if you care that the function is decreasing near the archetype but not far away. Two defaults suggest to weight point equally or discard bottom 50 percent.
 ##' @param return_only_summary set to TRUE when using inside other function to fit multiple features
 ##' @param stop_at_10 prevents \code{find_decreasing()} from fitting too many features
 ##' @param one_arc_per_model If TRUE fit separate gam models for each archetype. If FALSE combine all archetypes in one model: feature ~ s(arc1) + s(arc2) + ... + s(arcN).

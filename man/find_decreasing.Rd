@@ -29,7 +29,7 @@ fit_arc_gam_1(feature, col, N_smooths, data_attr, min.sp, ..., d, n_points,
 
 \item{d}{numeric vector (1L), finite difference interval}
 
-\item{weights}{how to weight points along x axis when calculating mean (integral) probability. Useful if you care that the function is decreasing near the archetype but not far away. Two defaults suggest to weight point equally or discard bottom 50%.}
+\item{weights}{how to weight points along x axis when calculating mean (integral) probability. Useful if you care that the function is decreasing near the archetype but not far away. Two defaults suggest to weight point equally or discard bottom 50 percent.}
 
 \item{return_only_summary}{set to TRUE when using inside other function to fit multiple features}
 

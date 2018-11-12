@@ -40,6 +40,13 @@ export PYTHONUSERBASE=/some_dir/python_libs/
 python -m pip install --user -i https://pypi.python.org/simple -U pip distribute
 python -m pip install --user -i https://pypi.python.org/simple --upgrade pip setuptools wheel
 }
+\examples{
+\dontrun{
+install_py_pcha()
+install_py_pcha(extra_packages = c("tensorflow", "pandas", "keras",
+                                   "h5py", "pydot", "sklearn"))
+}
+}
 \author{
 Vitalii Kleshchevnikov
 }

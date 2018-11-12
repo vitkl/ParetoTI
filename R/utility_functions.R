@@ -23,7 +23,7 @@
 ##' \dontrun{
 ##' install_py_pcha()
 ##' install_py_pcha(extra_packages = c("tensorflow", "pandas", "keras",
-##'                                    "h5py", "pydot", "sklearn))
+##'                                    "h5py", "pydot", "sklearn"))
 ##' }
 install_py_pcha = function(method = "auto", conda = "auto",
                            python_version = c("python 2.7.10", "python 3.6.4")[1],

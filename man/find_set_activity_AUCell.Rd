@@ -19,7 +19,7 @@ find_set_activity_pseudoinv(expr_mat, assay_name = "logcounts",
 
 \item{assay_name}{name of assay in SummarizedExperiment or SingleCellExperiment, normally counts or logcounts}
 
-\item{aucMaxRank}{argument for \link[AUCell]{AUCell_calcAUC}. Threshold to calculate the AUC.In a simplified way, the AUC value represents the fraction of genes, within the top X genes in the ranking, that are included in the signature. The parameter 'aucMaxRank' allows to modify the number of genes (maximum ranking) that is used to perform this computation. By default, it is set to 5% of the total number of genes in the rankings. Common values may range from 1 to 20%.}
+\item{aucMaxRank}{argument for \link[AUCell]{AUCell_calcAUC}. Threshold to calculate the AUC.In a simplified way, the AUC value represents the fraction of genes, within the top X genes in the ranking, that are included in the signature. The parameter 'aucMaxRank' allows to modify the number of genes (maximum ranking) that is used to perform this computation. By default, it is set to 0.05 of the total number of genes in the rankings. Common values may range from 0.01 to 0.3.}
 
 \item{gene_sets}{data.table or coercible to data.table that contains gene set annotations.}
 
@@ -45,5 +45,5 @@ find_set_activity_pseudoinv(expr_mat, assay_name = "logcounts",
 \description{
 \code{find_set_activity_AUCell()} finds activity of each gene set in each cell by combining AUCell functions into a pipeline. Aerts lab that developed AUCell recommends adjusting the threshold when binarising activities (Details: https://www.bioconductor.org/packages/devel/bioc/vignettes/AUCell/inst/doc/AUCell.html#determine-the-cells-with-the-given-gene-signatures-or-active-gene-sets). See documentations for details: \link[AUCell]{AUCell_buildRankings}, \link[AUCell]{AUCell_calcAUC}, \link[AUCell]{AUCell_exploreThresholds}.
 
-\code{find_set_activity_pseudoinv()} finds activity of each gene set in each cell by solving this matrix equation: expression = activities %*% gene_assignment_to_sets => activities = pseudoinverse(gene_assignment_to_sets) %*% expression. Based on code from Inferelator package by Richard Bonneau lab.
+\code{find_set_activity_pseudoinv()} finds activity of each gene set in each cell by solving this matrix equation: expression = activities x gene_assignment_to_sets => activities = pseudoinverse(gene_assignment_to_sets) x expression. Based on code from Inferelator package by Richard Bonneau lab.
 }

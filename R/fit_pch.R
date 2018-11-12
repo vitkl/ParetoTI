@@ -403,10 +403,10 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
     res$var_dim = arc_data$pch_fits$var_dim
   }
   if(isTRUE(as.integer(bootstrap_N) > 1) & (!bootstrap_average & ks_1)){
-    res$summary = data.table(rand_varexpl = NA, rand_t_ratio = NA,
+    res$summary = data.table::data.table(rand_varexpl = NA, rand_t_ratio = NA,
                              total_var = total_var, k = ks)
   } else {
-    res$summary = data.table(rand_varexpl = varexpl, rand_t_ratio = t_ratio,
+    res$summary = data.table::data.table(rand_varexpl = varexpl, rand_t_ratio = t_ratio,
                              total_var = total_var, k = ks)
   }
   ## choose to return data and archetype positions -----------------------------

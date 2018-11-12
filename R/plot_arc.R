@@ -10,10 +10,13 @@
 ##' @param average_func used when arc_data is "b_pch_fit", function telling how to find average position of vertices
 ##' @param geom plotting function to plot data in 2D, useful options are ggplot2::geom_point (scatterplot) and ggplot2::geom_bin2d (density)
 ##' @param colors character vector giving color palette for different archetype fits and the data (both 3D and 2D plot)
-##' @param arch_size size of archetype point
+##' @param arch_size size of archetype points
 ##' @param line_size width of lines connecting archetypes
+##' @param data_size size of data points in plotly. Values for ggplot are 1/2 of data_size.
+##' @param arch_alpha opacity of archetype points
 ##' @param data_lab vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label
 ##' @param arc_lab vector, 1L or nrow(arc_data$XC)/noc, label vertices/archetypes (points) with a qualitative or quantitative label
+##' @param legend_name name to display on legend, e.g. gene name in data_lab
 ##' @param text_size archetype label text size
 ##' @return \code{plot_arc()} ggplot2 (2D) or plotly (3D) plot
 ##' @export plot_arc
@@ -47,7 +50,9 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                     geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
                     colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"),
                     arch_size = NULL, line_size = NULL,
+                    data_size = 2, arch_alpha = 0.4,
                     data_lab = "data", arc_lab = "archetypes",
+                    legend_name = "data",
                     text_size = NULL, nudge = c(0.05, 0.1)) {
   if(!is.null(arch_data)){
     for_plot = ParetoTI:::.arc_data_table(arch_data, data, data_lab = data_lab,
@@ -119,9 +124,9 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     plot = ggplot2::ggplot(for_plot$data, ggplot2::aes(x = get(x), y = get(y),
                                                        color = lab))
     if(is.numeric(for_plot$data$lab)){
-      plot = plot + geom()
+      plot = plot + geom(size = data_size/2)
     } else {
-      plot = plot + geom(color = data_colors)
+      plot = plot + geom(color = data_colors, size = data_size/2)
     }
     if("lines_for_plot" %in% ls()) {
       # calculate nudge by distance for text labels
@@ -134,7 +139,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
         ggplot2::geom_point(data = for_plot$arc_data, inherit.aes = FALSE,
                             ggplot2::aes(x = get(x), y = get(y),
                                          group = lab), size = gg_arch_size,
-                            color = arc_colors) +
+                            color = arc_colors, alpha = arch_alpha) +
         ggplot2::geom_path(data = lines_for_plot, inherit.aes = FALSE,
                            ggplot2::aes(x = get(x), y = get(y),
                                         group = lab), size = gg_line_size,
@@ -163,30 +168,46 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     y = as.formula(paste0("~", y))
     z = as.formula(paste0("~", z))
 
+    setorder(for_plot$data, lab)
+    plot = plot_ly(for_plot$data)
+
     if(is.numeric(for_plot$data$lab)){
-      marker = list(size = 2, colorbar = list(title = "data"))
+      plot = add_markers(p = plot, x = x, y = y, z = z, showlegend = TRUE, mode = "markers",
+                         color = ~ lab, name = 'data',
+                         marker = list(size = data_size,
+                                       colorbar = list(title = legend_name)))
     } else {
-      marker = list(size = 2, color = data_colors)
+      plot = add_markers(p = plot, x = x, y = y, z = z, mode = "markers",
+                         colors = ~ lab, name = ~ lab,
+                         marker = list(size = data_size,
+                                       color = data_colors[for_plot$data$lab]))
     }
-    plot = plot_ly(for_plot$data) %>%
-      add_markers(x = x, y = y, z = z, showlegend = TRUE, mode = "markers",
-                  color = ~ lab,  name = 'data',
-                  marker = marker)
+
     if("lines_for_plot" %in% ls()) {
+      setorder(for_plot$arc_data, lab)
+      setorder(lines_for_plot, lab)
+      arc_colors = arc_colors[for_plot$arc_data$lab]
+      arc_line_colors = arc_colors[lines_for_plot$lab]
+      arc_text_colors = arc_colors[unique(lines_for_plot)$lab]
       plot = add_markers(p = plot, x = x, y = y, z = z, showlegend = FALSE,
-                         mode = "markers", color = ~ lab,
-                         marker = list(color = arc_colors, size = 2), data = for_plot$arc_data,
+                         mode = "markers", colors = ~ lab, name = ~ lab,
+                         marker = list(color = arc_colors, size = ly_arch_size,
+                                       opacity = arch_alpha),
+                         data = for_plot$arc_data,
                          inherit = TRUE) %>%
         add_trace(x = x, y = y, z = z, mode = 'lines',
-                  data = lines_for_plot, color = ~ lab,
-                  showlegend = TRUE,
-                  marker = list(size = ly_arch_size, color = arc_colors),
-                  line = list(width = ly_line_size, color = arc_colors),
+                  data = lines_for_plot, colors = ~ lab,
+                  showlegend = TRUE, name = ~ lab,
+                  marker = list(size = ly_arch_size, color = arc_line_colors),
+                  line = list(width = ly_line_size, color = arc_line_colors),
                   inherit = TRUE) %>%
-        add_text(mode = "markers", marker = list(size = 0, color = arc_colors),
-                 x = x, y = y, z = z, textposition = "top center", color = ~ lab,
-                 data = unique(lines_for_plot), inherit = TRUE, showlegend = FALSE,
-                 textfont = list(color = arc_colors, size = ly_text_size), text = ~ arch_id)
+        add_text(mode = "markers", showlegend = FALSE,
+                 x = x, y = y, z = z, textposition = "top center",
+                 colors = ~ lab, name = ~ lab,
+                 data = unique(lines_for_plot), inherit = TRUE,
+                 marker = list(size = 0, color = arc_colors),
+                 textfont = list(color = arc_colors, size = ly_text_size),
+                 text = ~ arch_id)
     }
   } else stop("asked to plot < 2 or > 3 dimensions, or dataset has less dimensions than specified by which_dimensions")
   plot

@@ -19,7 +19,12 @@
 ##' @return path to python enviroment with py_pcha module installed
 ##' @export install_py_pcha
 ##' @export select_conda
-##' @seealso \code{\link{}}, \code{\link{}}
+##' @examples
+##' \dontrun{
+##' install_py_pcha()
+##' install_py_pcha(extra_packages = c("tensorflow", "pandas", "keras",
+##'                                    "h5py", "pydot", "sklearn))
+##' }
 install_py_pcha = function(method = "auto", conda = "auto",
                            python_version = c("python 2.7.10", "python 3.6.4")[1],
                            envname = c("reticulate_PCHA", "reticulate_PCHA_36")[1],

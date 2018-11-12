@@ -40,9 +40,6 @@ export PYTHONUSERBASE=/some_dir/python_libs/
 python -m pip install --user -i https://pypi.python.org/simple -U pip distribute
 python -m pip install --user -i https://pypi.python.org/simple --upgrade pip setuptools wheel
 }
-\seealso{
-\code{\link{}}, \code{\link{}}
-}
 \author{
 Vitalii Kleshchevnikov
 }

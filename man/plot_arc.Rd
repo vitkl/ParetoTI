@@ -8,8 +8,9 @@ plot_arc(arch_data = NULL, data, which_dimensions = as.integer(1:2),
   type = c("average", "all")[1], average_func = mean,
   geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
   colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400",
-  "#FF7E0F"), arch_size = NULL, line_size = NULL, data_lab = "data",
-  arc_lab = "archetypes", text_size = NULL, nudge = c(0.05, 0.1))
+  "#FF7E0F"), arch_size = NULL, line_size = NULL, data_size = 2,
+  arch_alpha = 0.4, data_lab = "data", arc_lab = "archetypes",
+  legend_name = "data", text_size = NULL, nudge = c(0.05, 0.1))
 }
 \arguments{
 \item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}
@@ -24,13 +25,19 @@ plot_arc(arch_data = NULL, data, which_dimensions = as.integer(1:2),
 
 \item{colors}{character vector giving color palette for different archetype fits and the data (both 3D and 2D plot)}
 
-\item{arch_size}{size of archetype point}
+\item{arch_size}{size of archetype points}
 
 \item{line_size}{width of lines connecting archetypes}
+
+\item{data_size}{size of data points in plotly. Values for ggplot are 1/2 of data_size.}
+
+\item{arch_alpha}{opacity of archetype points}
 
 \item{data_lab}{vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label}
 
 \item{arc_lab}{vector, 1L or nrow(arc_data$XC)/noc, label vertices/archetypes (points) with a qualitative or quantitative label}
+
+\item{legend_name}{name to display on legend, e.g. gene name in data_lab}
 
 \item{text_size}{archetype label text size}
 

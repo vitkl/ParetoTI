@@ -7,6 +7,8 @@
   
   Need to perform multiple objectives and natural selection put cells on a Pareto front, a narrow subspace of optimal performance. When cells move along this front they trade-off performance at those tasks. Pareto front in the performance space translates into simple shapes gene expression of cell population. By finding minimal simplex polytope (triangle in 2D, tetrahedron in 3D, 5-vertex polytope in 4D) that encloses most of the data you can indentify the cellular tasks. This relies on recent work by Uri Alon group that showed that Pareto front is equal to minimal polytope defined by specialist phenotypes (convex hull defined by archetypes) and developed a matlab package ParTI for performing this analysis.
   
+  See [Manual](https://vitkl.github.io/ParetoTI/articles/introduction.html).
+  
   ParTI matlab package is described in more detail in Yuval Hart & Uri Alon paper in Nature Methods (2015):
     [Inferring biological tasks using Pareto analysis of high-dimensional data.](https://www.nature.com/articles/nmeth.3254)
     
@@ -38,7 +40,7 @@ ParetoTI::install_py_pcha(method = "conda")
 reticulate::py_discover_config("py_pcha")
 ```
 
-**Example: Fitting polytope to random data (finding Pareto front)**  
+**Example: Fitting polytope to random triangle-shaped data (finding Pareto front)**  
 
 ```r
 library(ParetoTI)
@@ -66,9 +68,8 @@ plot_arc(arch_data = arc_data, data = data,
   theme_bw()
 ```
 
-### Development and further updates
+### Development and further improvements
 
-It is currently under development and enables only polytope fitting and statistical significance tests.
-Other analyses, in particular, models of feature enrichment at archetype will be included later.
+It is currently under development and enables polytope fitting, statistical significance test by permutation, evaluating variance in vertex position by bootstraping, feature enrichment at archetype using the first derivative of Generalised Additive Model, measuring gene set activities in each cell with subsequent enrichment at archetype.
 
-Alternative methods for polytope fitting will be considered such as SPAMS implemented in c++ used via R interface: https://www.stat.berkeley.edu/~yuansi.chen/demo/demo.html, https://arxiv.org/pdf/1405.6472.pdf, http://spams-devel.gforge.inria.fr/downloads.html
+Key improvement that can be made is an implementation of PCHA algorhitm in c++ and for sparse matrices. Alternative methods for polytope fitting will be considered such as SPAMS implemented in c++ used via R interface: https://www.stat.berkeley.edu/~yuansi.chen/demo/demo.html, https://arxiv.org/pdf/1405.6472.pdf, http://spams-devel.gforge.inria.fr/downloads.html

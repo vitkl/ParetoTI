@@ -22,6 +22,8 @@ License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
+URL: https://vitkl.github.io/ParetoTI/
+BugReports: https://github.com/vitkl/ParetoTI/issues
 Depends: reticulate, data.table
 Imports: parallel, plotly, downloader, geometry, ggplot2, cowplot, AnnotationHub, GO.db, ontologyIndex, svd, Biobase, SummarizedExperiment, corpcor
 Suggests: voxel, clustermq

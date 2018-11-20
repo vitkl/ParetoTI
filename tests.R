@@ -234,8 +234,6 @@ class(res) = "pch_fit"
 plot_arc(arch_data = res, data = data,
          which_dimensions = 1:3)
 
-devtools::load_all()
-
 # set directory for user libraries, update pip, setuptools, wheel in that environment
 #export PYTHONUSERBASE=$vk7/software/python_libs/
 #python -m pip install --user -i https://pypi.python.org/simple -U pip distribute
@@ -247,3 +245,4 @@ selected_name = names(query(hub, "OrgDb"))[mcols(query(hub, "OrgDb"))$taxonomyid
 org_db = hub[[selected_name]]
 org_db
 
+pkgdown::build_site()

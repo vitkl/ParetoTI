@@ -1,5 +1,5 @@
-##' Use OrgDb packages to annotate genes with GO terms (including less specific)
-##' @rdname map_go_annot
+##' Annotate genes with GO terms and measure their activities
+##' @rdname measure_activity
 ##' @name map_go_annot
 ##' @description map_go_annot() annotates genes with Gene Ontology terms including less specific terms. It automatically loads correct OrgDb package given \code{taxonomy_id}. Then it selects GOALL annotations for genes provided in \code{keys}, filter by ontology branch and evidence codes. Finally it maps GO term names using GO.db and returns annotations in list and data.table formats. This function can be used to retrieve other gene annotations from OrgDb (e.g OMIM, PFAM) but those will not be mapped to readable names.
 ##' @details GO consortium annotates genes with the most specific terms so there is a need to propagate annotations to less specific parent terms. For example, "apoptotic process in response to mitochondrial fragmentation" (GO:0140208) is an "apoptotic process" (GO:0006915). Conceptually, if gene functions in the first it also functions in the second but it is only directly annotated by the first term. So, using GO annotations for functional enrichment requires propagating annotations to less specific terms.
@@ -68,7 +68,7 @@ map_go_annot = function(taxonomy_id = 9606, keys = c("TP53", "ALB"),
 
 
 
-##' @rdname map_go_annot
+##' @rdname measure_activity
 ##' @name filter_go_annot
 ##' @description filter_go_annot() filters GO annotations by ontology file, GO branch, number of genes annotated
 ##' @param annot GO annotations, output of map_go_annot()
@@ -88,7 +88,7 @@ filter_go_annot = function(annot, ontology_file = NULL, lower = 1, upper = Inf,
                            ontology_type = c("BP", "MF", "CC")){
   if(!is(annot, "ParetoTI_annot")) {
     if(sum(colnames(annot$annot_dt) %in% c("GO", "GOALL")) == 0) stop("filter_go_annot(): annot should be the output of map_go_annot() containing GO annotations (GO or GOALL)")
-    }
+  }
   colname = colnames(annot$annot_dt)
   go_colname = colname[colname %in% c("GO", "GOALL")]
   ont_colname = colname[colname %in% c("ONTOLOGY", "ONTOLOGYALL")]
@@ -112,4 +112,88 @@ filter_go_annot = function(annot, ontology_file = NULL, lower = 1, upper = Inf,
   # filter annotations in list format
   annot$annot_list = annot$annot_list[unique(annot$annot_dt[,get(go_colname)])]
   annot
+}
+
+##' @rdname measure_activity
+##' @name measure_activity
+##' @description measure_activity() annotates genes with GO terms and measures their activities
+##' @param expr_mat expression matrix (genes in rows, cells in columns) or one of: dgCMatrix, ExpressionSet, and SummarizedExperiment or SingleCellExperiment both of which require assay_name.
+##' @param which which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets.
+##' @param activity_method find activities using \link[ParetoTI]{find_set_activity_AUCell} or \link[ParetoTI]{find_set_activity_pseudoinv}?
+##' @param return_as_matrix return matrix (TRUE) or data.table (FALSE)
+##' @param assay_name name of assay in SummarizedExperiment or SingleCellExperiment, normally counts or logcounts
+##' @param aucell_options additional options specific to AUCell, details: \link[ParetoTI]{find_set_activity_AUCell}
+##' @export measure_activity
+##' @import data.table
+##' @examples
+##' activ = measure_activity(expr_mat, which = "BP",
+##'                          taxonomy_id = 9606, keytype = "ALIAS",
+##'                          ontology_file = load_go_ontology("./data/",
+##'                                                   "goslim_generic.obo"))
+measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
+                            activity_method = c("AUCell", "pseudoinverse")[1],
+                            keys = rownames(expr_mat), keytype = "ALIAS",
+                            ontology_file = NULL, taxonomy_id = 10090,
+                            evidence_code = "all", localHub = FALSE,
+                            ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
+                            lower = 1, upper = Inf,
+                            return_as_matrix = FALSE,
+                            assay_name = "logcounts",
+                            aucell_options = list(aucMaxRank = nrow(expr_mat) * 0.05,
+                                                  binary = F, nCores = 3)) {
+  # Retrieve annotations ---------------------------------------------------------
+  if(mean(which %in% c("BP", "MF", "CC")) == 1){
+    # Map GO annotations using AnnotationHub -------------------------------------
+    go_annot = map_go_annot(taxonomy_id = taxonomy_id, keys = keys,
+                            columns = c("GOALL"), keytype = keytype,
+                            ontology_type = which,
+                            evidence_code = evidence_code,
+                            localHub = localHub, return_org_db = FALSE,
+                            ann_hub_cache = ann_hub_cache)
+    # Choose terms from GO slim subset
+    go2gene_slim = filter_go_annot(go_annot, ontology_file = ontology_file,
+                                   lower = lower, upper = upper,
+                                   ontology_type = which)
+  }
+
+  # Find "activity" of each functional gene group  -------------------------------
+  if(activity_method == "AUCell"){
+    # using AUCell  --------------------------------------------------------------
+    activ = find_set_activity_AUCell(expr_mat, assay_name = aucell_options$assay_name,
+                                     aucMaxRank = aucell_options$aucMaxRank,
+                                     gene_sets = go2gene_slim$annot_dt,
+                                     gene_col = keytype,
+                                     set_id_col = "GOALL", set_name_col = "TERM",
+                                     binary = aucell_options$binary,
+                                     nCores = aucell_options$nCores,
+                                     plotHist = FALSE)
+  } else if (activity_method == "pseudoinverse") {
+    # or pseudoinverse(annotation_matrix) * expression ---------------------------
+    activ = find_set_activity_pseudoinv(expr_mat,
+                                        assay_name = pseudoinv_options$assay_name,
+                                        gene_sets = go2gene_slim$annot_dt,
+                                        gene_col = keytype,
+                                        set_id_col = "GOALL", set_name_col = "TERM",
+                                        noself = FALSE)
+  }
+  # when naming matrix dimensions ad
+  setnames(activ, colnames(activ), gsub(" ", "_", colnames(activ)))
+  setnames(activ, colnames(activ), gsub("-", "_", colnames(activ)))
+  if(return_as_matrix) activ = as.matrix(activ, rownames = "cells")
+  activ
+}
+
+##' @rdname measure_activity
+##' @name load_go_ontology
+##' @description load_go_ontology() load GO slim ontology file and return file path
+##' @param ont_dir directory where to save ontology
+##' @param ont_file which ontology file to load?
+##' @export load_go_ontology
+load_go_ontology = function(ont_dir = "./data/", ont_file = "goslim_generic.obo"){
+  file = paste0(ont_dir, ont_file)
+  if(!file.exists(file)){
+    download.file(paste0("http://www.geneontology.org/ontology/subsets/", ont_file),
+                  file)
+  }
+  file
 }

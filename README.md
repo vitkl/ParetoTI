@@ -1,12 +1,22 @@
 ## ParetoTI R package 
 ### Pareto Task Inference In R (based on ParTI)
 
-This package allows you to perform Pareto Task Inference in R as described in Yuval Hart & Uri Alon paper in Nature Methods (2015):
+  This package allows to find tasks that cells need to perform and trade-offs between them. 
+  
+  Caution: the package in currently in development and testing. If you want to use it please contact Vitalii Kleshchevnikov (vk7 at sanger.ac.uk)
+  
+  Need to perform multiple objectives and natural selection put cells on a Pareto front, a narrow subspace of optimal performance. When cells move along this front they trade-off performance at those tasks. Pareto front in the performance space translates into simple shapes gene expression of cell population. By finding minimal simplex polytope (triangle in 2D, tetrahedron in 3D, 5-vertex polytope in 4D) that encloses most of the data you can indentify the cellular tasks. This relies on recent work by Uri Alon group that showed that Pareto front is equal to minimal polytope defined by specialist phenotypes (convex hull defined by archetypes) and developed a matlab package ParTI for performing this analysis.
+  
+  ParTI matlab package is described in more detail in Yuval Hart & Uri Alon paper in Nature Methods (2015):
     [Inferring biological tasks using Pareto analysis of high-dimensional data.](https://www.nature.com/articles/nmeth.3254)
     
-This package realises polytope dimentionality and polytope position fitting using a python 2.7 implementation of PCHA algorithm. This algorithm was originally implemented in [Matlab by Morten Mørup](http://www.mortenmorup.dk/MMhomepageUpdated_files/Page327.htm) and re-implemented in python by Ulf Aslak Jensen.    
+  This ParetoTI R package realises very similar procedure with a few differences. 
+  
+  Polytope dimentionality and polytope positions are found using a python 2.7 implementation of PCHA algorithm. This algorithm was originally implemented in [Matlab by Morten Mørup](http://www.mortenmorup.dk/MMhomepageUpdated_files/Page327.htm) and re-implemented in python by Ulf Aslak Jensen.    
 
-Statistical significance of this fit is determined using permutations of the dataset that disrupt relationships between variables but keep the distribution of each variable constant.
+  As in original package, statistical significance of this fit is determined using permutations of the dataset that disrupt relationships between variables but keep the distribution of each variable constant. We implement bootstraping method to measure variability in vertex position. This adds additional selection criteria for best fit polytopes. Excessive number of vertices will lead to higher variance in positions. 
+
+  Features, genes whose expression decreases with distance from each vertex are identified using Generalised Additive Models (cubic splines) that define a smooth function of gene expression as a function of distance from vertices. We define p-value as the probability that the first derivative of this function is below zero (function is decreasing).
 
 ### Using the package
 

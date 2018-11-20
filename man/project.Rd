@@ -2,19 +2,21 @@
 % Please edit documentation in R/project.R
 \name{project}
 \alias{project}
-\title{Project polytope fit and data in low dimentions (PCA) and process data and polytopes fits for plotting}
+\title{Project polytope fit and data in low dimentions (PCA)}
 \usage{
-project(arc_data, data, proj_matrix = NULL)
+project(arc_data, data, n_dim = 3, proj_matrix = NULL)
 }
 \arguments{
-\item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.}
+\item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes and other data produced by \code{\link[ParetoTI]{fit_pch}}(). arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.}
 
 \item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}
+
+\item{n_dim}{number of principal component dimensions}
 
 \item{proj_matrix}{crossprod(proj_matrix, data) projects data/archetypes into principal component space}
 }
 \description{
-Project polytope fit and data in low dimentions (PCA) and process data and polytopes fits for plotting
+Project polytope fit and data in low dimentions (PCA)
 }
 \examples{
 # Random data that fits into the triangle

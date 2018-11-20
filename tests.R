@@ -9,6 +9,50 @@ devtools::load_all("../ParetoTI/")
 devtools::install_github("vitkl/ParetoTI", dependencies = T)
 library(ParetoTI)
 
+devtools::install_url("http://spams-devel.gforge.inria.fr/hitcounter2.php?file=file/36615/spams-R-v2.6-2017-03-22.tar.gz")
+
+# Let's try SPAMS package method (written in c++)
+library(ParetoTI)
+library(spams)
+# Random data that fits into the triangle (2D)
+set.seed(4355)
+archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
+                          mean = 0, sd = 1)
+data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
+microbenchmark::microbenchmark({
+  s_a <- spams.archetypalAnalysis(X = data, p = 3, Z0 = NULL, returnAB = FALSE,
+                                  robust=FALSE, epsilon=1e-3, computeXtX=TRUE,
+                                  stepsFISTA=0, stepsAS=100, randominit=TRUE,
+                                  numThreads=-1)},{
+                                    # Compare to PCHA
+  s_p <- fit_pch(data, noc = as.integer(3), delta = 0, conv_crit = 1e-03)},
+  times = 3)
+archetypes$XC
+s_a
+s_p$XC
+align_arc(s_a, archetypes$XC)
+align_arc(s_p$XC, archetypes$XC)
+
+res = lapply(seq_len(10), function(i) fit_pch(data, noc = as.integer(3),
+                                        delta = 0, conv_crit = 0.3*1e-03))
+sapply(res, function(res_1) align_arc(res_1$XC, archetypes$XC)$dist)
+sapply(res, function(res_1) align_arc(res_1$XC, archetypes$XC)$ind)
+
+grid = expand.grid(c(1, 3, 5, 8), c(1e-02, 1e-03, 1e-04, 1e-05, 1e-06))
+grid = sort(grid[, 1] * grid[, 2])
+res = lapply(grid, function(i) fit_pch(data, noc = as.integer(3),
+                                              delta = 0, conv_crit = i))
+plot(log10(grid), sapply(res, function(res_1) align_arc(res_1$XC, archetypes$XC)$dist))
+grid
+sapply(res, function(res_1) align_arc(res_1$XC, archetypes$XC)$dist)
+sapply(res, function(res_1) align_arc(res_1$XC, archetypes$XC)$ind)
+
+rob = lapply(grid, function(i) fit_pch_bootstrap(data, n = 20, type = "m", sample_prop = 0.65, seed = 2543, noc=as.integer(3), delta=0, conv_crit = i))
+
+plot(log10(grid), sapply(res, function(res_1) rob$total_var))
+grid
+sapply(res, function(res_1) rob$total_var)
+
 # create python environment and install py_pcha module
 install_py_pcha(method = "conda")
 ParetoTI::install_py_pcha(method = "virtualenv")
@@ -48,27 +92,65 @@ plot_arc(arch_data = arc_data, data = data,
 
 speed_test = microbenchmark::microbenchmark({
   # Fit a polytope with 3 vertices to data matrix
-  arc = fit_pch(data, noc=as.integer(3), delta=0.1)
+  arc = fit_pch(data, noc=as.integer(3), delta=0)
 }, {
   # Fit the same polytope 3 times without subsampling to test convergence of the algorithm.
   arc_rob_conv = fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
-                                   noc=as.integer(3), delta=0.1)
+                                   noc=as.integer(3), delta=0)
 }, {
   # Fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
   arc_data_rob = fit_pch_bootstrap(data, n = 20, sample_prop = 0.65, seed = 2543,
-                                   noc=as.integer(3), delta=0.1)
+                                   noc=as.integer(3), delta=0)
 }, {
   # Use local parallel processing to fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
-  arc_data_rob_m = fit_pch_bootstrap(data, n = 20, sample_prop = 0.65, seed = 2543, order_by_side = F,
-                                     noc=as.integer(3), delta=0.1, type = "m")
+  arc_data_rob_m = fit_pch_bootstrap(data, n = 20, sample_prop = 0.65, seed = 2543,
+                                     noc=as.integer(3), delta=0, type = "m")
 }, times = 5)
 speed_test_cmq = microbenchmark::microbenchmark({
   # Use parallel processing on a computing cluster with clustermq to fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
   arc_data_rob_cmq = fit_pch_bootstrap(data, n = 200, sample_prop = 0.65, seed = 2543,
-                                       noc = as.integer(3), order_by_side = F,
-                                       delta = 0.1, type = "cmq",
+                                       noc = as.integer(3),
+                                       delta = 0, type = "cmq",
                                        clust_options = list(memory = 1000, n_jobs = 10))
 }, times = 5)
+
+align_arc(arc$XC, archetypes$XC)
+align_arc(average_pch_fits(arc_data_rob_m)$XC, archetypes$XC)
+
+## Does bootstrap average give a better approximation of true vertex positions?
+pcha_bench = function(conv_crit) {
+  library(ParetoTI)
+  res = sapply(1:50, function(i){
+    archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
+                              mean = 0, sd = 1)
+    data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
+    arc = fit_pch(data, noc=as.integer(3), delta=0)
+    arc_data_rob_m = fit_pch_bootstrap(data, n = 20, sample_prop = 0.65, seed = NULL,
+                                       noc=as.integer(3), delta=0, type = "s",
+                                       conv_crit = conv_crit)
+    vect = c(align_arc(arc$XC, archetypes$XC)$dist,
+             align_arc(average_pch_fits(arc_data_rob_m)$XC, archetypes$XC)$dist)
+    names(vect) = c("all", "bootstrap")
+    vect
+  })
+  res = as.data.table(res, keep.rownames = "type")
+  res = melt.data.table(res, id.vars = "type")
+  res[, conv_crit := conv_crit]
+  res
+}
+# generate convergence values
+conv_vals = expand.grid(c(1, 3, 5, 8), c(1e-02, 1e-03, 1e-04, 1e-05, 1e-06))
+conv_vals = sort(conv_vals[, 1] * conv_vals[, 2])
+res = clustermq::Q(pcha_bench, c(1e-03, 1e-04, 1e-05, 1e-06),
+                   memory = 2000, n_jobs = 4, seed = 4534)
+res = rbindlist(res)
+saveRDS(res, "../../PCHA_accuracy_bootstrap_vs_all_data/conv_crit_res.rds")
+# yes!
+ggplot(res, aes(x = value, fill = type)) +
+  geom_density(aes(y=..count.. + 1), alpha = 0.5) +
+  facet_wrap( ~ conv_crit) +
+  scale_y_log10() +
+  theme_bw()
 
 plot_arc(arch_data = arc_data_rob_cmq, data = data,
          which_dimensions = 1:3, line_size = 1.5)
@@ -77,7 +159,7 @@ plot_arc(arch_data = arc_data_rob_cmq, data = data,
   theme_bw()
 
 # test function for different k
-arc_ks = k_fit_pch(data, ks = 1:4, check_installed = T, delta=0.1, order_by_side = F)
+arc_ks = k_fit_pch(data, ks = 1:4, check_installed = T, delta=0)
 plot_arc(arch_data = arc_ks, data = data,
          which_dimensions = 1:3, type = "all", arch_size = 2,
          colors = c("#D62728", "#1F77B4", "#2CA02C", "#17BED0", "grey"))
@@ -142,10 +224,10 @@ s$u %*% t(archetypes)
 data = matrix(rnorm(N * 10 * N), N * 10, N)
 microbenchmark::microbenchmark({
   # Fit a polytope with 3 vertices to data matrix
-  arc = ParetoTI::fit_pch(data, noc=as.integer(3), delta=0.1, conv_crit = 1e-06, maxiter = 500, verbose = FALSE)
+  arc = ParetoTI::fit_pch(data, noc=as.integer(3), delta=0, conv_crit = 1e-06, maxiter = 500, verbose = FALSE)
 }, {
   #RPCHA
-  res = PCHA::PCHA(data, noc=as.integer(3), delta=0.1, conv_crit = 1e-06, maxiter = 500, verbose = FALSE)
+  res = PCHA::PCHA(data, noc=as.integer(3), delta=0, conv_crit = 1e-06, maxiter = 500, verbose = FALSE)
 }, times = 10)
 res$XC = as.matrix(res$XC)
 class(res) = "pch_fit"

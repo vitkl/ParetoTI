@@ -29,9 +29,8 @@
 ##'              point_size = 2, line_size = 1.5) + theme_bw()
 plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl", "total_var")[1],
                         point_size = 2, line_size = 1.5){
-  type_lab = c("Variance explained", "Sum of squared errors", "Variance explained on top of k-1 model", "total variance in position of vertices", "T-ratio of volume of polytope by volume of convex hull")
-  names(type_lab) = c("varexpl", "SSE", "res_varexpl", "total_var", "t_ratio")
-  type_lab = type_lab[type]
+
+  type_lab = .type_lab(type)
   k_var = data.table(varexpl = arc_data$pch_fits$varexpl, SSE = arc_data$pch_fits$SSE,
                      k = sapply(arc_data$pch_fits$XC, ncol),
                      total_var = arc_data$pch_fits$total_var,
@@ -45,4 +44,14 @@ plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl", "tot
     ggplot2::geom_path(size = line_size) + ggplot2::geom_point(size = point_size) +
     ggplot2::xlab("k, number of vertices/archetypes") +
     ggplot2::ylab(type_lab)
+}
+
+.type_lab = function(type, short = FALSE){
+  if(short) {
+    type_lab = c("Variance explained", "Sum of squared errors", "Residual \nvariance explained", "Variance in positions", "Volume of polytope /\n convex hull")
+  } else {
+    type_lab = c("Variance explained", "Sum of squared errors", "Variance explained on top of k-1 model", "total variance in position of vertices", "T-ratio of volume of polytope by volume of convex hull")
+  }
+  names_type_lab = c("varexpl", "SSE", "res_varexpl", "total_var", "t_ratio")
+  type_lab[names_type_lab %in% type]
 }

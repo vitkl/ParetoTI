@@ -3,7 +3,9 @@
 \name{map_go_annot}
 \alias{map_go_annot}
 \alias{filter_go_annot}
-\title{Use OrgDb packages to annotate genes with GO terms (including less specific)}
+\alias{measure_activity}
+\alias{load_go_ontology}
+\title{Annotate genes with GO terms and measure their activities}
 \usage{
 map_go_annot(taxonomy_id = 9606, keys = c("TP53", "ALB"),
   columns = c("GOALL"), keytype = "ALIAS", ontology_type = c("BP",
@@ -13,6 +15,17 @@ map_go_annot(taxonomy_id = 9606, keys = c("TP53", "ALB"),
 
 filter_go_annot(annot, ontology_file = NULL, lower = 1, upper = Inf,
   ontology_type = c("BP", "MF", "CC"))
+
+measure_activity(expr_mat, which = c("BP", "MF", "CC"),
+  activity_method = c("AUCell", "pseudoinverse")[1],
+  keys = rownames(expr_mat), keytype = "ALIAS", ontology_file = NULL,
+  taxonomy_id = 10090, evidence_code = "all", localHub = FALSE,
+  ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
+  lower = 1, upper = Inf, return_as_matrix = FALSE,
+  assay_name = "logcounts", aucell_options = list(aucMaxRank =
+  nrow(expr_mat) * 0.05, binary = F, nCores = 3))
+
+load_go_ontology(ont_dir = "./data/", ont_file = "goslim_generic.obo")
 }
 \arguments{
 \item{taxonomy_id}{Taxonomy id of your species. 9606 is human, 10090 is mouse. Find your species id using taxonomy search by UniProt: https://www.uniprot.org/taxonomy/.}
@@ -40,6 +53,22 @@ filter_go_annot(annot, ontology_file = NULL, lower = 1, upper = Inf,
 \item{lower}{lower limit on size of gene sets (inclusive)}
 
 \item{upper}{upper limit on size of gene sets (exclusive)}
+
+\item{expr_mat}{expression matrix (genes in rows, cells in columns) or one of: dgCMatrix, ExpressionSet, and SummarizedExperiment or SingleCellExperiment both of which require assay_name.}
+
+\item{which}{which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets.}
+
+\item{activity_method}{find activities using \link[ParetoTI]{find_set_activity_AUCell} or \link[ParetoTI]{find_set_activity_pseudoinv}?}
+
+\item{return_as_matrix}{return matrix (TRUE) or data.table (FALSE)}
+
+\item{assay_name}{name of assay in SummarizedExperiment or SingleCellExperiment, normally counts or logcounts}
+
+\item{aucell_options}{additional options specific to AUCell, details: \link[ParetoTI]{find_set_activity_AUCell}}
+
+\item{ont_dir}{directory where to save ontology}
+
+\item{ont_file}{which ontology file to load?}
 }
 \value{
 list (S3 class ParetoTI_annot) containing GO annotations in list and data.table formats, and OrgDb database link.
@@ -48,6 +77,10 @@ list (S3 class ParetoTI_annot) containing GO annotations in list and data.table 
 map_go_annot() annotates genes with Gene Ontology terms including less specific terms. It automatically loads correct OrgDb package given \code{taxonomy_id}. Then it selects GOALL annotations for genes provided in \code{keys}, filter by ontology branch and evidence codes. Finally it maps GO term names using GO.db and returns annotations in list and data.table formats. This function can be used to retrieve other gene annotations from OrgDb (e.g OMIM, PFAM) but those will not be mapped to readable names.
 
 filter_go_annot() filters GO annotations by ontology file, GO branch, number of genes annotated
+
+measure_activity() annotates genes with GO terms and measures their activities
+
+load_go_ontology() load GO slim ontology file and return file path
 }
 \details{
 GO consortium annotates genes with the most specific terms so there is a need to propagate annotations to less specific parent terms. For example, "apoptotic process in response to mitochondrial fragmentation" (GO:0140208) is an "apoptotic process" (GO:0006915). Conceptually, if gene functions in the first it also functions in the second but it is only directly annotated by the first term. So, using GO annotations for functional enrichment requires propagating annotations to less specific terms.
@@ -59,4 +92,8 @@ annot = map_go_annot(taxonomy_id = 9606,
                      ontology_type = c("BP", "MF", "CC"))
 annot2 = filter_go_annot(annot, ontology_file = "http://www.geneontology.org/ontology/subsets/goslim_generic.obo",
            lower = 50, upper = 2000, ontology_type = "BP")
+activ = measure_activity(expr_mat, which = "BP",
+                         taxonomy_id = 9606, keytype = "ALIAS",
+                         ontology_file = load_go_ontology("./data/",
+                                                  "goslim_generic.obo"))
 }

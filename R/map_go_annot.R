@@ -159,7 +159,7 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
   # Find "activity" of each functional gene group  -------------------------------
   if(activity_method == "AUCell"){
     # using AUCell  --------------------------------------------------------------
-    activ = find_set_activity_AUCell(expr_mat, assay_name = aucell_options$assay_name,
+    activ = find_set_activity_AUCell(expr_mat, assay_name = assay_name,
                                      aucMaxRank = aucell_options$aucMaxRank,
                                      gene_sets = go2gene_slim$annot_dt,
                                      gene_col = keytype,
@@ -170,7 +170,7 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
   } else if (activity_method == "pseudoinverse") {
     # or pseudoinverse(annotation_matrix) * expression ---------------------------
     activ = find_set_activity_pseudoinv(expr_mat,
-                                        assay_name = pseudoinv_options$assay_name,
+                                        assay_name = assay_name,
                                         gene_sets = go2gene_slim$annot_dt,
                                         gene_col = keytype,
                                         set_id_col = "GOALL", set_name_col = "TERM",

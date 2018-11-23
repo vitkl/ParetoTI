@@ -110,22 +110,34 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     res$C = matrix(res$C, 1, 1)
   }
 
-  # when calculating convex hull and volume of the data
+  # when calculating convex hull and volume of the polytope
   # adjust number of dimensions to noc
   data_dim = seq(1, noc-1)
   if(isTRUE(convex_hull) & nrow(data) >= length(data_dim) & noc > 2){
     # calculate volume or area of the polytope only when number of vertices (noc) > number of dimenstions which means
     # find volume of the convex hull of the data
     hull_vol = fit_convhulln(data[data_dim, ], positions = FALSE)
-    # find volume of the polytope fit, qhull requires at least 4 points in 2D
-    # and more in higher dimensions so we have to add 20 points within
-    # PCHA-fit polytope
-    archetypes = res$XC[data_dim, ]
-    data_arc = cbind(archetypes, generate_data(archetypes, N_examples = 20,
-                                               jiiter = 0, size = 1))
-    arc_vol = fit_convhulln(data_arc, positions = FALSE)
+
+    # Calcute the volume of non-simplex polytope (4 vertices in 2D, 5 in 3D or more)
+    if(F){
+      # find volume of the polytope fit, qhull requires at least 4 points in 2D
+      # and more in higher dimensions so we have to add 20 points within
+      # PCHA-fit polytope - more testing needed.
+      # Currently program logic allows only for simplex polytopes
+      archetypes = res$XC[data_dim, ]
+      data_arc = cbind(archetypes, generate_data(archetypes, N_examples = 20,
+                                                 jiiter = 0, size = 1))
+      arc_vol = fit_convhulln(data_arc, positions = FALSE)
+      res$arc_vol = arc_vol$vol
+    } else {
+    # Calculate the volume of simplex polytope
+      archetypes = res$XC[data_dim, ]
+      arch_red = archetypes - archetypes[, noc]
+      res$arc_vol = abs(det(arch_red[, seq_len(noc - 1)]) /
+                          factorial(noc - 1))
+    }
+
     res$hull_vol = hull_vol$vol
-    res$arc_vol = arc_vol$vol
     res$t_ratio = res$arc_vol / res$hull_vol
   } else {
     if(isTRUE(convex_hull) & isTRUE(converge_else_fail)) message(paste0("Convex hull and t-ratio not computed for noc: ", noc," and nrow(data) = ", nrow(data),". fit_pch() can calculate volume or area of the polytope only when\nthe number of vertices (noc) > the number of dimensions (when polytope is convex):\ncheck that noc > nrow(data),\nselect only revelant dimensions or increase noc"))
@@ -464,6 +476,10 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
 
   # combine results ------------------------------------------------------------
 
+  # remove failed iterations: usual reason "PCHA failed to converge within max_iter"
+  res = res[!vapply(res, is.null,
+                    FUN.VALUE = logical(1))]
+
   rand_dist = lapply(res, function(x) x$summary)
   rand_dist = rbindlist(rand_dist)
   # melt this data.table
@@ -563,14 +579,13 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
   # fit polytope ---------------------------------------------------------------
 
   if(is.na(bootstrap_N)) { # single fit ----------------------------------------
-    if(length(ks) > 1){ # fitting many shapes (ks vertices)
-      arc_data = ParetoTI::k_fit_pch(data = data, ks = ks, check_installed = TRUE,
-                                     bootstrap = FALSE, seed = seed,
-                                     convex_hull = convex_hull, ...)
-    } else { # fitting one shape
-      arc_data = ParetoTI::fit_pch(data = data, noc = ks, ..., check_installed = FALSE,
-                                   convex_hull = convex_hull)
-    }
+    # fitting many shapes (ks vertices) or fitting one shape
+    arc_data = ParetoTI::k_fit_pch(data = data, ks = ks, check_installed = FALSE,
+                                   bootstrap = FALSE, seed = seed,
+                                   convex_hull = convex_hull,
+                                   # prevent whole pipeline from failing
+                                   # when PCHA doesn't converge:
+                                   converge_else_fail = FALSE, ...)
 
   } else if(isTRUE(as.integer(bootstrap_N) >= 1)) { # bootstraping --------------
     if(length(ks) > 1){ # fitting many shapes (ks vertices)
@@ -591,6 +606,9 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
   }
 
   ## combine results into summary ----------------------------------------------
+
+  # escape if null
+  if(is.null(arc_data)) return(NULL)
 
   res = list()
   res$call = match.call()

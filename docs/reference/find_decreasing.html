@@ -31,7 +31,8 @@
 <meta property="og:title" content="Find features that are decreasing functions of distance from archetype — find_decreasing" />
 
 <meta property="og:description" content="find_decreasing() Fits gam models to find if features are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.
-fit_arc_gam_1() Finds single GAM model fit and it's first derivative for a single feature and one or several archetypes." />
+fit_arc_gam_1() Finds single GAM model fit and it's first derivative for a single feature and one or several archetypes.
+get_top_decreasing() Get top-12 genes and top-3 gene sets for each archetype." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -111,6 +112,7 @@ fit_arc_gam_1() Finds single GAM model fit and it's first derivative for a singl
     
     <p><code>find_decreasing()</code> Fits gam models to find if features are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.</p>
 <p><code>fit_arc_gam_1()</code> Finds single GAM model fit and it's first derivative for a single feature and one or several archetypes.</p>
+<p><code>get_top_decreasing()</code> Get top-12 genes and top-3 gene sets for each archetype.</p>
     
     </div>
 
@@ -118,10 +120,17 @@ fit_arc_gam_1() Finds single GAM model fit and it's first derivative for a singl
   <span class='st'>"Apoa2"</span>)[<span class='fl'>3</span>], <span class='kw'>min.sp</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>60</span>), <span class='kw'>N_smooths</span> <span class='kw'>=</span> <span class='fl'>4</span>, <span class='kw'>n_points</span> <span class='kw'>=</span> <span class='fl'>200</span>,
   <span class='kw'>d</span> <span class='kw'>=</span> <span class='fl'>1</span>/<span class='no'>n_points</span>, <span class='kw'>weights</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fu'>rep</span>(<span class='fl'>1</span>, <span class='kw'>each</span> <span class='kw'>=</span> <span class='no'>n_points</span>), <span class='fu'>rep</span>(<span class='fu'>c</span>(<span class='fl'>1</span>, <span class='fl'>0</span>),
   <span class='kw'>each</span> <span class='kw'>=</span> <span class='no'>n_points</span>/<span class='fl'>2</span>))[<span class='fl'>1</span>], <span class='kw'>return_only_summary</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>stop_at_10</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>one_arc_per_model</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)
+  <span class='kw'>stop_at_10</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>one_arc_per_model</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"s"</span>, <span class='st'>"m"</span>,
+  <span class='st'>"cmq"</span>)[<span class='fl'>1</span>], <span class='kw'>clust_options</span> <span class='kw'>=</span> <span class='fu'>list</span>(), <span class='no'>...</span>)
 
 <span class='fu'>fit_arc_gam_1</span>(<span class='no'>feature</span>, <span class='no'>col</span>, <span class='no'>N_smooths</span>, <span class='no'>data_attr</span>, <span class='no'>min.sp</span>, <span class='no'>...</span>, <span class='no'>d</span>, <span class='no'>n_points</span>,
-  <span class='no'>weights</span>)</pre>
+  <span class='no'>weights</span>)
+
+<span class='fu'>get_top_decreasing</span>(<span class='no'>summary_genes</span>, <span class='kw'>summary_sets</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>cutoff_genes</span> <span class='kw'>=</span> <span class='fl'>0.99</span>, <span class='kw'>cutoff_sets</span> <span class='kw'>=</span> <span class='fl'>0.99</span>,
+  <span class='kw'>cutoff_metric</span> <span class='kw'>=</span> <span class='st'>"mean_prob"</span>, <span class='kw'>gam_fit_pval</span> <span class='kw'>=</span> <span class='fl'>0.01</span>,
+  <span class='kw'>order_by</span> <span class='kw'>=</span> <span class='st'>"deriv20"</span>, <span class='kw'>order_decreasing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>min_max_ratio_cutoff</span> <span class='kw'>=</span> <span class='fl'>1.3</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -171,8 +180,48 @@ fit_arc_gam_1() Finds single GAM model fit and it's first derivative for a singl
       <td><p>If TRUE fit separate gam models for each archetype. If FALSE combine all archetypes in one model: feature ~ s(arc1) + s(arc2) + ... + s(arcN).</p></td>
     </tr>
     <tr>
+      <th>type</th>
+      <td><p>one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package.</p></td>
+    </tr>
+    <tr>
+      <th>clust_options</th>
+      <td><p>list of options for parallel processing. The default for "m" is list(cores = parallel::detectCores()-1, cluster_type = "PSOCK"). The default for "cmq" is list(memory = 2000, template = list(), n_jobs = 10, fail_on_error = FALSE). Change these options as required.</p></td>
+    </tr>
+    <tr>
       <th>...</th>
       <td><p>arguments passed to <a href='http://www.rdocumentation.org/packages/mgcv/topics/gam'>gam</a></p></td>
+    </tr>
+    <tr>
+      <th>summary_genes</th>
+      <td><p>gam_deriv summary data.table for decreasing genes</p></td>
+    </tr>
+    <tr>
+      <th>summary_sets</th>
+      <td><p>gam_deriv summary data.table for decreasing gene sets</p></td>
+    </tr>
+    <tr>
+      <th>cutoff_genes</th>
+      <td><p>value of cutoff_metric (lower bound) for genes</p></td>
+    </tr>
+    <tr>
+      <th>cutoff_sets</th>
+      <td><p>value of cutoff_metric (lower bound) for gene sets</p></td>
+    </tr>
+    <tr>
+      <th>cutoff_metric</th>
+      <td><p>probability metric for selecting decreasing genes: mean_prob, prod_prob, mean_prob_excl or prod_prob_excl</p></td>
+    </tr>
+    <tr>
+      <th>gam_fit_pval</th>
+      <td><p>smooth term probability in gam fit (upper bound)</p></td>
+    </tr>
+    <tr>
+      <th>order_by</th>
+      <td><p>order decreasing feature list by measure in summary sets. By default is deriv20, the average value of derivative at 20 of point closest to vertex.</p></td>
+    </tr>
+    <tr>
+      <th>min_max_ratio</th>
+      <td><p>what should be the ratio of gene expression at the point closest to archetype compared to point furthest from archetype? By default, at least 1.3 or closest point is 30 percent higher than furthest point.</p></td>
     </tr>
     </table>
     
@@ -180,6 +229,7 @@ fit_arc_gam_1() Finds single GAM model fit and it's first derivative for a singl
 
     <p><code>find_decreasing()</code> list (S3 object, gam_deriv) containing summary p-values for features and each archetype, function call and (optionally) a data.table with values of the first derivative</p>
 <p><code>fit_arc_gam_1()</code> list containing function call, 1st derivative values of GAM model (derivs), summary of GAM model (p-value and r^2, gam_sm)</p>
+<p><code>get_top_decreasing()</code> return character vector with one element for each archetype and print to output</p>
     
 
   </div>

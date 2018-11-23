@@ -3,16 +3,24 @@
 \name{find_decreasing}
 \alias{find_decreasing}
 \alias{fit_arc_gam_1}
+\alias{get_top_decreasing}
 \title{Find features that are decreasing functions of distance from archetype}
 \usage{
 find_decreasing(data_attr, arc_col, features = c("Gpx1", "Alb", "Cyp2e1",
   "Apoa2")[3], min.sp = c(60), N_smooths = 4, n_points = 200,
   d = 1/n_points, weights = c(rep(1, each = n_points), rep(c(1, 0),
   each = n_points/2))[1], return_only_summary = FALSE,
-  stop_at_10 = TRUE, one_arc_per_model = TRUE, ...)
+  stop_at_10 = TRUE, one_arc_per_model = TRUE, type = c("s", "m",
+  "cmq")[1], clust_options = list(), ...)
 
 fit_arc_gam_1(feature, col, N_smooths, data_attr, min.sp, ..., d, n_points,
   weights)
+
+get_top_decreasing(summary_genes, summary_sets = NULL,
+  cutoff_genes = 0.99, cutoff_sets = 0.99,
+  cutoff_metric = "mean_prob", gam_fit_pval = 0.01,
+  order_by = "deriv20", order_decreasing = FALSE,
+  min_max_ratio_cutoff = 1.3)
 }
 \arguments{
 \item{data_attr}{data.table dim(examples, dimensions) that includes distance of each example to archetype in columns given by \code{arc_col} and feature values given by \code{features}}
@@ -37,15 +45,39 @@ fit_arc_gam_1(feature, col, N_smooths, data_attr, min.sp, ..., d, n_points,
 
 \item{one_arc_per_model}{If TRUE fit separate gam models for each archetype. If FALSE combine all archetypes in one model: feature ~ s(arc1) + s(arc2) + ... + s(arcN).}
 
+\item{type}{one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package.}
+
+\item{clust_options}{list of options for parallel processing. The default for "m" is list(cores = parallel::detectCores()-1, cluster_type = "PSOCK"). The default for "cmq" is list(memory = 2000, template = list(), n_jobs = 10, fail_on_error = FALSE). Change these options as required.}
+
 \item{...}{arguments passed to \link[mgcv]{gam}}
+
+\item{summary_genes}{gam_deriv summary data.table for decreasing genes}
+
+\item{summary_sets}{gam_deriv summary data.table for decreasing gene sets}
+
+\item{cutoff_genes}{value of cutoff_metric (lower bound) for genes}
+
+\item{cutoff_sets}{value of cutoff_metric (lower bound) for gene sets}
+
+\item{cutoff_metric}{probability metric for selecting decreasing genes: mean_prob, prod_prob, mean_prob_excl or prod_prob_excl}
+
+\item{gam_fit_pval}{smooth term probability in gam fit (upper bound)}
+
+\item{order_by}{order decreasing feature list by measure in summary sets. By default is deriv20, the average value of derivative at 20 of point closest to vertex.}
+
+\item{min_max_ratio}{what should be the ratio of gene expression at the point closest to archetype compared to point furthest from archetype? By default, at least 1.3 or closest point is 30 percent higher than furthest point.}
 }
 \value{
 \code{find_decreasing()} list (S3 object, gam_deriv) containing summary p-values for features and each archetype, function call and (optionally) a data.table with values of the first derivative
 
 \code{fit_arc_gam_1()} list containing function call, 1st derivative values of GAM model (derivs), summary of GAM model (p-value and r^2, gam_sm)
+
+\code{get_top_decreasing()} return character vector with one element for each archetype and print to output
 }
 \description{
 \code{find_decreasing()} Fits gam models to find if features are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.
 
 \code{fit_arc_gam_1()} Finds single GAM model fit and it's first derivative for a single feature and one or several archetypes.
+
+\code{get_top_decreasing()} Get top-12 genes and top-3 gene sets for each archetype.
 }

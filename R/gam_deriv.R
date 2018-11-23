@@ -65,9 +65,16 @@ find_gam_deriv = function(gam_fit,
   derivs = rbindlist(derivs)
   # generate summary of gam fit
   gam_sm = summary(gam_fit)
+
+  # find function value at 0 and 1 distance and compute f(0) / f(1) ratio
+  zero_one_d = as.data.frame(newd[c(1, n_points),])
+  colnames(zero_one_d) = colnames(newd)
+  zero_one = predict(gam_fit, zero_one_d, type="link")
+
   gam_sm = data.table(smooth_term_p_val = gam_sm$s.pv, r_sq =  gam_sm$r.sq,
                       y_name = as.character(gam_fit$formula[[2]]),
-                      x_name = unique(derivs$x_name))
+                      x_name = unique(derivs$x_name),
+                      min_max_ratio = zero_one[1] / zero_one[2])
   # combine results into list are return
   if(!isTRUE(return_gam)) {
     derivs = list(call = match.call(),
@@ -142,7 +149,8 @@ summary.gam_deriv = function(derivs){
 ##' @name plot.gam_deriv
 ##' @export plot.gam_deriv
 ##' @import data.table
-plot.gam_deriv = function(derivs, features = derivs$derivs$y_name) {
+plot.gam_deriv = function(derivs, features = derivs$derivs$y_name,
+                          title = "First derivative of GAM model: gene expression = function(distance from archetype)") {
   n_der = uniqueN(derivs$derivs$x_name)
   der = derivs$derivs
   der = der[y_name %in% features]
@@ -152,5 +160,7 @@ plot.gam_deriv = function(derivs, features = derivs$derivs$y_name) {
     ggplot2::geom_line(ggplot2::aes(x, y =  deriv - 2 * deriv_sd), linetype = 2) +
     ggplot2::ylim(min(der$deriv - 2 * der$deriv_sd),
                   max(der$deriv + 2 * der$deriv_sd)) +
-    ggplot2::facet_grid(y_name ~ x_name)
+    ggplot2::facet_grid(y_name ~ x_name) +
+    ggplot2::geom_hline(yintercept = 0, color = "grey80") +
+    ggtitle(title)
 }

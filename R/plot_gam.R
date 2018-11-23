@@ -12,7 +12,8 @@
 ##' @export plot_gam
 ##' @import data.table
 plot_gam = function(gam_deriv = NULL, gam_fit, data, feature = NULL,
-                    groupCovs = NULL, title_size = 10){
+                    groupCovs = NULL, title_size = 10,
+                    title = "GAM model: gene expression = function(distance from archetype)"){
   if(!is.null(gam_deriv)){
     ns = seq_len(length(gam_deriv$gam_fit))
     plots = lapply(ns, function(n){
@@ -40,16 +41,21 @@ plot_gam = function(gam_deriv = NULL, gam_fit, data, feature = NULL,
       plots = plots[features %in% feature]
       features = features[features %in% feature]
     }
-    cowplot::plot_grid(plotlist = plots, nrow = uniqueN(features))
+    end_plot = cowplot::plot_grid(plotlist = plots, nrow = uniqueN(features))
   } else {
     # find column names for each archetype
     cols = colnames(gam_fit$model)
     cols = cols[!cols %in% as.character(gam_fit$formula[[2]])]
-    voxel::plotGAM(gam_fit, smooth.cov = cols, groupCovs = groupCovs) +
+    end_plot = voxel::plotGAM(gam_fit, smooth.cov = cols, groupCovs = groupCovs) +
       geom_point(data = data, aes_string(y = as.character(gam_fit$formula[[2]]),
                                          x = cols), alpha = 0.2) +
       geom_rug(data = data, aes_string(y = as.character(gam_fit$formula[[2]]),
                                        x = cols), alpha = 0.2)
   }
+  title = cowplot::ggdraw() +
+    cowplot::draw_label(title,
+                        fontface = "bold")
+  cowplot::plot_grid(title, end_plot,
+                     ncol = 1, rel_heights = c(0.08, 1))
 }
 

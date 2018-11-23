@@ -238,7 +238,7 @@ plot_dim_var(pch_rand,
              nudge_y = 0.5, nudge_x = 0.5)
 ```
 
-** Faster version of randomisation that measure t-ratio alone
+** Faster version of randomisation that measures t-ratio alone
 
 ```{r, fig.height=5, fig.width=8}
 pch_rand_t = randomise_fit_pch(data, arc_data = arc_ks, n_rand = 1000,
@@ -247,9 +247,7 @@ pch_rand_t = randomise_fit_pch(data, arc_data = arc_ks, n_rand = 1000,
                              seed = 435,
                              convex_hull = T,
                              maxiter = 1000, delta = 0, conv_crit = 1e-4,
-                             order_type = "align", type = "m",
-                             # don't stop computation if one iteration failed
-                             converge_else_fail = FALSE) 
+                             order_type = "align", type = "m") 
 # plot random distributions, observed value (vertical bar) and empirical p-value
 plot(pch_rand_t, type = "t_ratio", nudge_y = 0.5)
 ```

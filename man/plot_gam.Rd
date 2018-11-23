@@ -5,7 +5,8 @@
 \title{Plot gam model fit for multiple genes and archetypes (Generalised Additive Model, mgcv)}
 \usage{
 plot_gam(gam_deriv = NULL, gam_fit, data, feature = NULL,
-  groupCovs = NULL, title_size = 10)
+  groupCovs = NULL, title_size = 10,
+  title = "GAM model: gene expression = function(distance from archetype)")
 }
 \arguments{
 \item{gam_deriv}{object with multiple gam fits (many arhetypes, many features). Either gam_deriv or gam_fit must be provided.}

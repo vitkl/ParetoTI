@@ -88,7 +88,7 @@
 <a href="#pareto-task-inference-in-r-based-on-parti" class="anchor"></a>Pareto Task Inference In R (based on ParTI)</h3>
 <p>This package allows to find tasks that cells need to perform and trade-offs between them.</p>
 <p>Caution: the package in currently in development and testing. If you want to use it please contact Vitalii Kleshchevnikov (vk7 at sanger.ac.uk)</p>
-<p>Need to perform multiple objectives and natural selection put cells on a Pareto front, a narrow subspace of optimal performance. When cells move along this front they trade-off performance at those tasks. Pareto front in the performance space translates into simple shapes gene expression of cell population. By finding minimal simplex polytope (triangle in 2D, tetrahedron in 3D, 5-vertex polytope in 4D) that encloses most of the data you can indentify the cellular tasks. This relies on recent work by Uri Alon group that showed that Pareto front is equal to minimal polytope defined by specialist phenotypes (convex hull defined by archetypes) and developed a matlab package ParTI for performing this analysis.</p>
+<p>Need to perform multiple tasks and natural selection put cells on a Pareto front, a narrow subspace where performance at those tasks is optimal. How important the tasks are in the environment puts cells at different locations along Pareto front. This reflects trade-off in performance at those tasks. Pareto front in the performance space translates into simple shapes gene expression of cell population. By finding minimal simplex polytope (triangle in 2D, tetrahedron in 3D, 5-vertex polytope in 4D) that encloses most of the data you can describe within cell-type heterogeniety. Cells near each vertex are specialists at one tasks, cells withing the shape perform a weighted combination of tasks. You can indentify the cellular tasks by finding what is special about cells closest to each vertex. This relies on recent work by Uri Alon group that showed that Pareto front is equal to minimal polytope defined by specialist phenotypes (convex hull defined by archetypes) and developed a matlab package ParTI for performing this analysis.</p>
 <p>See <a href="https://vitkl.github.io/ParetoTI/articles/introduction.html">Manual</a>.</p>
 <p>ParTI matlab package is described in more detail in Yuval Hart &amp; Uri Alon paper in Nature Methods (2015): <a href="https://www.nature.com/articles/nmeth.3254">Inferring biological tasks using Pareto analysis of high-dimensional data.</a></p>
 <p>This ParetoTI R package realises very similar procedure with a few differences.</p>
@@ -131,11 +131,11 @@ arc_data =<span class="st"> </span><span class="kw"><a href="reference/fit_pch.h
 <span class="co"># Plot static 2D scatterplot using ggplot2</span>
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_data, <span class="dt">data =</span> data,
          <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
-<span class="st">  </span><span class="kw"><a href="ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()
+<span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()
 <span class="co"># Plot data as 2D density rather than scatterplot</span>
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_data, <span class="dt">data =</span> data,
     <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="dt">geom =</span> ggplot2<span class="op">::</span>geom_bin2d) <span class="op">+</span>
-<span class="st">  </span><span class="kw"><a href="ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</code></pre></div>
+<span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</code></pre></div>
 </div>
 <div id="development-and-further-improvements" class="section level3">
 <h3 class="hasAnchor">

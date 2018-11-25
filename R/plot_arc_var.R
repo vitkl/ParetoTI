@@ -4,7 +4,7 @@
 ##' @author Vitalii Kleshchevnikov
 ##' @description \code{plot_arc_var()} shows SSE and variance explained by polytope models with different number of vertices (k)
 ##' @param arc_data object of class "k_pch_fit", storing the position of vertices of best fit polytopes with different k, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is a list where each element is XC matrix of dim(dimensions, archetypes) storing positions of vertices with different k.
-##' @param type which measure to plot as a function of k, one of "varexpl", "SSE", "res_varexpl"
+##' @param type which measure to plot as a function of k, one of "varexpl", "SSE", "res_varexpl", "dim". Use dim to plot variance in position in each dimension.
 ##' @param arch_size size of archetype point
 ##' @param line_size width of lines connecting archetypes
 ##' @return \code{plot_arc_var()} ggplot2 (2D) plot
@@ -27,9 +27,9 @@
 ##' # Show variance explained by a polytope with each k
 ##' plot_arc_var(arc_data, type = c("varexpl", "SSE", "res_varexpl")[1],
 ##'              point_size = 2, line_size = 1.5) + theme_bw()
-plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl", "total_var")[1],
+plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl", "total_var", "dim")[1],
                         point_size = 2, line_size = 1.5){
-
+  if(type != "dim"){
   type_lab = .type_lab(type)
   k_var = data.table(varexpl = arc_data$pch_fits$varexpl, SSE = arc_data$pch_fits$SSE,
                      k = sapply(arc_data$pch_fits$XC, ncol),
@@ -44,6 +44,15 @@ plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl", "tot
     ggplot2::geom_path(size = line_size) + ggplot2::geom_point(size = point_size) +
     ggplot2::xlab("k, number of vertices/archetypes") +
     ggplot2::ylab(type_lab)
+  } else {
+    var_dim = arc_data$pch_fits$var_dim
+    var_dim = melt.data.table(var_dim, id.vars = "k")
+    setorder(var_dim, k, value)
+    ggplot(var_dim, aes(x = variable, y = value, group = k)) +
+      geom_line() +
+      facet_wrap(~ k)
+  }
+
 }
 
 .type_lab = function(type, short = FALSE){

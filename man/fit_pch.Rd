@@ -26,13 +26,13 @@ fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
 
 k_fit_pch(data, ks = 2:4, check_installed = TRUE, bootstrap = FALSE,
   bootstrap_N = 10, bootstrap_type = c("s", "m", "cmq")[1],
-  seed = 345, simplex = c(FALSE, TRUE), ...)
+  seed = 345, simplex = c(FALSE, TRUE), normalise_var = TRUE, ...)
 
 fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
   check_installed = T, type = c("s", "m", "cmq")[1],
   clust_options = list(), seed = 235, replace = FALSE,
   average = FALSE, order_type = c("cosine", "side", "align")[3],
-  cacl_var_in_dims = TRUE, ...)
+  cacl_var_in_dims = TRUE, normalise_var = TRUE, ...)
 
 average_pch_fits(res, XC_array = NULL)
 
@@ -42,13 +42,14 @@ fit_pch_resample(i = 1, data, sample_prop = NULL, replace = FALSE,
 randomise_fit_pch(data, arc_data, n_rand = 3, replace = FALSE,
   bootstrap_N = c(NA, 50)[1], seed = 435, convex_hull = TRUE,
   maxiter = 1000, delta = 0, order_type = "align", type = c("s",
-  "m", "cmq")[1], clust_options = list(), check_installed = T, ...)
+  "m", "cmq")[1], clust_options = list(), normalise_var = TRUE,
+  check_installed = T, ...)
 
 randomise_fit_pch1(i = 1, data, ks = 2:4, replace = FALSE,
   prob = NULL, bootstrap_N = NA, seed = 435,
   bootstrap_type = c("s", "m", "cmq")[1], return_data = FALSE,
   return_arc = FALSE, bootstrap_average = FALSE, convex_hull = TRUE,
-  cacl_var_in_dims = TRUE, ...)
+  cacl_var_in_dims = TRUE, normalise_var = TRUE, ...)
 
 fit_convhulln(data, positions = TRUE)
 
@@ -112,6 +113,8 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 \item{seed}{seed for reproducible random number generation. Works for all types of processing.}
 
 \item{simplex}{when testing multiple k using \code{k_fit_pch()} match dimensions to the number of archetypes? Use only on ordered principal components. If FALSE try all k for all dimensions in data. If simplex == TRUE test only simplex shapes (k=3 in 2D, k=4 in 3D, k=5 in 4D...). This assumes order of columns which is valid for principal components but may not be valid for untransformed data.}
+
+\item{normalise_var}{normalise variance in position of vertices by variance in data in each dimention}
 
 \item{n}{number of samples to be taken when bootstraping}
 

@@ -8,7 +8,7 @@
 find_set_activity_AUCell(expr_mat, assay_name = "logcounts",
   aucMaxRank = nrow(expr_mat) * 0.05, gene_sets, gene_col = "ALIAS",
   set_id_col = "GOALL", set_name_col = "TERM", binary = FALSE,
-  nCores = 1, plotHist = FALSE, ...)
+  nCores = 1, plotHist = FALSE, plotStats = TRUE, ...)
 
 find_set_activity_pseudoinv(expr_mat, assay_name = "logcounts",
   gene_sets, gene_col = "ALIAS", set_id_col = "GOALL",

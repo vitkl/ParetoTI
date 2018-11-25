@@ -140,7 +140,8 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
                             return_as_matrix = FALSE,
                             assay_name = "logcounts",
                             aucell_options = list(aucMaxRank = nrow(expr_mat) * 0.05,
-                                                  binary = F, nCores = 3)) {
+                                                  binary = F, nCores = 3,
+                                                  plotStats = TRUE)) {
   # Retrieve annotations ---------------------------------------------------------
   if(mean(which %in% c("BP", "MF", "CC")) == 1){
     # Map GO annotations using AnnotationHub -------------------------------------
@@ -166,7 +167,8 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
                                      set_id_col = "GOALL", set_name_col = "TERM",
                                      binary = aucell_options$binary,
                                      nCores = aucell_options$nCores,
-                                     plotHist = FALSE)
+                                     plotHist = FALSE,
+                                     plotStats = aucell_options$plotStats)
   } else if (activity_method == "pseudoinverse") {
     # or pseudoinverse(annotation_matrix) * expression ---------------------------
     activ = find_set_activity_pseudoinv(expr_mat,

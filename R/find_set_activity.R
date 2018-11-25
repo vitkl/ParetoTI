@@ -21,16 +21,18 @@ find_set_activity_AUCell = function(expr_mat, assay_name = "logcounts",
                                     gene_sets, gene_col = "ALIAS",
                                     set_id_col = "GOALL", set_name_col = "TERM",
                                     binary = FALSE, nCores = 1,
-                                    plotHist = FALSE,  ...){
+                                    plotHist = FALSE, plotStats = TRUE,  ...){
 
   if(!is.data.table(try(as.data.table(gene_sets), silent = TRUE))) stop("gene_sets should be data.table or coercible to data.table: data.frame or matrix")
   gene_sets = as.data.table(gene_sets)
 
   if(is(expr_mat, "matrix") | is(expr_mat, "dgCMatrix") | is(expr_mat, "ExpressionSet")){
-    cells_rankings = AUCell::AUCell_buildRankings(expr_mat, nCores = nCores)
+    cells_rankings = AUCell::AUCell_buildRankings(expr_mat, nCores = nCores,
+                                                  plotStats = plotStats)
   } else if (is(expr_mat, "SummarizedExperiment")) {
     cells_rankings = AUCell::AUCell_buildRankings(expr_mat, nCores = nCores,
-                                                  assayName = assay_name)
+                                                  assayName = assay_name,
+                                                  plotStats = plotStats)
   }
 
   gene_set_list = split(gene_sets[, get(gene_col)],

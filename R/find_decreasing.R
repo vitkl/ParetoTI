@@ -72,19 +72,23 @@ find_decreasing = function(data_attr, arc_col,
     options = c(default[default_retain], clust_options)
 
     # run analysis
-    res = clustermq::Q(fun = ParetoTI:::.find_decreasing_1,
-                       i = seq_len(length(features)),
-                       const = list(features = features, arc_col = arc_col,
-                                    N_smooths = N_smooths,
-                                    data_attr = data_attr, min.sp = min.sp,
-                                    ..., d = d,
-                                    n_points = n_points, weights = weights,
-                                    return_only_summary = return_only_summary,
-                                    one_arc_per_model = one_arc_per_model),
-                       memory = options$memory, template = options$template,
-                       n_jobs = options$n_jobs, rettype = "list",
-                       fail_on_error = options$fail_on_error,
-                       timeout = options$timeout)
+    suppressWarnings({ # hide "NA introduced by coersion" warning specific to cmq implementation
+      suppressPackageStartupMessages({ # hide package startup warnings on each cluster
+        res = clustermq::Q(fun = ParetoTI:::.find_decreasing_1,
+                           i = seq_len(length(features)),
+                           const = list(features = features, arc_col = arc_col,
+                                        N_smooths = N_smooths,
+                                        data_attr = data_attr, min.sp = min.sp,
+                                        ..., d = d,
+                                        n_points = n_points, weights = weights,
+                                        return_only_summary = return_only_summary,
+                                        one_arc_per_model = one_arc_per_model),
+                           memory = options$memory, template = options$template,
+                           n_jobs = options$n_jobs, rettype = "list",
+                           fail_on_error = options$fail_on_error,
+                           timeout = options$timeout)
+      })
+    })
   }
 
   # combine results ------------------------------------------------------------

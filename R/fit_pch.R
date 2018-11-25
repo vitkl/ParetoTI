@@ -130,7 +130,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
       arc_vol = fit_convhulln(data_arc, positions = FALSE)
       res$arc_vol = arc_vol$vol
     } else {
-    # Calculate the volume of simplex polytope
+      # Calculate the volume of simplex polytope
       archetypes = res$XC[data_dim, ]
       arch_red = archetypes - archetypes[, noc]
       res$arc_vol = abs(det(arch_red[, seq_len(noc - 1)]) /
@@ -273,17 +273,22 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
                    fail_on_error = FALSE, timeout = Inf)
     default_retain = !names(default) %in% names(clust_options)
     options = c(default[default_retain], clust_options)
+
     # run analysis
-    res = clustermq::Q(fun = ParetoTI::fit_pch_resample, i = seq_len(n),
-                       const = list(data = data, sample_prop = sample_prop,
-                                    replace = replace,
-                                    order_type = order_type,
-                                    converge_else_fail = FALSE, ...),
-                       seed = seed,
-                       memory = options$memory, template = options$template,
-                       n_jobs = options$n_jobs, rettype = "list",
-                       fail_on_error = options$fail_on_error,
-                       timeout = options$timeout)
+    suppressWarnings({ # hide "NA introduced by coersion" warning specific to cmq implementation
+      suppressPackageStartupMessages({ # hide package startup warnings on each cluster
+        res = clustermq::Q(fun = ParetoTI::fit_pch_resample, i = seq_len(n),
+                           const = list(data = data, sample_prop = sample_prop,
+                                        replace = replace,
+                                        order_type = order_type,
+                                        converge_else_fail = FALSE, ...),
+                           seed = seed,
+                           memory = options$memory, template = options$template,
+                           n_jobs = options$n_jobs, rettype = "list",
+                           fail_on_error = options$fail_on_error,
+                           timeout = options$timeout)
+      })
+    })
   }
   # combine results ------------------------------------------------------------
   res = list(call = match.call(),
@@ -462,23 +467,28 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
                    fail_on_error = FALSE, timeout = Inf)
     default_retain = !names(default) %in% names(clust_options)
     options = c(default[default_retain], clust_options)
+
     # run analysis
-    res = clustermq::Q(fun = ParetoTI::randomise_fit_pch1, i = seq_len(n_rand),
-                       const = list(data = data, ks = ks,
-                                    replace = replace, bootstrap_N = bootstrap_N,
-                                    seed = seed, bootstrap_type = "s",
-                                    return_data = FALSE,
-                                    return_arc = FALSE, bootstrap_average = TRUE,
-                                    convex_hull = convex_hull,
-                                    maxiter = maxiter, delta = delta,
-                                    order_type = order_type,
-                                    cacl_var_in_dims = cacl_var_in_dims,
-                                    normalise_var = normalise_var, ...),
-                       seed = seed,
-                       memory = options$memory, template = options$template,
-                       n_jobs = options$n_jobs, rettype = "list",
-                       fail_on_error = options$fail_on_error,
-                       timeout = options$timeout)
+    suppressWarnings({ # hide "NA introduced by coersion" warning specific to cmq implementation
+      suppressPackageStartupMessages({ # hide package startup warnings on each cluster
+        res = clustermq::Q(fun = ParetoTI::randomise_fit_pch1, i = seq_len(n_rand),
+                           const = list(data = data, ks = ks,
+                                        replace = replace, bootstrap_N = bootstrap_N,
+                                        seed = seed, bootstrap_type = "s",
+                                        return_data = FALSE,
+                                        return_arc = FALSE, bootstrap_average = TRUE,
+                                        convex_hull = convex_hull,
+                                        maxiter = maxiter, delta = delta,
+                                        order_type = order_type,
+                                        cacl_var_in_dims = cacl_var_in_dims,
+                                        normalise_var = normalise_var, ...),
+                           seed = seed,
+                           memory = options$memory, template = options$template,
+                           n_jobs = options$n_jobs, rettype = "list",
+                           fail_on_error = options$fail_on_error,
+                           timeout = options$timeout)
+      })
+    })
   }
 
   # combine results ------------------------------------------------------------

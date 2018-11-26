@@ -28,9 +28,12 @@ You need to install development version of this package from github.com and inst
 
 ```r
 # Install ParetoTI package, this should also install reticulate package, if not - install manually.
-devtools::install_github("vitkl/ParetoTI", dependencies = T)
+install.packages("BiocManager") # for installing BioConductor dependencies
+BiocManager::install("vitkl/ParetoTI", dependencies = T)
+
 # Load package
 library(ParetoTI)
+
 # Install python dependency into conda python environment and install py_pcha module
 ParetoTI::install_py_pcha(method = "conda")
 # If no conda manager installed on your machine, try this (uncomment):

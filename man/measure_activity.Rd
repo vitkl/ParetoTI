@@ -23,7 +23,7 @@ measure_activity(expr_mat, which = c("BP", "MF", "CC"),
   ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
   lower = 1, upper = Inf, return_as_matrix = FALSE,
   assay_name = "logcounts", aucell_options = list(aucMaxRank =
-  nrow(expr_mat) * 0.05, binary = F, nCores = 3, plotStats = FALSE))
+  nrow(expr_mat) * 0.05, binary = F, nCores = 3, plotStats = TRUE))
 
 load_go_ontology(ont_dir = "./data/", ont_file = "goslim_generic.obo")
 }

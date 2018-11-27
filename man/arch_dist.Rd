@@ -4,12 +4,14 @@
 \alias{arch_dist}
 \title{Compute distance to archetypes}
 \usage{
-arch_dist(data, archetypes)
+arch_dist(data, archetypes, dist_metric = "euclidian")
 }
 \arguments{
 \item{data}{matrix of dim(variables/dimentions, examples)}
 
 \item{archetypes}{matrix of dim(variables/dimentions, archetypes)}
+
+\item{dist_metric}{distance metric, currently only "euclidian" implemented}
 }
 \value{
 matrix of distances to archetypes of dim(examples, archetypes)

@@ -672,22 +672,27 @@ fit_convhulln = function(data, positions = TRUE) {
 ##' @param feature_data matrix with dim(dimensions, examples) where rownames are feature names and colnames are sample_id.
 ##' @param colData annotations of examples in feature_data - dim(examples, dimensions), e.g. colData in SingleCellExperiment object or output of \link[ParetoTI]{find_set_activity_AUCell}.
 ##' @param colData_id column in colData that contains values matching colnames of feature_data.
+##' @param dist_metric how to describe distance to archetypes. Currently euclidian distance is implemented.
+##' @param rank rank by distance metric (euclidian distance)?
 ##' @return \code{merge_arch_dist()} list: data.table with samples in columns and features in rows (speficied by sample_id column) and column names specifying archetypes
 ##' @export merge_arch_dist
 ##' @import data.table
 merge_arch_dist = function(arch_data, data, feature_data,
-                           colData = NULL, colData_id){
+                           colData = NULL, colData_id,
+                           dist_metric = "euclidian", rank = TRUE){
   if(!is(arch_data, "pch_fit")) stop("arch_data should contain a single fit (pch_fit object): use fit_pch() or fit_pch_bootstrap() followed by average_pch_fits()")
   # find distance of data points to archetypes ---------------------------------
-  dist = arch_dist(data, arch_data$XC)
+  dist = arch_dist(data, arch_data$XC, dist_metric = dist_metric)
   arc_col = colnames(dist)
   # if no rownames provided add V1, V2 ... Vn names
   if(is.null(rownames(dist))) rownames(dist) = paste0("V", seq_len(nrow(dist)))
   dist = as.data.table(dist, keep.rownames = "sample_id")
   # convert distances to ranks and scale between 0 and 1 -----------------------
   # (max rank for min distance)
-  for (col in arc_col) {
-    dist[, c(col) := frank(get(col), ties.method=c("average")) / .N]
+  if(isTRUE(rank)){
+    for (col in arc_col) {
+      dist[, c(col) := frank(get(col), ties.method=c("average")) / .N]
+    }
   }
   # merge gene data ------------------------------------------------------------
   # if no sample_id (colnames) provided add V1, V2 ... Vn names

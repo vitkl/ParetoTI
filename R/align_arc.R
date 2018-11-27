@@ -49,7 +49,7 @@ gen_permut = function(n){
 ##' # Generate data
 ##' set.seed(4355)
 ##' archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
-##'                           mean = 0, sd = 1, N_dim = 2)
+##'                           mean = 0, sd = 1)
 ##' data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 ##' dim(data)
 ##' # fit polytopes to 2 subsamples of the data

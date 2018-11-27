@@ -54,7 +54,7 @@ randomise_fit_pch1(i = 1, data, ks = 2:4, replace = FALSE,
 fit_convhulln(data, positions = TRUE)
 
 merge_arch_dist(arch_data, data, feature_data, colData = NULL,
-  colData_id)
+  colData_id, dist_metric = "euclidian", rank = TRUE)
 
 \method{print}{pch_fit}(res)
 
@@ -153,6 +153,10 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 \item{colData}{annotations of examples in feature_data - dim(examples, dimensions), e.g. colData in SingleCellExperiment object or output of \link[ParetoTI]{find_set_activity_AUCell}.}
 
 \item{colData_id}{column in colData that contains values matching colnames of feature_data.}
+
+\item{dist_metric}{how to describe distance to archetypes. Currently euclidian distance is implemented.}
+
+\item{rank}{rank by distance metric (euclidian distance)?}
 }
 \value{
 \code{fit_pch()}: object of class pch_fit (list) containing the following elements:

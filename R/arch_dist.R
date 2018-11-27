@@ -5,6 +5,7 @@
 ##' @description \code{arch_dist()} calculates Euclidian distance from every point to every archetype give matrices that contain this data.
 ##' @param data matrix of dim(variables/dimentions, examples)
 ##' @param archetypes matrix of dim(variables/dimentions, archetypes)
+##' @param dist_metric distance metric, currently only "euclidian" implemented
 ##' @return matrix of distances to archetypes of dim(examples, archetypes)
 ##' @export arch_dist
 ##' @seealso \code{\link[ParetoTI]{fit_pch}}, \code{\link[ParetoTI]{generate_arc}}, \code{\link[ParetoTI]{generate_data}}
@@ -20,12 +21,14 @@
 ##' distance = arch_dist(data, archetypes)
 ##' # Find Euclidian distance between archetypes
 ##' arc_distance = arch_dist(archetypes, archetypes)
-arch_dist = function(data, archetypes){
-  archetypes = lapply(seq_len(ncol(archetypes)), function(i) archetypes[, i])
-  archetypes = vapply(archetypes, function(arc, data){
-    diff = arc - data
-    sqrt(colSums(diff^2))
-  }, FUN.VALUE = numeric(ncol(data)), data)
-  colnames(archetypes) = paste0("archetype_", seq_len(ncol(archetypes)))
-  archetypes
+arch_dist = function(data, archetypes, dist_metric = "euclidian"){
+  if(dist_metric == "euclidian"){
+    archetypes = lapply(seq_len(ncol(archetypes)), function(i) archetypes[, i])
+    distances = vapply(archetypes, function(arc, data){
+      diff = arc - data
+      sqrt(colSums(diff^2))
+    }, FUN.VALUE = numeric(ncol(data)), data)
+    colnames(distances) = paste0("archetype_", seq_len(ncol(distances)))
+  }
+  distances
 }

@@ -322,15 +322,25 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
   }
   # calculate and include variance in positions --------------------------------
   dim. = c(dim(XC_array)[1] * dim(XC_array)[2], dim(XC_array)[3])
-  res$var = matrix(matrixStats::rowVars(XC_array,dim. = dim.),
+  res$var = matrix(matrixStats::rowVars(XC_array, dim. = dim.),
                    dim(XC_array)[1], dim(XC_array)[2])
-  # normalise variance in vertex positions by variance of data in each dimension
-  if(isTRUE(normalise_var)) res$var = res$var / matrixStats::rowVars(data)
+
+  # calculate variance of data in each dimension
+  if(isTRUE(normalise_var)) row_var_data = matrixStats::rowVars(data)
+
   # sum variance in position of each vertex across dimensions
   res$var_vert = colSums(res$var)
-  # sum variance in position for each dimension across vertices
+  # normalise variance in vertex positions by variance of data
+  if(isTRUE(normalise_var)) res$var_vert = res$var_vert / sum(row_var_data)
+  # find mean of variances of all vertices to get a single number
+  res$total_var = mean(res$var_vert)
+
+  # normalise variance in vertex positions by variance of data in each dimension
+  if(isTRUE(normalise_var)) res$var = res$var / matrixStats::rowVars(data)
+
   if(isTRUE(cacl_var_in_dims)){
-    res$var_dim = data.table::data.table(matrix(rowSums(res$var), nrow = 1,
+    # find mean variance in position for each dimension across vertices
+    res$var_dim = data.table::data.table(matrix(rowMeans(res$var), nrow = 1,
                                                 ncol = nrow(data)))
     res$var_dim$k = ncol(res$var)
   } else {
@@ -340,8 +350,7 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
     }
     res$var_dim$k = integer(0)
   }
-  # find mean of variances of all vertices to get a single number
-  res$total_var = mean(res$var_vert)
+
   # update summary data.table  -------------------------------------------------
   res$summary[, total_var := res$total_var]
   res$summary = unique(res$summary)

@@ -178,7 +178,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     ## 3D plot ===================================================================##
   } else if(length(which_dimensions) == 3 & nrow(data) >= 3) {
     if(is.integer(which_dimensions)){
-      z = colnames(for_plot$arc_data)[3]
+      z = colnames(for_plot$data)[3]
     } else if (is.character(which_dimensions)) {
       z = which_dimensions[3]
     } else stop("which_dimensions is neither integer nor character vector")

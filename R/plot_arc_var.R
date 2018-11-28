@@ -29,28 +29,40 @@
 ##'              point_size = 2, line_size = 1.5) + theme_bw()
 plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl", "total_var", "dim")[1],
                         point_size = 2, line_size = 1.5){
-  if(type != "dim"){
-  type_lab = .type_lab(type)
-  k_var = data.table(varexpl = arc_data$pch_fits$varexpl, SSE = arc_data$pch_fits$SSE,
-                     k = sapply(arc_data$pch_fits$XC, ncol),
-                     total_var = arc_data$pch_fits$total_var,
-                     t_ratio = arc_data$pch_fits$t_ratio)
-  setorder(k_var, k)
-  k_var[k == min(k), res_varexpl := varexpl]
-  for (i in seq(min(k_var$k)+1, max(k_var$k))) {
-    k_var[k == i, res_varexpl := varexpl - k_var[k == i - 1, varexpl]]
+  if(!(is(arc_data, "k_pch_fit") | is(arc_data, "b_pch_fit") |
+       is(arc_data, "pch_fit"))) {
+    stop("arc_data should be k_pch_fit, b_pch_fit or pch_fit")
   }
-  ggplot2::ggplot(k_var, ggplot2::aes(x = k, y = get(type))) +
-    ggplot2::geom_path(size = line_size) + ggplot2::geom_point(size = point_size) +
-    ggplot2::xlab("k, number of vertices/archetypes") +
-    ggplot2::ylab(type_lab)
+
+  if(type != "dim"){
+    type_lab = .type_lab(type)
+    k_var = data.table(varexpl = arc_data$pch_fits$varexpl, SSE = arc_data$pch_fits$SSE,
+                       k = sapply(arc_data$pch_fits$XC, ncol),
+                       total_var = arc_data$pch_fits$total_var,
+                       t_ratio = arc_data$pch_fits$t_ratio)
+    setorder(k_var, k)
+    k_var[k == min(k), res_varexpl := varexpl]
+    for (i in seq(min(k_var$k)+1, max(k_var$k))) {
+      k_var[k == i, res_varexpl := varexpl - k_var[k == i - 1, varexpl]]
+    }
+    ggplot2::ggplot(k_var, ggplot2::aes(x = k, y = get(type))) +
+      ggplot2::geom_path(size = line_size) + ggplot2::geom_point(size = point_size) +
+      ggplot2::xlab("k, number of vertices/archetypes") +
+      ggplot2::ylab(type_lab)
   } else {
-    var_dim = arc_data$pch_fits$var_dim
+    if(is(arc_data, "k_pch_fit")){
+      var_dim = arc_data$pch_fits$var_dim
+    } else {
+      var_dim = arc_data$var_dim
+    }
+
     var_dim = melt.data.table(var_dim, id.vars = "k")
     setorder(var_dim, k, value)
-    ggplot(var_dim, aes(x = variable, y = value, group = k)) +
-      geom_line() +
-      facet_wrap(~ k)
+    ggplot2::ggplot(var_dim, ggplot2::aes(x = variable, y = value, group = k)) +
+      ggplot2::geom_line() +
+      ggplot2::facet_wrap(~ k) +
+      ggplot2::xlab("dimension name") +
+      ggplot2::ylab("variance in position, average across vertices")
   }
 
 }

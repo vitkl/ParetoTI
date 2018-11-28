@@ -7,6 +7,7 @@ install()
 devtools::load_all("../ParetoTI/")
 
 devtools::install_github("vitkl/ParetoTI", dependencies = T)
+
 library(ParetoTI)
 
 devtools::install_url("http://spams-devel.gforge.inria.fr/hitcounter2.php?file=file/36615/spams-R-v2.6-2017-03-22.tar.gz")

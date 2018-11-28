@@ -342,6 +342,11 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
     # find mean variance in position for each dimension across vertices
     res$var_dim = data.table::data.table(matrix(rowMeans(res$var), nrow = 1,
                                                 ncol = nrow(data)))
+    # assign column names
+    if(!is.null(rownames(data))) {
+      data.table::setnames(res$var_dim, colnames(res$var_dim), rownames(data))
+    }
+    # add k, number of vertices
     res$var_dim$k = ncol(res$var)
   } else {
     res$var_dim = data.table::data.table(matrix(nrow = 0, ncol = nrow(data)))

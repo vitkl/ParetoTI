@@ -181,6 +181,7 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
   # when naming matrix dimensions ad
   setnames(activ, colnames(activ), gsub(" ", "_", colnames(activ)))
   setnames(activ, colnames(activ), gsub("-", "_", colnames(activ)))
+  setnames(activ, colnames(activ), gsub(",", "_", colnames(activ)))
   if(return_as_matrix) activ = as.matrix(activ, rownames = "cells")
   activ
 }

@@ -64,7 +64,7 @@ merge_arch_dist(arch_data, data, feature_data, colData = NULL,
 
 \method{print}{r_pch_fit}(res)
 
-plot.r_pch_fit(rand_arch, ks = unique(rand_arch$rand_dist$k),
+\method{plot}{r_pch_fit}(rand_arch, ks = unique(rand_arch$rand_dist$k),
   type = c("total_var", "varexpl", "t_ratio"), colors = c("#1F77B4",
   "#D62728", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"), nudge_y = 0.8,
   nudge_x = 0.1, text_lab_size = 4, line_size = 0.5)

@@ -7,6 +7,7 @@
 ##' @param type which measure to plot as a function of k, one of "varexpl", "SSE", "res_varexpl", "dim". Use dim to plot variance in position in each dimension.
 ##' @param arch_size size of archetype point
 ##' @param line_size width of lines connecting archetypes
+##' @param reorder reorder dimensions based on variance in position (type = "dim).
 ##' @return \code{plot_arc_var()} ggplot2 (2D) plot
 ##' @export plot_arc_var
 ##' @seealso \code{\link[ParetoTI]{fit_pch}}, \code{\link[ParetoTI]{plot_arc}}
@@ -27,8 +28,9 @@
 ##' # Show variance explained by a polytope with each k
 ##' plot_arc_var(arc_data, type = c("varexpl", "SSE", "res_varexpl")[1],
 ##'              point_size = 2, line_size = 1.5) + theme_bw()
-plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl", "total_var", "dim")[1],
-                        point_size = 2, line_size = 1.5){
+plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl",
+                                           "total_var", "dim")[1],
+                        point_size = 2, line_size = 1.5, reorder = FALSE){
   if(!(is(arc_data, "k_pch_fit") | is(arc_data, "b_pch_fit") |
        is(arc_data, "pch_fit"))) {
     stop("arc_data should be k_pch_fit, b_pch_fit or pch_fit")
@@ -58,6 +60,11 @@ plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl", "tot
 
     var_dim = melt.data.table(var_dim, id.vars = "k")
     setorder(var_dim, k, value)
+    if(reorder){
+      var_dim[, variable := factor(variable,
+                                   levels = unique(variable[order(value)]))]
+    }
+
     ggplot2::ggplot(var_dim, ggplot2::aes(x = variable, y = value, group = k)) +
       ggplot2::geom_line() +
       ggplot2::facet_wrap(~ k) +

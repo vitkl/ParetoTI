@@ -22,22 +22,24 @@ fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
   verbose = FALSE, conv_crit = 1e-06, maxiter = 500,
   check_installed = T, order_by = seq(1, nrow(data)),
   order_type = c("cosine", "side", "align")[3], convex_hull = FALSE,
-  converge_else_fail = TRUE)
+  converge_else_fail = TRUE, var_in_dims = FALSE,
+  normalise_var = TRUE)
 
 k_fit_pch(data, ks = 2:4, check_installed = TRUE, bootstrap = FALSE,
-  bootstrap_N = 10, bootstrap_type = c("s", "m", "cmq")[1],
-  seed = 345, simplex = c(FALSE, TRUE), normalise_var = TRUE, ...)
+  bootstrap_N = 10, sample_prop = 0.65, bootstrap_type = c("s", "m",
+  "cmq")[1], seed = 345, simplex = FALSE, var_in_dims = FALSE,
+  normalise_var = TRUE, ...)
 
 fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
   check_installed = T, type = c("s", "m", "cmq")[1],
   clust_options = list(), seed = 235, replace = FALSE,
   average = FALSE, order_type = c("cosine", "side", "align")[3],
-  cacl_var_in_dims = TRUE, normalise_var = TRUE, ...)
+  var_in_dims = TRUE, normalise_var = TRUE, ...)
 
 average_pch_fits(res, XC_array = NULL)
 
 fit_pch_resample(i = 1, data, sample_prop = NULL, replace = FALSE,
-  ...)
+  var_in_dims = var_in_dims, normalise_var = normalise_var, ...)
 
 randomise_fit_pch(data, arc_data, n_rand = 3, replace = FALSE,
   bootstrap_N = c(NA, 50)[1], seed = 435, convex_hull = TRUE,
@@ -46,10 +48,10 @@ randomise_fit_pch(data, arc_data, n_rand = 3, replace = FALSE,
   check_installed = T, ...)
 
 randomise_fit_pch1(i = 1, data, ks = 2:4, replace = FALSE,
-  prob = NULL, bootstrap_N = NA, seed = 435,
+  prob = NULL, bootstrap_N = NA, seed = 435, sample_prop = 0.65,
   bootstrap_type = c("s", "m", "cmq")[1], return_data = FALSE,
   return_arc = FALSE, bootstrap_average = FALSE, convex_hull = TRUE,
-  cacl_var_in_dims = TRUE, normalise_var = TRUE, ...)
+  var_in_dims = TRUE, normalise_var = TRUE, ...)
 
 fit_convhulln(data, positions = TRUE)
 
@@ -102,11 +104,17 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 
 \item{converge_else_fail}{throw an error and stop execution if PCHA did not converge in \code{maxiter} steps.}
 
+\item{var_in_dims}{calculate variance in dimensions across vertices in addition to variance in vertices.}
+
+\item{normalise_var}{normalise variance in position of vertices by variance in data in each dimention}
+
 \item{ks}{integer vector, dimensions of polytopes to be fit to data}
 
 \item{bootstrap}{\code{k_fit_pch()}: use bootstrap to find average positions for each k? Also returns variability in vertex position to aid the selection of k. At excessive k position vary more.}
 
 \item{bootstrap_N}{randomise_fit_pch1() and k_fit_pch(): integer, number of bootstrap samples on random data to measure variability in vertex positions. Set to NA fit once to all data instead of bootstraping. When this option is positive seed bootstrap_seed and sample_prop must be provided.}
+
+\item{sample_prop}{either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times on the same data which is useful for evaluating how often the algorithm gets stuck in local optima.}
 
 \item{bootstrap_type}{\code{randomise_fit_pch1()} and \code{k_fit_pch()}: parallel processing type when bootstraping. Caution: avoid nested parallel processing, do not use "m" and "cmq" inside other parallel functions.}
 
@@ -114,11 +122,7 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 
 \item{simplex}{when testing multiple k using \code{k_fit_pch()} match dimensions to the number of archetypes? Use only on ordered principal components. If FALSE try all k for all dimensions in data. If simplex == TRUE test only simplex shapes (k=3 in 2D, k=4 in 3D, k=5 in 4D...). This assumes order of columns which is valid for principal components but may not be valid for untransformed data.}
 
-\item{normalise_var}{normalise variance in position of vertices by variance in data in each dimention}
-
 \item{n}{number of samples to be taken when bootstraping}
-
-\item{sample_prop}{either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times on the same data which is useful for evaluating how often the algorithm gets stuck in local optima.}
 
 \item{type}{one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package. "See also" for details.}
 
@@ -127,8 +131,6 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 \item{replace}{should resampling be with replacement? passed to \link[base]{sample.int}}
 
 \item{average}{average archetype positions and varexpl? By default FALSE, return all fits to resampled data.}
-
-\item{cacl_var_in_dims}{calculate variance in dimensions across vertices in addition to variance in vertices.}
 
 \item{XC_array}{Used by average_pch_fits() inside fit_pch_bootstrap(). You should not to use it in most cases.}
 

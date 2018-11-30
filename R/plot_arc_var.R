@@ -62,7 +62,7 @@ plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl", "tot
       ggplot2::geom_line() +
       ggplot2::facet_wrap(~ k) +
       ggplot2::xlab("dimension name") +
-      ggplot2::ylab("variance in position, average across vertices")
+      ggplot2::ylab("variance in position across vertices")
   }
 
 }

@@ -79,7 +79,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    maxiter = 500, check_installed = T,
                    order_by = seq(1, nrow(data)),
                    order_type = c("cosine", "side", "align")[3],
-                   convex_hull = FALSE, converge_else_fail = TRUE) {
+                   convex_hull = FALSE, converge_else_fail = TRUE,
+                   var_in_dims = FALSE, normalise_var = TRUE) {
   if(check_installed) .py_pcha_installed()
   # run PCHA
   res = tryCatch({
@@ -88,6 +89,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                        conv_crit = conv_crit, maxiter = maxiter)
     names(res) = c("XC", "S", "C", "SSE", "varexpl")
     if(!is.null(rownames(data))) rownames(res$XC) = rownames(data)
+    class(res) = "pch_fit"
     res
   }, error = function(err) {
     if(isTRUE(converge_else_fail)) stop(paste0("fit_pch(noc = ",noc,") error: ", err))
@@ -145,13 +147,10 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     res$arc_vol = NA
     res$t_ratio = NA
   }
-  rownames(res$XC) = rownames(data)
   res$var_vert = NA
-  res$var_dim = data.table::data.table(matrix(nrow = 0, ncol = nrow(data)))
-  if(!is.null(rownames(data))) {
-    data.table::setnames(res$var_dim, colnames(res$var_dim), rownames(data))
-  }
-  res$var_dim$k = integer(0)
+
+  res = ParetoTI:::.cacl_var_in_dims(res, data, var_in_dims, normalise_var)
+
   res$total_var = NA
   # add summary table:
   res$summary = data.table::data.table(varexpl = as.numeric(res$varexpl),
@@ -159,7 +158,6 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                                        total_var = as.numeric(res$total_var),
                                        k = noc)
   res$call = match.call()
-  class(res) = "pch_fit"
   res
 }
 
@@ -173,9 +171,10 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 ##' @import clustermq
 ##' @export k_fit_pch
 k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
-                     bootstrap = FALSE, bootstrap_N = 10,
-                     bootstrap_type = c("s", "m", "cmq")[1], seed = 345,
-                     simplex = c(FALSE, TRUE), normalise_var = TRUE, ...) {
+                     bootstrap = FALSE, bootstrap_N = 10, sample_prop = 0.65,
+                     bootstrap_type = c("s", "m", "cmq")[1],
+                     seed = 345, simplex = FALSE,
+                     var_in_dims = FALSE, normalise_var = TRUE, ...) {
   if(check_installed) .py_pcha_installed()
   # check that ks do not exceed dimensions when simplex is true
   if(nrow(data) < (max(ks) - 1) & isTRUE(simplex)) stop("simplex = TRUE but number of vertices (",
@@ -191,7 +190,8 @@ k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
       # fit models
       fit_pch_bootstrap(data[data_dim,], noc = k, n = bootstrap_N,
                         check_installed = FALSE, type = bootstrap_type,
-                        seed = seed, average = TRUE,
+                        seed = seed, average = TRUE, sample_prop = sample_prop,
+                        var_in_dims = var_in_dims,
                         normalise_var = normalise_var, ...)
     })
   } else {
@@ -203,7 +203,9 @@ k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
       } else data_dim = seq(1, nrow(data))
       # fit models
       fit_pch(data = data[data_dim,], noc = k,
-              ..., check_installed = FALSE)
+              ..., check_installed = FALSE,
+              var_in_dims = var_in_dims,
+              normalise_var = normalise_var)
     })
   }
   # combine results ------------------------------------------------------------
@@ -229,7 +231,7 @@ k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
 ##' @param seed seed for reproducible random number generation. Works for all types of processing.
 ##' @param replace should resampling be with replacement? passed to \link[base]{sample.int}
 ##' @param average average archetype positions and varexpl? By default FALSE, return all fits to resampled data.
-##' @param cacl_var_in_dims calculate variance in dimensions across vertices in addition to variance in vertices.
+##' @param var_in_dims calculate variance in dimensions across vertices in addition to variance in vertices.
 ##' @param normalise_var normalise variance in position of vertices by variance in data in each dimention
 ##' @return \code{fit_pch_bootstrap()} object of class b_pch_fit (list) containing the same elements as pch_fit, but each is either a list of pch_fit elements (e.g. list of n number of XC matrices) or a vector (which pch_fit element is one number).
 ##' @import clustermq
@@ -238,14 +240,16 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
                              type = c("s", "m", "cmq")[1], clust_options = list(),
                              seed = 235, replace = FALSE, average = FALSE,
                              order_type = c("cosine", "side", "align")[3],
-                             cacl_var_in_dims = TRUE, normalise_var = TRUE, ...) {
+                             var_in_dims = TRUE, normalise_var = TRUE, ...) {
   if(check_installed) .py_pcha_installed()
   # single process -------------------------------------------------------------
   if(type == "s"){
     set.seed(seed)
     res = lapply(seq_len(n), fit_pch_resample, data, sample_prop,
                  replace = replace, order_type = order_type,
-                 converge_else_fail = FALSE, ...)
+                 converge_else_fail = FALSE,
+                 var_in_dims = var_in_dims,
+                 normalise_var = normalise_var, ...)
   }
   # multi-process --------------------------------------------------------------
   if(type == "m"){
@@ -262,7 +266,9 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
     res = parallel::parLapply(cl, seq_len(n), ParetoTI::fit_pch_resample, data,
                               sample_prop, replace = replace,
                               order_type = order_type,
-                              converge_else_fail = FALSE, ...)
+                              converge_else_fail = FALSE,
+                              var_in_dims = var_in_dims,
+                              normalise_var = normalise_var, ...)
     # stop cluster
     parallel::stopCluster(cl)
   }
@@ -281,7 +287,9 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
                            const = list(data = data, sample_prop = sample_prop,
                                         replace = replace,
                                         order_type = order_type,
-                                        converge_else_fail = FALSE, ...),
+                                        converge_else_fail = FALSE,
+                                        var_in_dims = var_in_dims,
+                                        normalise_var = normalise_var, ...),
                            seed = seed,
                            memory = options$memory, template = options$template,
                            n_jobs = options$n_jobs, rettype = "list",
@@ -338,23 +346,8 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
   # normalise variance in vertex positions by variance of data in each dimension
   if(isTRUE(normalise_var)) res$var = res$var / matrixStats::rowVars(data)
 
-  if(isTRUE(cacl_var_in_dims)){
-    # find mean variance in position for each dimension across vertices
-    res$var_dim = data.table::data.table(matrix(rowMeans(res$var), nrow = 1,
-                                                ncol = nrow(data)))
-    # assign column names
-    if(!is.null(rownames(data))) {
-      data.table::setnames(res$var_dim, colnames(res$var_dim), rownames(data))
-    }
-    # add k, number of vertices
-    res$var_dim$k = ncol(res$var)
-  } else {
-    res$var_dim = data.table::data.table(matrix(nrow = 0, ncol = nrow(data)))
-    if(!is.null(rownames(data))) {
-      data.table::setnames(res$var_dim, colnames(res$var_dim), rownames(data))
-    }
-    res$var_dim$k = integer(0)
-  }
+  # find mean variance in position for each dimension across vertices
+  res = ParetoTI:::.cacl_var_in_dims(res, data, var_in_dims, normalise_var, XC_array)
 
   # update summary data.table  -------------------------------------------------
   res$summary[, total_var := res$total_var]
@@ -396,7 +389,9 @@ average_pch_fits = function(res, XC_array = NULL){
 ##' @param i iteration number
 ##' @return \code{fit_pch_resample()} object of class pch_fit
 ##' @export fit_pch_resample
-fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE, ...) {
+fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE,
+                            var_in_dims = var_in_dims,
+                            normalise_var = normalise_var, ...) {
   # do resampling of the data
   if(!is.null(sample_prop)){
     if(data.table::between(sample_prop[1], 0, 1)){
@@ -406,7 +401,8 @@ fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE, ..
     } else stop("sample_prop should be NULL or a number between 0 and 1")
   }
   # fit polytope
-  ParetoTI::fit_pch(data = data, ..., check_installed = FALSE)
+  ParetoTI::fit_pch(data = data, ..., var_in_dims = var_in_dims,
+                    normalise_var = normalise_var, check_installed = FALSE)
 }
 
 ##' @rdname fit_pch
@@ -428,7 +424,7 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
 
   # extract some parameters of observed fit
   ks = sort(unique(arc_data$summary$k))
-  cacl_var_in_dims = isTRUE(nrow(arc_data$var_dim) > 0) |
+  var_in_dims = isTRUE(nrow(arc_data$var_dim) > 0) |
     isTRUE(nrow(arc_data$pch_fits$var_dim) > 0)
   # single process -------------------------------------------------------------
 
@@ -441,7 +437,7 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
                  bootstrap_average = TRUE, convex_hull = convex_hull,
                  maxiter = maxiter, delta = delta,
                  order_type = order_type,
-                 cacl_var_in_dims = cacl_var_in_dims,
+                 var_in_dims = var_in_dims,
                  normalise_var = normalise_var, ...)
   }
 
@@ -467,7 +463,7 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
                               convex_hull = convex_hull,
                               maxiter = maxiter, delta = delta,
                               order_type = order_type,
-                              cacl_var_in_dims = cacl_var_in_dims,
+                              var_in_dims = var_in_dims,
                               normalise_var = normalise_var, ...)
     # stop cluster
     parallel::stopCluster(cl)
@@ -494,7 +490,7 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
                                         convex_hull = convex_hull,
                                         maxiter = maxiter, delta = delta,
                                         order_type = order_type,
-                                        cacl_var_in_dims = cacl_var_in_dims,
+                                        var_in_dims = var_in_dims,
                                         normalise_var = normalise_var, ...),
                            seed = seed,
                            memory = options$memory, template = options$template,
@@ -598,11 +594,11 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
 ##' @export randomise_fit_pch1
 randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
                               replace = FALSE, prob = NULL,
-                              bootstrap_N = NA, seed = 435,
+                              bootstrap_N = NA, seed = 435, sample_prop = 0.65,
                               bootstrap_type = c("s", "m", "cmq")[1],
                               return_data = FALSE, return_arc = FALSE,
                               bootstrap_average = FALSE, convex_hull = TRUE,
-                              cacl_var_in_dims = TRUE, normalise_var = TRUE, ...) {
+                              var_in_dims = TRUE, normalise_var = TRUE, ...) {
   # randomise variables --------------------------------------------------------
 
   data = ParetoTI::rand_var(data, MARGIN = 1, replace = replace, prob = prob)
@@ -614,6 +610,7 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
     arc_data = ParetoTI::k_fit_pch(data = data, ks = ks, check_installed = FALSE,
                                    bootstrap = FALSE, seed = seed,
                                    convex_hull = convex_hull,
+                                   var_in_dims = var_in_dims,
                                    normalise_var = normalise_var,
                                    # prevent whole pipeline from failing
                                    # when PCHA doesn't converge:
@@ -623,17 +620,19 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
     if(length(ks) > 1){ # fitting many shapes (ks vertices)
       arc_data = ParetoTI::k_fit_pch(data = data, ks = ks, check_installed = TRUE,
                                      bootstrap = TRUE, bootstrap_N = bootstrap_N,
+                                     sample_prop = sample_prop,
                                      bootstrap_type = bootstrap_type, seed = seed,
                                      replace = replace,
-                                     cacl_var_in_dims = cacl_var_in_dims,
+                                     var_in_dims = var_in_dims,
                                      normalise_var = normalise_var,
                                      ..., convex_hull = convex_hull)
     } else { # fitting many shapes (ks vertices)
       arc_data = ParetoTI::fit_pch_bootstrap(data, n = bootstrap_N, noc = ks,
                                              check_installed = FALSE,
                                              type = bootstrap_type, seed = seed,
+                                             sample_prop = sample_prop,
                                              replace = replace, average = bootstrap_average,
-                                             cacl_var_in_dims = cacl_var_in_dims,
+                                             var_in_dims = var_in_dims,
                                              normalise_var = normalise_var,
                                              ..., convex_hull = convex_hull)
     }
@@ -902,4 +901,37 @@ plot_dim_var = function(rand_arch,
               nudge_y = nudge_y, nudge_x = nudge_x) +
     xlab("Variance in vertex positions") +
     ylab("Dimension where variance is measured")
+}
+
+.cacl_var_in_dims = function(res, data, var_in_dims, normalise_var,
+                             XC_array = NULL) {
+  if(var_in_dims){
+    # calculate variance in vertex positions in each dimension
+    if(is(res, "pch_fit")){
+      res$var_dim = matrix(matrixStats::rowVars(res$XC), nrow = 1, ncol = nrow(data))
+      noc = ncol(res$XC)
+    } else if(is(res, "b_pch_fit")){
+      res$var_dim = matrix(XC_array, dim(XC_array)[1],
+                           dim(XC_array)[2] * dim(XC_array)[3])
+      res$var_dim = matrix(matrixStats::rowVars(res$var_dim),
+                           nrow = 1, ncol = nrow(data))
+      noc = dim(XC_array)[2]
+    }
+    # normalise by variance of data in each dimension
+    if(normalise_var) res$var_dim = res$var_dim / matrix(matrixStats::rowVars(data),
+                                                         nrow = 1, ncol = nrow(data))
+    res$var_dim = data.table::data.table(res$var_dim)
+    if(!is.null(rownames(data))) {
+      data.table::setnames(res$var_dim, colnames(res$var_dim), rownames(data))
+    }
+    res$var_dim$k = noc
+  } else {
+    # add empty results if not needed
+    res$var_dim = data.table::data.table(matrix(nrow = 0, ncol = nrow(data)))
+    if(!is.null(rownames(data))) {
+      data.table::setnames(res$var_dim, colnames(res$var_dim), rownames(data))
+    }
+    res$var_dim$k = integer(0)
+  }
+  res
 }

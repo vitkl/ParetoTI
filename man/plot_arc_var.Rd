@@ -5,7 +5,8 @@
 \title{Plot SSE and variance explained by polytope fit}
 \usage{
 plot_arc_var(arc_data, type = c("varexpl", "SSE", "res_varexpl",
-  "total_var", "dim")[1], point_size = 2, line_size = 1.5)
+  "total_var", "dim")[1], point_size = 2, line_size = 1.5,
+  reorder = FALSE)
 }
 \arguments{
 \item{arc_data}{object of class "k_pch_fit", storing the position of vertices of best fit polytopes with different k, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is a list where each element is XC matrix of dim(dimensions, archetypes) storing positions of vertices with different k.}
@@ -13,6 +14,8 @@ plot_arc_var(arc_data, type = c("varexpl", "SSE", "res_varexpl",
 \item{type}{which measure to plot as a function of k, one of "varexpl", "SSE", "res_varexpl", "dim". Use dim to plot variance in position in each dimension.}
 
 \item{line_size}{width of lines connecting archetypes}
+
+\item{reorder}{reorder dimensions based on variance in position (type = "dim).}
 
 \item{arch_size}{size of archetype point}
 }

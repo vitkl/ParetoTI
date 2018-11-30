@@ -547,7 +547,12 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
   # if variability in dimensions was measured, calculate empirical pval --------
   if(nrow(var_dim) > 0){
     # melt observed data
-    var_dim_obs = melt.data.table(arc_data$pch_fits$var_dim, id.vars = c("k"),
+    if(is(arc_data, "k_pch_fit")){
+      var_dim_obs = arc_data$pch_fits$var_dim
+    } else {
+      var_dim_obs = arc_data$var_dim
+    }
+    var_dim_obs = melt.data.table(var_dim_obs, id.vars = c("k"),
                                   value.name = "var_obs", variable.name = "var_name")
     # add replicate labels and melt randomised data
     setorder(var_dim, k)

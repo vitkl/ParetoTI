@@ -1,7 +1,7 @@
 ##' Find features that are decreasing functions of distance from archetype
 ##' @rdname find_decreasing
 ##' @name find_decreasing
-##' @description \code{find_decreasing()} Fits gam models to find if features are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.
+##' @description \code{find_decreasing()} Fits gam models to find features that are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.
 ##' @param data_attr data.table dim(examples, dimensions) that includes distance of each example to archetype in columns given by \code{arc_col} and feature values given by \code{features}
 ##' @param arc_col character vector, columns that give distance to archetypes (column per archetype)
 ##' @param features character vector (1L), column than containg feature values
@@ -10,7 +10,7 @@
 ##' @param n_points number of points at which to evaluate derivative
 ##' @param d numeric vector (1L), finite difference interval
 ##' @param weights how to weight points along x axis when calculating mean (integral) probability. Useful if you care that the function is decreasing near the archetype but not far away. Two defaults suggest to weight point equally or discard bottom 50 percent.
-##' @param return_only_summary set to TRUE when using inside other function to fit multiple features
+##' @param return_only_summary return only summary data.table containing p-values for each feature at each archetype and effect-size measures (average derivative).
 ##' @param stop_at_10 prevents \code{find_decreasing()} from fitting too many features
 ##' @param one_arc_per_model If TRUE fit separate gam models for each archetype. If FALSE combine all archetypes in one model: feature ~ s(arc1) + s(arc2) + ... + s(arcN).
 ##' @param type one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package.
@@ -227,4 +227,92 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
     cat(" -- ", enriched$arch_lab[i], "\n\n", sep = " ")
   }
   enriched
+}
+
+
+##' @rdname find_decreasing
+##' @name find_decreasing_wilcox
+##' @description \code{find_decreasing_wilcox()} find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to vertex (1 vs all Wilcox test).
+##' @param bin_prop proportion of data to put in bin closest to archetype
+##' @return \code{find_decreasing_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.
+##' @export find_decreasing_wilcox
+##' @import data.table
+find_decreasing_wilcox = function(data_attr, arc_col,
+                                features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
+                                bin_prop = 0.1,
+                                type = c("s", "m", "cmq")[1],
+                                clust_options = list()) {
+
+  # extract distance to archetypes into matrix
+  dist_to_arch = as.matrix(data_attr[, arc_col, with = FALSE])
+  # extract relevant features to list
+  feature_list = lapply(features, function(feature) {
+    m = matrix(data_attr[, get(feature)], nrow = nrow(data_attr), ncol = 1)
+    colnames(m) = feature
+    m
+  })
+
+  # create clusters with provided options --------------------------------------
+  if(type == "m"){
+    # set default options or replace them with provided options
+    default = list(cores = parallel::detectCores()-1, cluster_type = "PSOCK")
+    default_retain = !names(default) %in% names(clust_options)
+    options = c(default[default_retain], clust_options)
+
+    # create and register cluster
+    cl = parallel::makePSOCKcluster(2)
+    doParallel::registerDoParallel(cl)
+  } else if(type == "cmq") {
+    # set defaults or replace them with provided options
+    default = list(memory = 2000, template = list(), n_jobs = 5,
+                   fail_on_error = FALSE, timeout = Inf)
+    default_retain = !names(default) %in% names(clust_options)
+    options = c(default[default_retain], clust_options)
+
+    # register cluster
+    clustermq::register_dopar_cmq(n_jobs = options$n_jobs,
+                                  memory = options$memory,
+                                  template = options$template,
+                                  fail_on_error = options$fail_on_error,
+                                  timeout = options$timeout)
+  }
+
+  # run wilcox test for features -----------------------------------------------
+  # define how to iterate over feature list with foreach syntax
+  fr_obj = foreach::foreach(feature_mat = feature_list,
+                            .combine = rbind)
+
+  # run tests
+  if(type %in% c("m", "cmq")){
+    # multiple cores locally or computing cluster with clustermq
+    decreasing = foreach::`%dopar%`(fr_obj,
+                   ParetoTI:::.find_decreasing_wilcox_1(feature_mat, dist_to_arch,
+                                                           arc_col, bin_prop))
+    if(type == "m") parallel::stopCluster(cl) # stop local cluster
+  } else {
+    # single core locally
+    decreasing = foreach::`%do%`(fr_obj,
+                   ParetoTI:::.find_decreasing_wilcox_1(feature_mat, dist_to_arch,
+                                                        arc_col, bin_prop))
+  }
+  decreasing
+}
+
+.find_decreasing_wilcox_1 = function(feature_mat, dist_to_arch,
+                                  arc_col, bin_prop) {
+
+  decreasing = apply(dist_to_arch, 2, function(arc, feature_mat) {
+    y = feature_mat[, 1][order(arc, decreasing = FALSE)]
+    y1 = y[seq_len(round(length(y) * bin_prop, 0))]
+    y0 = y[seq(length(y1) + 1, length(y) - length(y1))]
+
+    data.table(p_value = wilcox.test(x = y1, y = y0,
+                                     alternative = "greater")$p.value,
+               median_diff = median(y1) - median(y0),
+               mean_diff = mean(y1) - mean(y0))
+  }, feature_mat)
+  decreasing = rbindlist(decreasing)
+  decreasing$x_name = colnames(dist_to_arch)
+  decreasing$y_name = colnames(feature_mat)
+  decreasing
 }

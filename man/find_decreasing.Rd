@@ -4,6 +4,7 @@
 \alias{find_decreasing}
 \alias{fit_arc_gam_1}
 \alias{get_top_decreasing}
+\alias{find_decreasing_wilcox}
 \title{Find features that are decreasing functions of distance from archetype}
 \usage{
 find_decreasing(data_attr, arc_col, features = c("Gpx1", "Alb", "Cyp2e1",
@@ -21,6 +22,10 @@ get_top_decreasing(summary_genes, summary_sets = NULL,
   cutoff_metric = "mean_prob", gam_fit_pval = 0.01,
   order_by = "deriv20", order_decreasing = FALSE,
   min_max_ratio_cutoff = 1.3)
+
+find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
+  "Cyp2e1", "Apoa2")[3], bin_prop = 0.1, type = c("s", "m", "cmq")[1],
+  clust_options = list())
 }
 \arguments{
 \item{data_attr}{data.table dim(examples, dimensions) that includes distance of each example to archetype in columns given by \code{arc_col} and feature values given by \code{features}}
@@ -39,7 +44,7 @@ get_top_decreasing(summary_genes, summary_sets = NULL,
 
 \item{weights}{how to weight points along x axis when calculating mean (integral) probability. Useful if you care that the function is decreasing near the archetype but not far away. Two defaults suggest to weight point equally or discard bottom 50 percent.}
 
-\item{return_only_summary}{set to TRUE when using inside other function to fit multiple features}
+\item{return_only_summary}{return only summary data.table containing p-values for each feature at each archetype and effect-size measures (average derivative).}
 
 \item{stop_at_10}{prevents \code{find_decreasing()} from fitting too many features}
 
@@ -65,6 +70,8 @@ get_top_decreasing(summary_genes, summary_sets = NULL,
 
 \item{order_by}{order decreasing feature list by measure in summary sets. By default is deriv20, the average value of derivative at 20 of point closest to vertex.}
 
+\item{bin_prop}{proportion of data to put in bin closest to archetype}
+
 \item{min_max_ratio}{what should be the ratio of gene expression at the point closest to archetype compared to point furthest from archetype? By default, at least 1.3 or closest point is 30 percent higher than furthest point.}
 }
 \value{
@@ -73,11 +80,15 @@ get_top_decreasing(summary_genes, summary_sets = NULL,
 \code{fit_arc_gam_1()} list containing function call, 1st derivative values of GAM model (derivs), summary of GAM model (p-value and r^2, gam_sm)
 
 \code{get_top_decreasing()} return character vector with one element for each archetype and print to output
+
+\code{find_decreasing_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.
 }
 \description{
-\code{find_decreasing()} Fits gam models to find if features are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.
+\code{find_decreasing()} Fits gam models to find features that are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.
 
 \code{fit_arc_gam_1()} Finds single GAM model fit and it's first derivative for a single feature and one or several archetypes.
 
 \code{get_top_decreasing()} Get top-12 genes and top-3 gene sets for each archetype.
+
+\code{find_decreasing_wilcox()} find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to vertex (1 vs all Wilcox test).
 }

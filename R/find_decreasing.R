@@ -174,7 +174,7 @@ fit_arc_gam_1 = function(feature, col, N_smooths, data_attr, min.sp, ..., d,
 ##' @param cutoff_metric probability metric for selecting decreasing genes: mean_prob, prod_prob, mean_prob_excl or prod_prob_excl
 ##' @param gam_fit_pval smooth term probability in gam fit (upper bound)
 ##' @param order_by order decreasing feature list by measure in summary sets. By default is deriv20, the average value of derivative at 20 of point closest to vertex.
-##' @param min_max_ratio what should be the ratio of gene expression at the point closest to archetype compared to point furthest from archetype? By default, at least 1.3 or closest point is 30 percent higher than furthest point.
+##' @param min_max_diff what should be the ratio of gene expression at the point closest to archetype compared to point furthest from archetype? By default, at least 1.3 or closest point is 30 percent higher than furthest point.
 ##' @return \code{get_top_decreasing()} return character vector with one element for each archetype and print to output
 ##' @export get_top_decreasing
 ##' @import data.table
@@ -183,11 +183,11 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
                               cutoff_metric = "mean_prob",
                               gam_fit_pval = 0.01,
                               order_by = "deriv20", order_decreasing = FALSE,
-                              min_max_ratio_cutoff = 1.3) {
+                              min_max_diff_cutoff = 1.3) {
 
   enriched = summary_genes[metric == cutoff_metric][p > cutoff_genes &
                                                       smooth_term_p_val < gam_fit_pval &
-                                                      min_max_ratio > min_max_ratio_cutoff]
+                                                      min_max_diff > min_max_diff_cutoff]
   # add enriched genes and sets
   enriched = enriched[order(get(order_by), decreasing = order_decreasing),
                       .(arch_name = x_name, y_name)]
@@ -204,7 +204,7 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
   if(!is.null(summary_sets)) {
     enriched_sets = summary_sets[metric == cutoff_metric][p > cutoff_sets &
                                                             smooth_term_p_val < gam_fit_pval &
-                                                            min_max_ratio > min_max_ratio_cutoff]
+                                                            min_max_diff > min_max_diff_cutoff]
 
     enriched_sets = enriched_sets[order(get(order_by), decreasing = order_decreasing),
                                   .(arch_name = x_name, y_name_set = y_name)]

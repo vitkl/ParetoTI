@@ -21,7 +21,7 @@ get_top_decreasing(summary_genes, summary_sets = NULL,
   cutoff_genes = 0.99, cutoff_sets = 0.99,
   cutoff_metric = "mean_prob", gam_fit_pval = 0.01,
   order_by = "deriv20", order_decreasing = FALSE,
-  min_max_ratio_cutoff = 1.3)
+  min_max_diff_cutoff = 1.3)
 
 find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
   "Cyp2e1", "Apoa2")[3], bin_prop = 0.1, type = c("s", "m", "cmq")[1],
@@ -74,7 +74,7 @@ find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
 
 \item{method}{how to find_decreasing_wilcox()? Use \link[BioQC]{wmwTest} or \link[stats]{wilcox.test}. BioQC::wmwTest can be up to 1000 times faster, so it is default.}
 
-\item{min_max_ratio}{what should be the ratio of gene expression at the point closest to archetype compared to point furthest from archetype? By default, at least 1.3 or closest point is 30 percent higher than furthest point.}
+\item{min_max_diff}{what should be the ratio of gene expression at the point closest to archetype compared to point furthest from archetype? By default, at least 1.3 or closest point is 30 percent higher than furthest point.}
 }
 \value{
 \code{find_decreasing()} list (S3 object, gam_deriv) containing summary p-values for features and each archetype, function call and (optionally) a data.table with values of the first derivative

@@ -74,7 +74,7 @@ find_gam_deriv = function(gam_fit,
   gam_sm = data.table(smooth_term_p_val = gam_sm$s.pv, r_sq =  gam_sm$r.sq,
                       y_name = as.character(gam_fit$formula[[2]]),
                       x_name = unique(derivs$x_name),
-                      min_max_ratio = zero_one[1] / zero_one[2])
+                      min_max_diff = zero_one[1] - zero_one[2])
   # combine results into list are return
   if(!isTRUE(return_gam)) {
     derivs = list(call = match.call(),

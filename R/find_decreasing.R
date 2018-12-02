@@ -250,17 +250,17 @@ find_decreasing_wilcox = function(data_attr, arc_col,
   # convert distances to order
   dist_to_arch = apply(dist_to_arch, MARGIN = 2, order, decreasing = FALSE)
 
+  # find how many points fit into bin closest to archetype
+  bin1_length = round(nrow(dist_to_arch) * bin_prop, 0)
+  # pick indices of cells in 1st bin
+  dist_to_arch = dist_to_arch[seq_len(bin1_length), ]
+  arch_bin = lapply(seq(1, ncol(dist_to_arch)), function(i) dist_to_arch[,i])
+  names(arch_bin) = colnames(dist_to_arch)
+
   if(method == "BioQC"){
     ## create gene sets using bin_prop,
     ## define gene set as 0.1 points closest to archetype
     ## use BioQC::wmwTest to do Wilcoxon tests
-
-    # find how many points fit into bin closest to archetype
-    bin1_length = round(nrow(dist_to_arch) * bin_prop, 0)
-    # pick indices of cells in 1st bin
-    dist_to_arch = dist_to_arch[seq_len(bin1_length), ]
-    arch_bin = lapply(seq(1, ncol(dist_to_arch)), function(i) dist_to_arch[,i])
-    names(arch_bin) = colnames(dist_to_arch)
 
     # extract relevant features to matrix (cells in rows, features in columns)
     feature_mat = as.matrix(data_attr[, c(features, "sample_id"), with = FALSE],
@@ -326,13 +326,13 @@ find_decreasing_wilcox = function(data_attr, arc_col,
     if(type %in% c("m", "cmq")){
       # multiple cores locally or computing cluster with clustermq
       decreasing = foreach::`%dopar%`(fr_obj,
-                     ParetoTI:::.find_decreasing_wilcox_1(feature_mat, dist_to_arch,
+                     ParetoTI:::.find_decreasing_wilcox_1(feature_mat, arch_bin,
                                                           arc_col, bin_prop))
       if(type == "m") parallel::stopCluster(cl) # stop local cluster
     } else {
       # single core locally
       decreasing = foreach::`%do%`(fr_obj,
-                     ParetoTI:::.find_decreasing_wilcox_1(feature_mat, dist_to_arch,
+                     ParetoTI:::.find_decreasing_wilcox_1(feature_mat, arch_bin,
                                                           arc_col, bin_prop))
     }
   }
@@ -340,14 +340,13 @@ find_decreasing_wilcox = function(data_attr, arc_col,
   decreasing[,.(x_name, y_name, p, median_diff, mean_diff)]
 }
 
-.find_decreasing_wilcox_1 = function(feature_mat, dist_to_arch,
+.find_decreasing_wilcox_1 = function(feature_mat, arch_bin,
                                      arc_col, bin_prop) {
 
-  decreasing = apply(dist_to_arch, 2, function(arc, feature_mat) {
-    # order using arc values
-    y = feature_mat[, 1][arc]
-    y1 = y[seq_len(round(length(y) * bin_prop, 0))]
-    y0 = y[seq(length(y1) + 1, length(y) - length(y1))]
+  decreasing = lapply(arch_bin, function(arc, feature_mat) {
+    # select 1st bin cells with indices
+    y1 = feature_mat[arc, 1]
+    y0 = feature_mat[-arc, 1]
 
     data.table(p = wilcox.test(x = y1, y = y0,
                                alternative = "greater")$p.value,
@@ -355,7 +354,7 @@ find_decreasing_wilcox = function(data_attr, arc_col,
                mean_diff = mean(y1) - mean(y0))
   }, feature_mat)
   decreasing = rbindlist(decreasing)
-  decreasing$x_name = colnames(dist_to_arch)
+  decreasing$x_name = names(arch_bin)
   decreasing$y_name = colnames(feature_mat)
   decreasing
 }

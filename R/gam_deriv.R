@@ -141,6 +141,9 @@ summary.gam_deriv = function(derivs){
   if(!isTRUE(is.na(derivs$gam_sm))) {
     summary = merge(summary, derivs$gam_sm, by = c("y_name", "x_name"), all = TRUE)
   }
+
+  #invert probabilities to make a p-value
+  summary[, p := 1 - p]
   summary
 }
 

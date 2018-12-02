@@ -25,7 +25,7 @@ get_top_decreasing(summary_genes, summary_sets = NULL,
 
 find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
   "Cyp2e1", "Apoa2")[3], bin_prop = 0.1, type = c("s", "m", "cmq")[1],
-  clust_options = list(), method = c("r_stats", "BioQC")[1])
+  clust_options = list(), method = c("BioQC", "r_stats")[1])
 }
 \arguments{
 \item{data_attr}{data.table dim(examples, dimensions) that includes distance of each example to archetype in columns given by \code{arc_col} and feature values given by \code{features}}

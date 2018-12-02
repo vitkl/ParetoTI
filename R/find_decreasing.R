@@ -243,7 +243,7 @@ find_decreasing_wilcox = function(data_attr, arc_col,
                                   bin_prop = 0.1,
                                   type = c("s", "m", "cmq")[1],
                                   clust_options = list(),
-                                  method = c("r_stats", "BioQC")[1]) {
+                                  method = c("BioQC", "r_stats")[1]) {
 
   # extract distance to archetypes into matrix,
   dist_to_arch = as.matrix(data_attr[, arc_col, with = FALSE])
@@ -336,6 +336,7 @@ find_decreasing_wilcox = function(data_attr, arc_col,
                                                           arc_col, bin_prop))
     }
   }
+  setorder(decreasing, x_name, p)
   decreasing[,.(x_name, y_name, p, median_diff, mean_diff)]
 }
 

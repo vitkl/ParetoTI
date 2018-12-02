@@ -6,7 +6,8 @@ install()
 
 devtools::load_all("../ParetoTI/")
 
-devtools::install_github("vitkl/ParetoTI", dependencies = T)
+#install.packages("BiocManager") # for installing BioConductor dependencies
+BiocManager::install("vitkl/ParetoTI", dependencies = T)
 
 library(ParetoTI)
 

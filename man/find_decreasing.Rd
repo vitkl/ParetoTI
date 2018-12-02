@@ -18,10 +18,10 @@ fit_arc_gam_1(feature, col, N_smooths, data_attr, min.sp, ..., d, n_points,
   weights)
 
 get_top_decreasing(summary_genes, summary_sets = NULL,
-  cutoff_genes = 0.99, cutoff_sets = 0.99,
-  cutoff_metric = "mean_prob", gam_fit_pval = 0.01,
-  order_by = "deriv20", order_decreasing = FALSE,
-  min_max_diff_cutoff = 1.3)
+  cutoff_genes = 0.01, cutoff_sets = 0.01,
+  cutoff_metric = "wilcoxon_p_val", p.adjust.method = c("fdr",
+  "none")[1], gam_fit_pval = 0.01, order_by = "deriv20",
+  order_decreasing = FALSE, min_max_diff_cutoff = 1.3)
 
 find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
   "Cyp2e1", "Apoa2")[3], bin_prop = 0.1, type = c("s", "m", "cmq")[1],
@@ -65,6 +65,8 @@ find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
 \item{cutoff_sets}{value of cutoff_metric (lower bound) for gene sets}
 
 \item{cutoff_metric}{probability metric for selecting decreasing genes: mean_prob, prod_prob, mean_prob_excl or prod_prob_excl}
+
+\item{p.adjust.method}{choose method for correcting p-value for multiple hypothesis testing. See p.adjust.methods and \link[stats]{p.adjust} for details.}
 
 \item{gam_fit_pval}{smooth term probability in gam fit (upper bound)}
 

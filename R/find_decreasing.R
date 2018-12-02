@@ -172,6 +172,7 @@ fit_arc_gam_1 = function(feature, col, N_smooths, data_attr, min.sp, ..., d,
 ##' @param cutoff_genes value of cutoff_metric (lower bound) for genes
 ##' @param cutoff_sets value of cutoff_metric (lower bound) for gene sets
 ##' @param cutoff_metric probability metric for selecting decreasing genes: mean_prob, prod_prob, mean_prob_excl or prod_prob_excl
+##' @param p.adjust.method choose method for correcting p-value for multiple hypothesis testing. See p.adjust.methods and \link[stats]{p.adjust} for details.
 ##' @param gam_fit_pval smooth term probability in gam fit (upper bound)
 ##' @param order_by order decreasing feature list by measure in summary sets. By default is deriv20, the average value of derivative at 20 of point closest to vertex.
 ##' @param min_max_diff what should be the ratio of gene expression at the point closest to archetype compared to point furthest from archetype? By default, at least 1.3 or closest point is 30 percent higher than furthest point.
@@ -179,15 +180,22 @@ fit_arc_gam_1 = function(feature, col, N_smooths, data_attr, min.sp, ..., d,
 ##' @export get_top_decreasing
 ##' @import data.table
 get_top_decreasing = function(summary_genes, summary_sets = NULL,
-                              cutoff_genes = 0.99, cutoff_sets = 0.99,
-                              cutoff_metric = "mean_prob",
+                              cutoff_genes = 0.01, cutoff_sets = 0.01,
+                              cutoff_metric = "wilcoxon_p_val",
+                              p.adjust.method = c("fdr", "none")[1],
                               gam_fit_pval = 0.01,
                               order_by = "deriv20", order_decreasing = FALSE,
                               min_max_diff_cutoff = 1.3) {
 
-  enriched = summary_genes[metric == cutoff_metric][p > cutoff_genes &
-                                                      smooth_term_p_val < gam_fit_pval &
-                                                      min_max_diff > min_max_diff_cutoff]
+  enriched = summary_genes[metric == cutoff_metric]
+  # do fdr correction of p-value
+  enriched[, p := p.adjust(p, method = p.adjust.method)]
+  # look at derivatives only when the model fit itself is good
+  if("gam_fit_pval"  %in% colnames(enriched)) {
+    enriched = enriched[smooth_term_p_val < gam_fit_pval]
+  }
+  enriched = enriched[p < cutoff_genes &
+                        min_max_diff > min_max_diff_cutoff]
   # add enriched genes and sets
   enriched = enriched[order(get(order_by), decreasing = order_decreasing),
                       .(arch_name = x_name, y_name)]
@@ -202,9 +210,16 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
   enriched = unique(enriched[, .(arch_name, arch_lab)])
   # get and merge enriched sets
   if(!is.null(summary_sets)) {
-    enriched_sets = summary_sets[metric == cutoff_metric][p > cutoff_sets &
-                                                            smooth_term_p_val < gam_fit_pval &
-                                                            min_max_diff > min_max_diff_cutoff]
+    enriched_sets = summary_sets[metric == cutoff_metric]
+    # do fdr correction of p-value
+    enriched_sets[, p := p.adjust(p, method = p.adjust.method)]
+    # look at derivatives only when the model fit itself is good
+    if("gam_fit_pval"  %in% colnames(enriched_sets)) {
+      enriched_sets = enriched_sets[smooth_term_p_val < gam_fit_pval]
+    }
+
+    enriched_sets = enriched_sets[p < cutoff_sets &
+                                  min_max_diff > min_max_diff_cutoff]
 
     enriched_sets = enriched_sets[order(get(order_by), decreasing = order_decreasing),
                                   .(arch_name = x_name, y_name_set = y_name)]
@@ -326,17 +341,18 @@ find_decreasing_wilcox = function(data_attr, arc_col,
     if(type %in% c("m", "cmq")){
       # multiple cores locally or computing cluster with clustermq
       decreasing = foreach::`%dopar%`(fr_obj,
-                     ParetoTI:::.find_decreasing_wilcox_1(feature_mat, arch_bin,
-                                                          arc_col, bin_prop))
+                                      ParetoTI:::.find_decreasing_wilcox_1(feature_mat, arch_bin,
+                                                                           arc_col, bin_prop))
       if(type == "m") parallel::stopCluster(cl) # stop local cluster
     } else {
       # single core locally
       decreasing = foreach::`%do%`(fr_obj,
-                     ParetoTI:::.find_decreasing_wilcox_1(feature_mat, arch_bin,
-                                                          arc_col, bin_prop))
+                                   ParetoTI:::.find_decreasing_wilcox_1(feature_mat, arch_bin,
+                                                                        arc_col, bin_prop))
     }
   }
   setorder(decreasing, x_name, p)
+  decreasing$metric = "wilcoxon_p_val"
   decreasing[,.(x_name, y_name, p, median_diff, mean_diff)]
 }
 

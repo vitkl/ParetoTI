@@ -5,6 +5,7 @@
 \alias{filter_go_annot}
 \alias{measure_activity}
 \alias{load_go_ontology}
+\alias{map_gwas_annot}
 \title{Annotate genes with GO terms and measure their activities}
 \usage{
 map_go_annot(taxonomy_id = 9606, keys = c("TP53", "ALB"),
@@ -26,6 +27,12 @@ measure_activity(expr_mat, which = c("BP", "MF", "CC"),
   nrow(expr_mat) * 0.05, binary = F, nCores = 3, plotStats = TRUE))
 
 load_go_ontology(ont_dir = "./data/", ont_file = "goslim_generic.obo")
+
+map_gwas_annot(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
+  keytype = "GENENAME", localHub = FALSE,
+  ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
+  gwas_url = "https://www.ebi.ac.uk/gwas/api/search/downloads/alternative",
+  gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2018-11-19.tsv")
 }
 \arguments{
 \item{taxonomy_id}{Taxonomy id of your species. 9606 is human, 10090 is mouse. Find your species id using taxonomy search by UniProt: https://www.uniprot.org/taxonomy/.}
@@ -56,7 +63,7 @@ load_go_ontology(ont_dir = "./data/", ont_file = "goslim_generic.obo")
 
 \item{expr_mat}{expression matrix (genes in rows, cells in columns) or one of: dgCMatrix, ExpressionSet, and SummarizedExperiment or SingleCellExperiment both of which require assay_name.}
 
-\item{which}{which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets.}
+\item{which}{which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets. Use "gwas" for constructing gene sets with gwas_catalog v1.0.2. GWAS option works only with human hgnc identifiers.}
 
 \item{activity_method}{find activities using \link[ParetoTI]{find_set_activity_AUCell} or \link[ParetoTI]{find_set_activity_pseudoinv}?}
 
@@ -69,6 +76,10 @@ load_go_ontology(ont_dir = "./data/", ont_file = "goslim_generic.obo")
 \item{ont_dir}{directory where to save ontology}
 
 \item{ont_file}{which ontology file to load?}
+
+\item{gwas_url}{where to download annotations? Useful for other versions of GWAS Catalog.}
+
+\item{gwas_file}{name of the file where to store GWAS Catalog data locally (in ann_hub_cache directory).}
 }
 \value{
 list (S3 class ParetoTI_annot) containing GO annotations in list and data.table formats, and OrgDb database link.
@@ -81,6 +92,8 @@ filter_go_annot() filters GO annotations by ontology file, GO branch, number of 
 measure_activity() annotates genes with GO terms and measures their activities
 
 load_go_ontology() load GO slim ontology file and return file path
+
+map_gwas_annot() load GO slim ontology file and return file path
 }
 \details{
 GO consortium annotates genes with the most specific terms so there is a need to propagate annotations to less specific parent terms. For example, "apoptotic process in response to mitochondrial fragmentation" (GO:0140208) is an "apoptotic process" (GO:0006915). Conceptually, if gene functions in the first it also functions in the second but it is only directly annotated by the first term. So, using GO annotations for functional enrichment requires propagating annotations to less specific terms.

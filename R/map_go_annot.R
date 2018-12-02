@@ -118,13 +118,14 @@ filter_go_annot = function(annot, ontology_file = NULL, lower = 1, upper = Inf,
 ##' @name measure_activity
 ##' @description measure_activity() annotates genes with GO terms and measures their activities
 ##' @param expr_mat expression matrix (genes in rows, cells in columns) or one of: dgCMatrix, ExpressionSet, and SummarizedExperiment or SingleCellExperiment both of which require assay_name.
-##' @param which which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets.
+##' @param which which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets. Use "gwas" for constructing gene sets with gwas_catalog v1.0.2. GWAS option works only with human hgnc identifiers.
 ##' @param activity_method find activities using \link[ParetoTI]{find_set_activity_AUCell} or \link[ParetoTI]{find_set_activity_pseudoinv}?
 ##' @param return_as_matrix return matrix (TRUE) or data.table (FALSE)
 ##' @param assay_name name of assay in SummarizedExperiment or SingleCellExperiment, normally counts or logcounts
 ##' @param aucell_options additional options specific to AUCell, details: \link[ParetoTI]{find_set_activity_AUCell}
 ##' @export measure_activity
 ##' @import data.table
+##' @import AnnotationHub
 ##' @examples
 ##' activ = measure_activity(expr_mat, which = "BP",
 ##'                          taxonomy_id = 9606, keytype = "ALIAS",
@@ -145,16 +146,27 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
   # Retrieve annotations ---------------------------------------------------------
   if(mean(which %in% c("BP", "MF", "CC")) == 1){
     # Map GO annotations using AnnotationHub -------------------------------------
-    go_annot = map_go_annot(taxonomy_id = taxonomy_id, keys = keys,
-                            columns = c("GOALL"), keytype = keytype,
-                            ontology_type = which,
-                            evidence_code = evidence_code,
-                            localHub = localHub, return_org_db = FALSE,
-                            ann_hub_cache = ann_hub_cache)
+    annot = map_go_annot(taxonomy_id = taxonomy_id, keys = keys,
+                         columns = c("GOALL"), keytype = keytype,
+                         ontology_type = which,
+                         evidence_code = evidence_code,
+                         localHub = localHub, return_org_db = FALSE,
+                         ann_hub_cache = ann_hub_cache)
     # Choose terms from GO slim subset
-    go2gene_slim = filter_go_annot(go_annot, ontology_file = ontology_file,
-                                   lower = lower, upper = upper,
-                                   ontology_type = which)
+    annot = filter_go_annot(annot, ontology_file = ontology_file,
+                            lower = lower, upper = upper,
+                            ontology_type = which)
+    set_id_col = "GOALL"
+    set_name_col = "TERM"
+  } else if(which == "gwas") {
+    # Map GWAS phenotype and disease associations GWAS Catalog -------------------
+    annot = map_gwas_annot(taxonomy_id = taxonomy_id, keys = keys,
+                           keytype = keytype, localHub = localHub,
+                           ann_hub_cache = ann_hub_cache,
+                           gwas_url = "https://www.ebi.ac.uk/gwas/api/search/downloads/alternative",
+                           gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2018-11-19.tsv")
+    set_id_col = "MAPPED_TRAIT_ID"
+    set_name_col = "MAPPED_TRAIT_NAME"
   }
 
   # Find "activity" of each functional gene group  -------------------------------
@@ -162,9 +174,10 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
     # using AUCell  --------------------------------------------------------------
     activ = find_set_activity_AUCell(expr_mat, assay_name = assay_name,
                                      aucMaxRank = aucell_options$aucMaxRank,
-                                     gene_sets = go2gene_slim$annot_dt,
+                                     gene_sets = annot$annot_dt,
                                      gene_col = keytype,
-                                     set_id_col = "GOALL", set_name_col = "TERM",
+                                     set_id_col = set_id_col,
+                                     set_name_col = set_name_col,
                                      binary = aucell_options$binary,
                                      nCores = aucell_options$nCores,
                                      plotHist = FALSE,
@@ -173,9 +186,10 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
     # or pseudoinverse(annotation_matrix) * expression ---------------------------
     activ = find_set_activity_pseudoinv(expr_mat,
                                         assay_name = assay_name,
-                                        gene_sets = go2gene_slim$annot_dt,
+                                        gene_sets = annot$annot_dt,
                                         gene_col = keytype,
-                                        set_id_col = "GOALL", set_name_col = "TERM",
+                                        set_id_col = set_id_col,
+                                        set_name_col = set_name_col,
                                         noself = FALSE)
   }
   # when naming matrix dimensions ad
@@ -184,6 +198,10 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
   setnames(activ, colnames(activ), gsub(",", "_", colnames(activ)))
   setnames(activ, colnames(activ), gsub("/", "_", colnames(activ)))
   setnames(activ, colnames(activ), gsub("'", "_", colnames(activ)))
+  setnames(activ, colnames(activ), gsub("\\[", "_", colnames(activ)))
+  setnames(activ, colnames(activ), gsub("\\]", "_", colnames(activ)))
+  setnames(activ, colnames(activ), gsub("\\(", "_", colnames(activ)))
+  setnames(activ, colnames(activ), gsub("\\)", "_", colnames(activ)))
   if(return_as_matrix) activ = as.matrix(activ, rownames = "cells")
   activ
 }
@@ -201,4 +219,70 @@ load_go_ontology = function(ont_dir = "./data/", ont_file = "goslim_generic.obo"
                   file)
   }
   file
+}
+
+##' @rdname measure_activity
+##' @name map_gwas_annot
+##' @description map_gwas_annot() load GO slim ontology file and return file path
+##' @param gwas_url where to download annotations? Useful for other versions of GWAS Catalog.
+##' @param gwas_file name of the file where to store GWAS Catalog data locally (in ann_hub_cache directory).
+##' @export map_gwas_annot
+map_gwas_annot = function(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
+                          keytype = "GENENAME", localHub = FALSE,
+                          ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
+                          gwas_url = "https://www.ebi.ac.uk/gwas/api/search/downloads/alternative",
+                          gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2018-11-19.tsv") {
+  if(taxonomy_id %in% c(9606)){
+    # find annotation data base for taxonomy_id
+    setAnnotationHubOption("CACHE", ann_hub_cache)
+    hub = AnnotationHub(localHub = localHub)
+    record = subset(hub, taxonomyid == taxonomy_id & rdataclass == "OrgDb")
+    org_db = hub[[names(record)]]
+    suppressMessages({
+      annot = as.data.table(AnnotationDbi::select(org_db, keys = keys,
+                                                  columns = unique(c(keytype, "GENENAME")),
+                                                  keytype = keytype))
+    })
+  } else stop("GWAS are annotations of human genes only (taxonomy_id = 9606)")
+  gwas_file = paste0(ann_hub_cache, gwas_file)
+  if(!file.exists(gwas_file)){
+    if(!dir.exists(ann_hub_cache)) dir.create(ann_hub_cache, recursive = TRUE)
+    download.file(gwas_url,
+                  destfile = gwas_file)
+  }
+  gwas_data = fread(gwas_file, stringsAsFactors = FALSE, header = TRUE)
+  # expand mapped traits and gene associations to one trait-one gene per row
+  # remove traits not mapped to ontology
+  trait_id = unique(gwas_data[MAPPED_TRAIT_URI != "",
+                              .(MAPPED_TRAIT_URI, MAPPED_TRAIT)])
+  # produce clean trait_id
+  trait_id = trait_id[, .(MAPPED_TRAIT_ID = unlist(strsplit(MAPPED_TRAIT_URI,", ")),
+                          MAPPED_TRAIT_NAME = ifelse(length(unlist(strsplit(MAPPED_TRAIT,", "))) >
+                                                       length(unlist(strsplit(MAPPED_TRAIT_URI,", "))),
+                                                     MAPPED_TRAIT,
+                                                     unlist(strsplit(MAPPED_TRAIT,", "))),
+                          MAPPED_TRAIT = MAPPED_TRAIT),
+                      by = MAPPED_TRAIT_URI]
+  trait_id[, MAPPED_TRAIT_ID := gsub("^.+/", "",MAPPED_TRAIT_ID)]
+  trait_id[, MAPPED_TRAIT_NAME := paste0(MAPPED_TRAIT_NAME, "_", MAPPED_TRAIT_ID)]
+  # produce clean gene_names
+  gene_names = unique(gwas_data[MAPPED_GENE != "", ][, .(MAPPED_GENE_NAME =
+                                                           unlist(strsplit(MAPPED_GENE," - "))),
+                                                     by = MAPPED_GENE])
+
+  # merge MAPPED_GENE_NAMEs and MAPPED_TRAIT_IDs to all data
+  gwas_data = merge(gwas_data, trait_id,
+                    by = c("MAPPED_TRAIT_URI", "MAPPED_TRAIT"),
+                    all.y = TRUE, as.x = FALSE,
+                    allow.cartesian = TRUE)
+  gwas_data = merge(gwas_data, gene_names,
+                    by = c("MAPPED_GENE"),
+                    all.y = TRUE, as.x = FALSE,
+                    allow.cartesian = TRUE)
+  # merge gene identifiers in the dataset to gene names in GWAS catalog
+  gwas_data = merge(gwas_data, annot,
+                    by.x = c("MAPPED_GENE_NAME"), by.y = c("GENENAME"),
+                    all.y = TRUE, as.x = FALSE,
+                    allow.cartesian = TRUE)
+  list(annot_dt = unique(gwas_data))
 }

@@ -25,7 +25,7 @@ get_top_decreasing(summary_genes, summary_sets = NULL,
 
 find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
   "Cyp2e1", "Apoa2")[3], bin_prop = 0.1, type = c("s", "m", "cmq")[1],
-  clust_options = list())
+  clust_options = list(), method = c("r_stats", "BioQC")[1])
 }
 \arguments{
 \item{data_attr}{data.table dim(examples, dimensions) that includes distance of each example to archetype in columns given by \code{arc_col} and feature values given by \code{features}}
@@ -71,6 +71,8 @@ find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
 \item{order_by}{order decreasing feature list by measure in summary sets. By default is deriv20, the average value of derivative at 20 of point closest to vertex.}
 
 \item{bin_prop}{proportion of data to put in bin closest to archetype}
+
+\item{method}{how to find_decreasing_wilcox()? Use \link[BioQC]{wmwTest} or \link[stats]{wilcox.test}. BioQC::wmwTest can be up to 1000 times faster, so it is default.}
 
 \item{min_max_ratio}{what should be the ratio of gene expression at the point closest to archetype compared to point furthest from archetype? By default, at least 1.3 or closest point is 30 percent higher than furthest point.}
 }

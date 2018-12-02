@@ -25,5 +25,5 @@ RoxygenNote: 6.1.1
 URL: https://vitkl.github.io/ParetoTI/
 BugReports: https://github.com/vitkl/ParetoTI/issues
 Depends: reticulate, data.table
-Imports: parallel, plotly, downloader, geometry, ggplot2, cowplot, AnnotationHub, GO.db, ontologyIndex, svd, Biobase, SummarizedExperiment, corpcor
-Suggests: voxel, clustermq
+Imports: parallel, plotly, BioQC, geometry, ggplot2, AnnotationHub, GO.db, ontologyIndex, Biobase, SummarizedExperiment, corpcor
+Suggests: voxel, clustermq, cowplot

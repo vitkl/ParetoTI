@@ -234,80 +234,122 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
 ##' @name find_decreasing_wilcox
 ##' @description \code{find_decreasing_wilcox()} find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to vertex (1 vs all Wilcox test).
 ##' @param bin_prop proportion of data to put in bin closest to archetype
+##' @param method how to find_decreasing_wilcox()? Use \link[BioQC]{wmwTest} or \link[stats]{wilcox.test}. BioQC::wmwTest can be up to 1000 times faster, so it is default.
 ##' @return \code{find_decreasing_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.
 ##' @export find_decreasing_wilcox
 ##' @import data.table
 find_decreasing_wilcox = function(data_attr, arc_col,
-                                features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
-                                bin_prop = 0.1,
-                                type = c("s", "m", "cmq")[1],
-                                clust_options = list()) {
+                                  features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
+                                  bin_prop = 0.1,
+                                  type = c("s", "m", "cmq")[1],
+                                  clust_options = list(),
+                                  method = c("r_stats", "BioQC")[1]) {
 
-  # extract distance to archetypes into matrix
+  # extract distance to archetypes into matrix,
   dist_to_arch = as.matrix(data_attr[, arc_col, with = FALSE])
-  # extract relevant features to list
-  feature_list = lapply(features, function(feature) {
-    m = matrix(data_attr[, get(feature)], nrow = nrow(data_attr), ncol = 1)
-    colnames(m) = feature
-    m
-  })
+  # convert distances to order
+  dist_to_arch = apply(dist_to_arch, MARGIN = 2, order, decreasing = FALSE)
 
-  # create clusters with provided options --------------------------------------
-  if(type == "m"){
-    # set default options or replace them with provided options
-    default = list(cores = parallel::detectCores()-1, cluster_type = "PSOCK")
-    default_retain = !names(default) %in% names(clust_options)
-    options = c(default[default_retain], clust_options)
+  if(method == "BioQC"){
+    ## create gene sets using bin_prop,
+    ## define gene set as 0.1 points closest to archetype
+    ## use BioQC::wmwTest to do Wilcoxon tests
 
-    # create and register cluster
-    cl = parallel::makePSOCKcluster(2)
-    doParallel::registerDoParallel(cl)
-  } else if(type == "cmq") {
-    # set defaults or replace them with provided options
-    default = list(memory = 2000, template = list(), n_jobs = 5,
-                   fail_on_error = FALSE, timeout = Inf)
-    default_retain = !names(default) %in% names(clust_options)
-    options = c(default[default_retain], clust_options)
+    # find how many points fit into bin closest to archetype
+    bin1_length = round(nrow(dist_to_arch) * bin_prop, 0)
+    # pick indices of cells in 1st bin
+    dist_to_arch = dist_to_arch[seq_len(bin1_length), ]
+    arch_bin = lapply(seq(1, ncol(dist_to_arch)), function(i) dist_to_arch[,i])
+    names(arch_bin) = colnames(dist_to_arch)
 
-    # register cluster
-    clustermq::register_dopar_cmq(n_jobs = options$n_jobs,
-                                  memory = options$memory,
-                                  template = options$template,
-                                  fail_on_error = options$fail_on_error,
-                                  timeout = options$timeout)
+    # extract relevant features to matrix (cells in rows, features in columns)
+    feature_mat = as.matrix(data_attr[, c(features, "sample_id"), with = FALSE],
+                            rownames = "sample_id")
+
+    # run Wilcox tests
+    decreasing = BioQC::wmwTest(x = feature_mat, indexList = arch_bin,
+                                col = "GeneSymbol",
+                                valType = c("p.greater"), simplify = TRUE)
+    decreasing = as.data.table(decreasing, keep.rownames = "x_name")
+    decreasing = melt.data.table(decreasing, id.vars = "x_name",
+                                 value.name = "p", variable.name = "y_name")
+    # find mean and median difference between bin closest to vertex vs other bins
+    decreasing[, c("median_diff", "mean_diff") := .({
+      median(feature_mat[arch_bin[x_name][[1]], y_name]) -
+        median(feature_mat[-arch_bin[x_name][[1]], y_name])
+    }, {
+      mean(feature_mat[arch_bin[x_name][[1]], y_name]) -
+        mean(feature_mat[-arch_bin[x_name][[1]], y_name])
+    }), by = .(y_name, x_name)]
+
+  } else if(method == "r_stats"){
+
+    # extract relevant features to list
+    feature_list = lapply(features, function(feature) {
+      m = matrix(data_attr[, get(feature)], nrow = nrow(data_attr), ncol = 1)
+      rownames(m) = data_attr$sample_id
+      colnames(m) = feature
+      m
+    })
+
+    # create clusters with provided options --------------------------------------
+    if(type == "m"){
+      # set default options or replace them with provided options
+      default = list(cores = parallel::detectCores()-1, cluster_type = "PSOCK")
+      default_retain = !names(default) %in% names(clust_options)
+      options = c(default[default_retain], clust_options)
+
+      # create and register cluster
+      cl = parallel::makePSOCKcluster(2)
+      doParallel::registerDoParallel(cl)
+    } else if(type == "cmq") {
+      # set defaults or replace them with provided options
+      default = list(memory = 2000, template = list(), n_jobs = 5,
+                     fail_on_error = FALSE, timeout = Inf)
+      default_retain = !names(default) %in% names(clust_options)
+      options = c(default[default_retain], clust_options)
+
+      # register cluster
+      clustermq::register_dopar_cmq(n_jobs = options$n_jobs,
+                                    memory = options$memory,
+                                    template = options$template,
+                                    fail_on_error = options$fail_on_error,
+                                    timeout = options$timeout)
+    }
+
+    # run wilcox test for features -----------------------------------------------
+    # define how to iterate over feature list with foreach syntax
+    fr_obj = foreach::foreach(feature_mat = feature_list,
+                              .combine = rbind)
+
+    # run tests
+    if(type %in% c("m", "cmq")){
+      # multiple cores locally or computing cluster with clustermq
+      decreasing = foreach::`%dopar%`(fr_obj,
+                     ParetoTI:::.find_decreasing_wilcox_1(feature_mat, dist_to_arch,
+                                                          arc_col, bin_prop))
+      if(type == "m") parallel::stopCluster(cl) # stop local cluster
+    } else {
+      # single core locally
+      decreasing = foreach::`%do%`(fr_obj,
+                     ParetoTI:::.find_decreasing_wilcox_1(feature_mat, dist_to_arch,
+                                                          arc_col, bin_prop))
+    }
   }
-
-  # run wilcox test for features -----------------------------------------------
-  # define how to iterate over feature list with foreach syntax
-  fr_obj = foreach::foreach(feature_mat = feature_list,
-                            .combine = rbind)
-
-  # run tests
-  if(type %in% c("m", "cmq")){
-    # multiple cores locally or computing cluster with clustermq
-    decreasing = foreach::`%dopar%`(fr_obj,
-                   ParetoTI:::.find_decreasing_wilcox_1(feature_mat, dist_to_arch,
-                                                           arc_col, bin_prop))
-    if(type == "m") parallel::stopCluster(cl) # stop local cluster
-  } else {
-    # single core locally
-    decreasing = foreach::`%do%`(fr_obj,
-                   ParetoTI:::.find_decreasing_wilcox_1(feature_mat, dist_to_arch,
-                                                        arc_col, bin_prop))
-  }
-  decreasing
+  decreasing[,.(x_name, y_name, p, median_diff, mean_diff)]
 }
 
 .find_decreasing_wilcox_1 = function(feature_mat, dist_to_arch,
-                                  arc_col, bin_prop) {
+                                     arc_col, bin_prop) {
 
   decreasing = apply(dist_to_arch, 2, function(arc, feature_mat) {
-    y = feature_mat[, 1][order(arc, decreasing = FALSE)]
+    # order using arc values
+    y = feature_mat[, 1][arc]
     y1 = y[seq_len(round(length(y) * bin_prop, 0))]
     y0 = y[seq(length(y1) + 1, length(y) - length(y1))]
 
-    data.table(p_value = wilcox.test(x = y1, y = y0,
-                                     alternative = "greater")$p.value,
+    data.table(p = wilcox.test(x = y1, y = y0,
+                               alternative = "greater")$p.value,
                median_diff = median(y1) - median(y0),
                mean_diff = mean(y1) - mean(y0))
   }, feature_mat)

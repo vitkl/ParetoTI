@@ -15,7 +15,7 @@
 ##' @param check_installed if TRUE, check if python module py_pcha is found. Useful to set to FALSE for running analysis or within other functions
 ##' @param order_by integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector. When bootstraping vertices can be aligned to reference and ordered (order_type == "align") by these dimensions.
 ##' @param order_type order archetypes by: cosine distance from c(1,1, ..., 1) vector ("cosine"), dot product that measures position to each side of the c(1,1) vector ("side"), align positions to reference when bootstraping(fit using all data, "align"). See \link[ParetoTI]{align_arc} When order_type is "align" vertices are ordered by "cosine" first.
-##' @param convex_hull find volume of the convex hull of the data and the t-ratio? Caution! Dimesnsions for calculation are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions. Geometric figure should be at least simplex: qhull algorhirm will fail to find convex hull of flat 2D shapes in 3D, 3D shapes in 4D and so on.
+##' @param volume_ratio find volume of the convex hull of the data and the t-ratio ("t_ratio") or ratio of variance of vertex positions to variance of data ("variance_ratio") or do nothing ("none")? Caution! Geometric figure should be at least simplex: qhull algorhirm will fail to find convex hull of flat 2D shapes in 3D, 3D shapes in 4D and so on. So, for calculating this dimentions are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions.
 ##' @param converge_else_fail throw an error and stop execution if PCHA did not converge in \code{maxiter} steps.
 ##' @return \code{fit_pch()}: object of class pch_fit (list) containing the following elements:
 ##' XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes);
@@ -79,7 +79,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    maxiter = 500, check_installed = T,
                    order_by = seq(1, nrow(data)),
                    order_type = c("cosine", "side", "align")[3],
-                   convex_hull = FALSE, converge_else_fail = TRUE,
+                   volume_ratio = c("t_ratio", "variance_ratio", "none")[1],
+                   converge_else_fail = TRUE,
                    var_in_dims = FALSE, normalise_var = TRUE) {
   if(check_installed) .py_pcha_installed()
   # run PCHA
@@ -112,10 +113,12 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     res$C = matrix(res$C, 1, 1)
   }
 
+  # Calculate ratio of volumes to measure goodness of fit ----------------------
+  # 1 t_ratio  -----------------------------------------------------------------
   # when calculating convex hull and volume of the polytope
   # adjust number of dimensions to noc
   data_dim = seq(1, noc-1)
-  if(isTRUE(convex_hull) & nrow(data) >= length(data_dim) & noc > 2){
+  if(volume_ratio == "t_ratio" & nrow(data) >= length(data_dim) & noc > 2){
     # calculate volume or area of the polytope only when number of vertices (noc) > number of dimenstions which means
     # find volume of the convex hull of the data
     hull_vol = fit_convhulln(data[data_dim, ], positions = FALSE)
@@ -141,15 +144,37 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 
     res$hull_vol = hull_vol$vol
     res$t_ratio = res$arc_vol / res$hull_vol
+
+  } else if(volume_ratio == "variance_ratio") {
+
+    # 2 variance ratio ---------------------------------------------------------
+    # (variance of vertex positions within each dimension /
+    #      variance of data in that dimension summed across dimensions)
+    res = ParetoTI:::.cacl_var_in_dims(res, data,
+                                       var_in_dims = T, normalise_var = T)
+
+    dim_names = colnames(res$var_dim)[!colnames(res$var_dim) %in% "k"]
+    res$t_ratio = mean(as.matrix(res$var_dim[, dim_names, with = FALSE]))
+
+    res$hull_vol = NA
+    res$arc_vol = NA
+
   } else {
-    if(isTRUE(convex_hull) & isTRUE(converge_else_fail)) message(paste0("Convex hull and t-ratio not computed for noc: ", noc," and nrow(data) = ", nrow(data),". fit_pch() can calculate volume or area of the polytope only when\nthe number of vertices (noc) > the number of dimensions (when polytope is convex):\ncheck that noc > nrow(data),\nselect only revelant dimensions or increase noc"))
+
+    # 3 none
+
+    if(volume_ratio == "t_ratio" & isTRUE(converge_else_fail)) message(paste0("Convex hull and t-ratio not computed for noc: ", noc," and nrow(data) = ", nrow(data),". fit_pch() can calculate volume or area of the polytope only when\nthe number of vertices (noc) > the number of dimensions (when polytope is convex):\ncheck that noc > nrow(data),\nselect only revelant dimensions or increase noc"))
     res$hull_vol = NA
     res$arc_vol = NA
     res$t_ratio = NA
   }
   res$var_vert = NA
 
-  res = ParetoTI:::.cacl_var_in_dims(res, data, var_in_dims, normalise_var)
+  if(is.null(res$var_dim)){
+    # calculate variance in positions only if it was not calculated before
+    # (at variance_ratio step)
+    res = ParetoTI:::.cacl_var_in_dims(res, data, var_in_dims, normalise_var)
+  }
 
   res$total_var = NA
   # add summary table:
@@ -416,7 +441,8 @@ fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE,
 ##' @export randomise_fit_pch
 randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
                              bootstrap_N = c(NA, 50)[1], seed = 435,
-                             convex_hull = TRUE, maxiter = 1000, delta = 0,
+                             volume_ratio = c("t_ratio", "variance_ratio", "none")[1],
+                             maxiter = 1000, delta = 0,
                              order_type = "align", type = c("s", "m", "cmq")[1],
                              clust_options = list(), normalise_var = TRUE,
                              check_installed = T, ...) {
@@ -434,7 +460,7 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
                  replace = replace, bootstrap_N = bootstrap_N, seed = seed,
                  bootstrap_type = "s",
                  return_data = FALSE, return_arc = FALSE,
-                 bootstrap_average = TRUE, convex_hull = convex_hull,
+                 bootstrap_average = TRUE, volume_ratio = volume_ratio,
                  maxiter = maxiter, delta = delta,
                  order_type = order_type,
                  var_in_dims = var_in_dims,
@@ -460,7 +486,7 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
                               seed = seed, bootstrap_type = "s",
                               return_data = FALSE,
                               return_arc = FALSE, bootstrap_average = TRUE,
-                              convex_hull = convex_hull,
+                              volume_ratio = volume_ratio,
                               maxiter = maxiter, delta = delta,
                               order_type = order_type,
                               var_in_dims = var_in_dims,
@@ -487,7 +513,7 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
                                         seed = seed, bootstrap_type = "s",
                                         return_data = FALSE,
                                         return_arc = FALSE, bootstrap_average = TRUE,
-                                        convex_hull = convex_hull,
+                                        volume_ratio = volume_ratio,
                                         maxiter = maxiter, delta = delta,
                                         order_type = order_type,
                                         var_in_dims = var_in_dims,
@@ -602,7 +628,8 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
                               bootstrap_N = NA, seed = 435, sample_prop = 0.65,
                               bootstrap_type = c("s", "m", "cmq")[1],
                               return_data = FALSE, return_arc = FALSE,
-                              bootstrap_average = FALSE, convex_hull = TRUE,
+                              bootstrap_average = FALSE,
+                              volume_ratio = c("t_ratio", "variance_ratio", "none")[1],
                               var_in_dims = TRUE, normalise_var = TRUE, ...) {
   # randomise variables --------------------------------------------------------
 
@@ -614,7 +641,7 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
     # fitting many shapes (ks vertices) or fitting one shape
     arc_data = ParetoTI::k_fit_pch(data = data, ks = ks, check_installed = FALSE,
                                    bootstrap = FALSE, seed = seed,
-                                   convex_hull = convex_hull,
+                                   volume_ratio = volume_ratio,
                                    var_in_dims = var_in_dims,
                                    normalise_var = normalise_var,
                                    # prevent whole pipeline from failing
@@ -630,7 +657,7 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
                                      replace = replace,
                                      var_in_dims = var_in_dims,
                                      normalise_var = normalise_var,
-                                     ..., convex_hull = convex_hull)
+                                     ..., volume_ratio = volume_ratio)
     } else { # fitting many shapes (ks vertices)
       arc_data = ParetoTI::fit_pch_bootstrap(data, n = bootstrap_N, noc = ks,
                                              check_installed = FALSE,
@@ -639,7 +666,7 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
                                              replace = replace, average = bootstrap_average,
                                              var_in_dims = var_in_dims,
                                              normalise_var = normalise_var,
-                                             ..., convex_hull = convex_hull)
+                                             ..., volume_ratio = volume_ratio)
     }
   }
 
@@ -732,6 +759,8 @@ merge_arch_dist = function(arch_data, data, feature_data,
 .c_pch_fit_list = function(pch_fit_list){
   # remove failed fits
   pch_fit_list = pch_fit_list[!vapply(pch_fit_list, is.null,
+                                      FUN.VALUE = logical(1))]
+  pch_fit_list = pch_fit_list[!vapply(pch_fit_list, function(fit) is.null(fit$XC),
                                       FUN.VALUE = logical(1))]
   # combine results
   list(XC = lapply(pch_fit_list, function(pch) pch$XC),

@@ -50,7 +50,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                     geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
                     colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"),
                     arch_size = NULL, line_size = NULL,
-                    data_size = 2, arch_alpha = 0.4,
+                    data_size = 4, arch_alpha = 0.4,
                     data_lab = "data", arc_lab = "archetypes",
                     legend_name = "data",
                     text_size = NULL, nudge = c(0.05, 0.1)) {
@@ -68,7 +68,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     for_plot$arc_data[grepl("archetypes", lab), lab := "archetypes"]
     for_plot$arc_data[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
     setorder(for_plot$arc_data, lab)
-    ly_arch_size = 2
+    ly_arch_size = 3
     ly_line_size = 5
     gg_arch_size = 2
     gg_line_size = 1.5

@@ -21,7 +21,8 @@
 fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
   verbose = FALSE, conv_crit = 1e-06, maxiter = 500,
   check_installed = T, order_by = seq(1, nrow(data)),
-  order_type = c("cosine", "side", "align")[3], convex_hull = FALSE,
+  order_type = c("cosine", "side", "align")[3],
+  volume_ratio = c("t_ratio", "variance_ratio", "none")[1],
   converge_else_fail = TRUE, var_in_dims = FALSE,
   normalise_var = TRUE)
 
@@ -42,15 +43,17 @@ fit_pch_resample(i = 1, data, sample_prop = NULL, replace = FALSE,
   var_in_dims = var_in_dims, normalise_var = normalise_var, ...)
 
 randomise_fit_pch(data, arc_data, n_rand = 3, replace = FALSE,
-  bootstrap_N = c(NA, 50)[1], seed = 435, convex_hull = TRUE,
-  maxiter = 1000, delta = 0, order_type = "align", type = c("s",
-  "m", "cmq")[1], clust_options = list(), normalise_var = TRUE,
-  check_installed = T, ...)
+  bootstrap_N = c(NA, 50)[1], seed = 435, volume_ratio = c("t_ratio",
+  "variance_ratio", "none")[1], maxiter = 1000, delta = 0,
+  order_type = "align", type = c("s", "m", "cmq")[1],
+  clust_options = list(), normalise_var = TRUE, check_installed = T,
+  ...)
 
 randomise_fit_pch1(i = 1, data, ks = 2:4, replace = FALSE,
   prob = NULL, bootstrap_N = NA, seed = 435, sample_prop = 0.65,
   bootstrap_type = c("s", "m", "cmq")[1], return_data = FALSE,
-  return_arc = FALSE, bootstrap_average = FALSE, convex_hull = TRUE,
+  return_arc = FALSE, bootstrap_average = FALSE,
+  volume_ratio = c("t_ratio", "variance_ratio", "none")[1],
   var_in_dims = TRUE, normalise_var = TRUE, ...)
 
 fit_convhulln(data, positions = TRUE)
@@ -100,7 +103,7 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 
 \item{order_type}{order archetypes by: cosine distance from c(1,1, ..., 1) vector ("cosine"), dot product that measures position to each side of the c(1,1) vector ("side"), align positions to reference when bootstraping(fit using all data, "align"). See \link[ParetoTI]{align_arc} When order_type is "align" vertices are ordered by "cosine" first.}
 
-\item{convex_hull}{find volume of the convex hull of the data and the t-ratio? Caution! Dimesnsions for calculation are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions. Geometric figure should be at least simplex: qhull algorhirm will fail to find convex hull of flat 2D shapes in 3D, 3D shapes in 4D and so on.}
+\item{volume_ratio}{find volume of the convex hull of the data and the t-ratio ("t_ratio") or ratio of variance of vertex positions to variance of data ("variance_ratio") or do nothing ("none")? Caution! Geometric figure should be at least simplex: qhull algorhirm will fail to find convex hull of flat 2D shapes in 3D, 3D shapes in 4D and so on. So, for calculating this dimentions are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions.}
 
 \item{converge_else_fail}{throw an error and stop execution if PCHA did not converge in \code{maxiter} steps.}
 

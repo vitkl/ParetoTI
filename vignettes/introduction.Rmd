@@ -150,7 +150,7 @@ A complementary approach to find the appropriate the number of vertexes is to ev
 # add - fit to log(data)
 arc_ks = k_fit_pch(data, ks = 2:4, check_installed = T,
                    bootstrap = T, bootstrap_N = 20, 
-                   bootstrap_type = "m", seed = 2543, convex_hull = T,
+                   bootstrap_type = "m", seed = 2543, volume_ratio = "t_ratio",
                    delta=0, conv_crit = 1e-4, order_type = "align",
                    sample_prop = 0.65, simplex = F)
 plot_arc(arch_data = arc_ks, data = data,
@@ -185,13 +185,13 @@ plot_arc_var(arc_ks, type = "total_var", point_size = 2, line_size = 1.5) + them
 # Fit all vertices again to show variance in position of vertices while varying k
 arc_data2 = fit_pch_bootstrap(data, n = 50, sample_prop = 0.65, seed = 2543,
                            order_type = "align", noc = as.integer(2),
-                           delta = 0, convex_hull = T, conv_crit = 1e-4, type = "m")
+                           delta = 0, volume_ratio = "t_ratio", conv_crit = 1e-4, type = "m")
 arc_data3 = fit_pch_bootstrap(data, n = 50, sample_prop = 0.65, seed = 2543,
                            order_type = "align", noc = as.integer(3),
-                           delta = 0, convex_hull = T, conv_crit = 1e-4, type = "m")
+                           delta = 0, volume_ratio = "t_ratio", conv_crit = 1e-4, type = "m")
 arc_data4 = fit_pch_bootstrap(data, n = 50, sample_prop = 0.65, seed = 2543,
                            order_type = "align", noc = as.integer(4),
-                           delta = 0, convex_hull = T, conv_crit = 1e-4, type = "m")
+                           delta = 0, volume_ratio = "t_ratio", conv_crit = 1e-4, type = "m")
 ## put this into a function
 library(cowplot)
 p2 = plot_arc(arc_data2, data, which_dimensions = 1:2, line_size = 1)
@@ -210,7 +210,7 @@ rand3_repl = randomise_fit_pch1(i = 1, data, ks = 3, replace = TRUE,
                                 bootstrap_N = 50, seed = 2543,
                            return_data = T, return_arc = T, sample_prop = 0.65,
                            order_type = "align",
-                           delta = 0, convex_hull = T,
+                           delta = 0, volume_ratio = "t_ratio",
                            conv_crit = 1e-4, bootstrap_type = "m")
 
 p3 = plot_arc(arc_data3, data, which_dimensions = 1:2, line_size = 1)
@@ -229,7 +229,7 @@ pch_rand = randomise_fit_pch(data, arc_data = arc_ks, n_rand = 1000,
                              bootstrap_N = 50,
                              seed = 435,
                              sample_prop = 0.65,
-                             convex_hull = T,
+                             volume_ratio = "t_ratio",
                              maxiter = 1000, delta = 0, conv_crit = 1e-4,
                              order_type = "align", type = "cmq",
                              clust_options = list(memory = 2000, n_jobs = 10))
@@ -248,7 +248,7 @@ pch_rand_t = randomise_fit_pch(data, arc_data = arc_ks, n_rand = 1000,
                              replace = FALSE,
                              bootstrap_N = NA,
                              seed = 435,
-                             convex_hull = T,
+                             volume_ratio = "t_ratio",
                              maxiter = 1000, delta = 0, conv_crit = 1e-4,
                              order_type = "align", type = "m") 
 # plot random distributions, observed value (vertical bar) and empirical p-value
@@ -266,7 +266,7 @@ This step is necessary for computing the volume of convex hull and t-ratio for a
 s = svd(data)
 arc_data3 = fit_pch_bootstrap(t(s$v[,1:2]), n = 50, sample_prop = 0.65,
                               seed = 2543, order_type = "align", noc = as.integer(3), 
-                              delta = 0, type = "m", convex_hull = T)
+                              delta = 0, type = "m", volume_ratio = "t_ratio")
 plot_arc(arc_data3, t(s$v[,1:2]), which_dimensions = 1:2, line_size = 1)
 ```
 

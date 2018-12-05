@@ -8,7 +8,7 @@ plot_arc(arch_data = NULL, data, which_dimensions = as.integer(1:2),
   type = c("average", "all")[1], average_func = mean,
   geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
   colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400",
-  "#FF7E0F"), arch_size = NULL, line_size = NULL, data_size = 2,
+  "#FF7E0F"), arch_size = NULL, line_size = NULL, data_size = 4,
   arch_alpha = 0.4, data_lab = "data", arc_lab = "archetypes",
   legend_name = "data", text_size = NULL, nudge = c(0.05, 0.1))
 }

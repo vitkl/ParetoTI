@@ -353,7 +353,7 @@ find_decreasing_wilcox = function(data_attr, arc_col,
   }
   setorder(decreasing, x_name, p)
   decreasing$metric = "wilcoxon_p_val"
-  decreasing[,.(x_name, y_name, p, median_diff, mean_diff)]
+  decreasing[,.(x_name, y_name, p, median_diff, mean_diff, metric)]
 }
 
 .find_decreasing_wilcox_1 = function(feature_mat, arch_bin,

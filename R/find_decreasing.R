@@ -174,28 +174,49 @@ fit_arc_gam_1 = function(feature, col, N_smooths, data_attr, min.sp, ..., d,
 ##' @param cutoff_metric probability metric for selecting decreasing genes: mean_prob, prod_prob, mean_prob_excl or prod_prob_excl
 ##' @param p.adjust.method choose method for correcting p-value for multiple hypothesis testing. See p.adjust.methods and \link[stats]{p.adjust} for details.
 ##' @param gam_fit_pval smooth term probability in gam fit (upper bound)
+##' @param invert_cutoff invert cutoff for genes and sets. If FALSE p < cutoff_genes, if TRUE p > cutoff_genes.
 ##' @param order_by order decreasing feature list by measure in summary sets. By default is deriv20, the average value of derivative at 20 of point closest to vertex.
-##' @param min_max_diff what should be the ratio of gene expression at the point closest to archetype compared to point furthest from archetype? By default, at least 1.3 or closest point is 30 percent higher than furthest point.
-##' @return \code{get_top_decreasing()} return character vector with one element for each archetype and print to output
+##' @param min_max_diff_cutoff_g what should be the mean difference (log-ratio, when y is log-space) of gene expression at the point closest to archetype compared to point furthest from archetype? When Wilcox method was used it is difference between mean of bin closest to archetype and all other cells. By default, at least 0.3 for genes 0.1 for functions.
+##' @param min_max_diff_cutoff_f see min_max_diff_cutoff_g
+##' @return \code{get_top_decreasing()} print summary to output, and return list with character vector with one element for each archetype, and 2 data.table- with selection of enriched genes and functions.
 ##' @export get_top_decreasing
 ##' @import data.table
 get_top_decreasing = function(summary_genes, summary_sets = NULL,
                               cutoff_genes = 0.01, cutoff_sets = 0.01,
                               cutoff_metric = "wilcoxon_p_val",
                               p.adjust.method = c("fdr", "none")[1],
-                              gam_fit_pval = 0.01,
-                              order_by = "deriv20", order_decreasing = FALSE,
-                              min_max_diff_cutoff = 1.3) {
+                              gam_fit_pval = 0.01, invert_cutoff = FALSE,
+                              order_by = "mean_diff", order_decreasing = FALSE,
+                              min_max_diff_cutoff_g = 0.3, min_max_diff_cutoff_f = 0.1) {
 
   enriched = summary_genes[metric == cutoff_metric]
   # do fdr correction of p-value
   enriched[, p := p.adjust(p, method = p.adjust.method)]
   # look at derivatives only when the model fit itself is good
-  if("gam_fit_pval"  %in% colnames(enriched)) {
+  if("gam_fit_pval" %in% colnames(enriched)) {
     enriched = enriched[smooth_term_p_val < gam_fit_pval]
   }
-  enriched = enriched[p < cutoff_genes &
-                        min_max_diff > min_max_diff_cutoff]
+
+  if(isTRUE(invert_cutoff)) {
+    enriched = enriched[p >= cutoff_genes]
+  } else {
+    enriched = enriched[p < cutoff_genes]
+  }
+
+  # filter by difference between min and max value (GAM) or by log-ratio
+  if("min_max_diff" %in% colnames(enriched)) { # min and max value of GAM
+    if(isTRUE(invert_cutoff)) {
+      enriched = enriched[min_max_diff < min_max_diff_cutoff_g]
+    } else {
+      enriched = enriched[min_max_diff > min_max_diff_cutoff_g]
+    }
+  } else if("mean_diff" %in% colnames(enriched)) { # wilcox test mean log-ratio
+    if(isTRUE(invert_cutoff)) {
+      enriched = enriched[mean_diff < min_max_diff_cutoff_g]
+    } else {
+      enriched = enriched[mean_diff > min_max_diff_cutoff_g]
+    }
+  }
   # add enriched genes and sets
   enriched = enriched[order(get(order_by), decreasing = order_decreasing),
                       .(arch_name = x_name, y_name)]
@@ -207,8 +228,9 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
                                 paste0(y_name[9:12][!is.na(y_name[9:12])],
                                        collapse = ", ")),
            by = arch_name]
-  enriched = unique(enriched[, .(arch_name, arch_lab)])
+  enriched_lab = unique(enriched[, .(arch_name, arch_lab)])
   # get and merge enriched sets
+  enriched_sets = NULL # set to null when nothing provided
   if(!is.null(summary_sets)) {
     enriched_sets = summary_sets[metric == cutoff_metric]
     # do fdr correction of p-value
@@ -218,30 +240,49 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
       enriched_sets = enriched_sets[smooth_term_p_val < gam_fit_pval]
     }
 
-    enriched_sets = enriched_sets[p < cutoff_sets &
-                                  min_max_diff > min_max_diff_cutoff]
+    if(isTRUE(invert_cutoff)) {
+      enriched_sets = enriched_sets[p >= cutoff_genes]
+    } else {
+      enriched_sets = enriched_sets[p < cutoff_genes]
+    }
 
-    enriched_sets = enriched_sets[order(get(order_by), decreasing = order_decreasing),
+    # filter by difference between min and max value (GAM) or by log-ratio
+    if("min_max_diff" %in% colnames(enriched_sets)) { # min and max value of GAM
+      if(isTRUE(invert_cutoff)) {
+        enriched_sets = enriched_sets[min_max_diff < min_max_diff_cutoff_f]
+      } else {
+        enriched_sets = enriched_sets[min_max_diff > min_max_diff_cutoff_f]
+      }
+    } else if("mean_diff" %in% colnames(enriched_sets)) { # wilcox test mean log-ratio
+      if(isTRUE(invert_cutoff)) {
+        enriched_sets = enriched_sets[mean_diff < min_max_diff_cutoff_f]
+      } else {
+        enriched_sets = enriched_sets[mean_diff > min_max_diff_cutoff_f]
+      }
+    }
+
+    enriched_sets_lab = enriched_sets[order(get(order_by), decreasing = order_decreasing),
                                   .(arch_name = x_name, y_name_set = y_name)]
-    enriched = merge(enriched, enriched_sets, by = "arch_name",
-                     all.x = T, all.y = F)
-    enriched[, arch_lab := paste0(arch_lab, "\n\n",
-                                  paste0(y_name_set[1][!is.na(y_name_set[1])],
-                                         collapse = ", "), "\n",
-                                  paste0(y_name_set[2][!is.na(y_name_set[2])],
-                                         collapse = ", "), "\n",
-                                  paste0(y_name_set[3][!is.na(y_name_set[3])],
-                                         collapse = ", ")),
-             by = arch_name]
-    enriched = unique(enriched[, .(arch_name, arch_lab)])
-    while(sum(grepl("\n\n\n", enriched$arch_lab))){
-      enriched$arch_lab = gsub("\n\n\n", "\n\n", enriched$arch_lab)
+    enriched_lab = merge(enriched_lab, enriched_sets_lab, by = "arch_name",
+                         all.x = T, all.y = F)
+    enriched_lab[, arch_lab := paste0(arch_lab, "\n\n",
+                                      paste0(y_name_set[1][!is.na(y_name_set[1])],
+                                             collapse = ", "), "\n",
+                                      paste0(y_name_set[2][!is.na(y_name_set[2])],
+                                             collapse = ", "), "\n",
+                                      paste0(y_name_set[3][!is.na(y_name_set[3])],
+                                             collapse = ", ")),
+                 by = arch_name]
+    enriched_lab = unique(enriched_lab[, .(arch_name, arch_lab)])
+    while(sum(grepl("\n\n\n", enriched_lab$arch_lab))){
+      enriched_lab$arch_lab = gsub("\n\n\n", "\n\n", enriched_lab$arch_lab)
     }
   }
-  for (i in seq_len(nrow(enriched))) {
-    cat(" -- ", enriched$arch_lab[i], "\n\n", sep = " ")
+  for (i in seq_len(nrow(enriched_lab))) {
+    cat(" -- ", enriched_lab$arch_lab[i], "\n\n", sep = " ")
   }
-  enriched
+  list(lab = enriched_lab,
+       enriched = enriched, enriched_sets = enriched_sets)
 }
 
 

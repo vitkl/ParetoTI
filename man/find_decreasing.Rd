@@ -20,8 +20,9 @@ fit_arc_gam_1(feature, col, N_smooths, data_attr, min.sp, ..., d, n_points,
 get_top_decreasing(summary_genes, summary_sets = NULL,
   cutoff_genes = 0.01, cutoff_sets = 0.01,
   cutoff_metric = "wilcoxon_p_val", p.adjust.method = c("fdr",
-  "none")[1], gam_fit_pval = 0.01, order_by = "deriv20",
-  order_decreasing = FALSE, min_max_diff_cutoff = 1.3)
+  "none")[1], gam_fit_pval = 0.01, invert_cutoff = FALSE,
+  order_by = "mean_diff", order_decreasing = FALSE,
+  min_max_diff_cutoff_g = 0.3, min_max_diff_cutoff_f = 0.1)
 
 find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
   "Cyp2e1", "Apoa2")[3], bin_prop = 0.1, type = c("s", "m", "cmq")[1],
@@ -70,20 +71,24 @@ find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
 
 \item{gam_fit_pval}{smooth term probability in gam fit (upper bound)}
 
+\item{invert_cutoff}{invert cutoff for genes and sets. If FALSE p < cutoff_genes, if TRUE p > cutoff_genes.}
+
 \item{order_by}{order decreasing feature list by measure in summary sets. By default is deriv20, the average value of derivative at 20 of point closest to vertex.}
+
+\item{min_max_diff_cutoff_g}{what should be the mean difference (log-ratio, when y is log-space) of gene expression at the point closest to archetype compared to point furthest from archetype? When Wilcox method was used it is difference between mean of bin closest to archetype and all other cells. By default, at least 0.3 for genes 0.1 for functions.}
+
+\item{min_max_diff_cutoff_f}{see min_max_diff_cutoff_g}
 
 \item{bin_prop}{proportion of data to put in bin closest to archetype}
 
 \item{method}{how to find_decreasing_wilcox()? Use \link[BioQC]{wmwTest} or \link[stats]{wilcox.test}. BioQC::wmwTest can be up to 1000 times faster, so it is default.}
-
-\item{min_max_diff}{what should be the ratio of gene expression at the point closest to archetype compared to point furthest from archetype? By default, at least 1.3 or closest point is 30 percent higher than furthest point.}
 }
 \value{
 \code{find_decreasing()} list (S3 object, gam_deriv) containing summary p-values for features and each archetype, function call and (optionally) a data.table with values of the first derivative
 
 \code{fit_arc_gam_1()} list containing function call, 1st derivative values of GAM model (derivs), summary of GAM model (p-value and r^2, gam_sm)
 
-\code{get_top_decreasing()} return character vector with one element for each archetype and print to output
+\code{get_top_decreasing()} print summary to output, and return list with character vector with one element for each archetype, and 2 data.table- with selection of enriched genes and functions.
 
 \code{find_decreasing_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.
 }

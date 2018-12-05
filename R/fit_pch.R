@@ -760,8 +760,6 @@ merge_arch_dist = function(arch_data, data, feature_data,
   # remove failed fits
   pch_fit_list = pch_fit_list[!vapply(pch_fit_list, is.null,
                                       FUN.VALUE = logical(1))]
-  pch_fit_list = pch_fit_list[!vapply(pch_fit_list, function(fit) is.null(fit$XC),
-                                      FUN.VALUE = logical(1))]
   # combine results
   list(XC = lapply(pch_fit_list, function(pch) pch$XC),
        S = lapply(pch_fit_list, function(pch) pch$S),

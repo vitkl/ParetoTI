@@ -347,7 +347,7 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
       ref_XC = res$pch_fits$XC[[1]]
     }
     for (i in seq_len(length(res$pch_fits$XC))) {
-      ind = align_arc(ref$XC, res$pch_fits$XC[[i]])$ind
+      ind = align_arc(ref_XC, res$pch_fits$XC[[i]])$ind
       res$pch_fits$XC[[i]] = res$pch_fits$XC[[i]][, ind]
       res$pch_fits$S[[i]] = res$pch_fits$S[[i]][ind, ]
       res$pch_fits$C[[i]] = res$pch_fits$C[[i]][ind, ]

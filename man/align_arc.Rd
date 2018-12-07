@@ -50,7 +50,7 @@ data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 dim(data)
 # fit polytopes to 2 subsamples of the data
 arc_data = fit_pch_bootstrap(data, n = 2, sample_prop = 0.65, seed = 2543,
-                        order_by_side = F, noc = as.integer(6),
+                        order_type = "align", noc = as.integer(6),
                         delta = 0, type = "s")
 # align archetypes by exhausive search
 align_arc(arc_data$pch_fits$XC[[1]], arc_data$pch_fits$XC[[2]])
@@ -66,7 +66,7 @@ res[[which.min(sapply(res, function(r) r$dist))]]
 #for (i in 2:12) {
 #    # fit polytopes to 2 subsamples
 #    arc_data = fit_pch_bootstrap(data, n = 2, sample_prop = 0.65, seed = 2543,
-#                             order_by_side = F, noc = as.integer(i),
+#                             order_type = "align", noc = as.integer(i),
 #                             delta = 0, type = "s")
 #    print(i)
 #    # measure how much time each method takes

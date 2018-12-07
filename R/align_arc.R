@@ -54,7 +54,7 @@ gen_permut = function(n){
 ##' dim(data)
 ##' # fit polytopes to 2 subsamples of the data
 ##' arc_data = fit_pch_bootstrap(data, n = 2, sample_prop = 0.65, seed = 2543,
-##'                         order_by_side = F, noc = as.integer(6),
+##'                         order_type = "align", noc = as.integer(6),
 ##'                         delta = 0, type = "s")
 ##' # align archetypes by exhausive search
 ##' align_arc(arc_data$pch_fits$XC[[1]], arc_data$pch_fits$XC[[2]])
@@ -70,7 +70,7 @@ gen_permut = function(n){
 ##' #for (i in 2:12) {
 ##' #    # fit polytopes to 2 subsamples
 ##' #    arc_data = fit_pch_bootstrap(data, n = 2, sample_prop = 0.65, seed = 2543,
-##' #                             order_by_side = F, noc = as.integer(i),
+##' #                             order_type = "align", noc = as.integer(i),
 ##' #                             delta = 0, type = "s")
 ##' #    print(i)
 ##' #    # measure how much time each method takes

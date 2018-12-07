@@ -35,7 +35,7 @@ fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
   check_installed = T, type = c("s", "m", "cmq")[1],
   clust_options = list(), seed = 235, replace = FALSE,
   average = FALSE, order_type = c("cosine", "side", "align")[3],
-  var_in_dims = TRUE, normalise_var = TRUE, ...)
+  var_in_dims = TRUE, normalise_var = TRUE, reference = FALSE, ...)
 
 average_pch_fits(res, XC_array = NULL)
 
@@ -69,7 +69,7 @@ merge_arch_dist(arch_data, data, feature_data, colData = NULL,
 
 \method{print}{r_pch_fit}(res)
 
-plot.r_pch_fit(rand_arch, ks = unique(rand_arch$rand_dist$k),
+\method{plot}{r_pch_fit}(rand_arch, ks = unique(rand_arch$rand_dist$k),
   type = c("total_var", "varexpl", "t_ratio"), colors = c("#1F77B4",
   "#D62728", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"), nudge_y = 0.8,
   nudge_x = 0.1, text_lab_size = 4, line_size = 0.5)
@@ -134,6 +134,8 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 \item{replace}{should resampling be with replacement? passed to \link[base]{sample.int}}
 
 \item{average}{average archetype positions and varexpl? By default FALSE, return all fits to resampled data.}
+
+\item{reference}{align vertices (order_type="align") against reference polytope based on all data (TRUE), or align to the polytope from the first bootstrap iteration (FALSE). Second option can save time for large datasets}
 
 \item{XC_array}{Used by average_pch_fits() inside fit_pch_bootstrap(). You should not to use it in most cases.}
 
@@ -200,7 +202,7 @@ call - function call.
 
 \code{k_fit_pch()} finds polytopes of k dimensions in the data. This function applies \code{fit_pch()} to different k-s.
 
-\code{fit_pch_bootstrap()} uses resampling data with or without replacement (bootstrapping) to find robust positions of vertices of a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch_resample()}.
+\code{fit_pch_bootstrap()} uses resampling data with or without replacement (bootstrapping) to find robust positions of vertices of a polytope (Principal Convex Hull) describing the data. This function uses \code{fit_pch_resample()}.
 
 \code{average_pch_fits()} averages archetypes positions and relevant metrics across polytope fit obtained using bootstraping. Uses output of fit_pch_bootstrap() directly.
 

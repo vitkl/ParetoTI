@@ -13,7 +13,7 @@ find_gam_deriv(gam_fit, n_points = 200, x = NULL, N_smooths = 9,
 
 \method{summary}{gam_deriv}(derivs)
 
-plot.gam_deriv(derivs, features = derivs$derivs$y_name,
+\method{plot}{gam_deriv}(derivs, features = derivs$derivs$y_name,
   title = "First derivative of GAM model: gene expression = function(distance from archetype)")
 }
 \arguments{

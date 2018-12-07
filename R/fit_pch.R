@@ -248,7 +248,7 @@ k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
 
 ##' @rdname fit_pch
 ##' @name fit_pch_bootstrap
-##' @description \code{fit_pch_bootstrap()} uses resampling data with or without replacement (bootstrapping) to find robust positions of vertices of a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch_resample()}.
+##' @description \code{fit_pch_bootstrap()} uses resampling data with or without replacement (bootstrapping) to find robust positions of vertices of a polytope (Principal Convex Hull) describing the data. This function uses \code{fit_pch_resample()}.
 ##' @param n number of samples to be taken when bootstraping
 ##' @param sample_prop either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times on the same data which is useful for evaluating how often the algorithm gets stuck in local optima.
 ##' @param type one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package. "See also" for details.
@@ -258,6 +258,7 @@ k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
 ##' @param average average archetype positions and varexpl? By default FALSE, return all fits to resampled data.
 ##' @param var_in_dims calculate variance in dimensions across vertices in addition to variance in vertices.
 ##' @param normalise_var normalise variance in position of vertices by variance in data in each dimention
+##' @param reference align vertices (order_type="align") against reference polytope based on all data (TRUE), or align to the polytope from the first bootstrap iteration (FALSE). Second option can save time for large datasets
 ##' @return \code{fit_pch_bootstrap()} object of class b_pch_fit (list) containing the same elements as pch_fit, but each is either a list of pch_fit elements (e.g. list of n number of XC matrices) or a vector (which pch_fit element is one number).
 ##' @import clustermq
 ##' @export fit_pch_bootstrap
@@ -265,7 +266,8 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
                              type = c("s", "m", "cmq")[1], clust_options = list(),
                              seed = 235, replace = FALSE, average = FALSE,
                              order_type = c("cosine", "side", "align")[3],
-                             var_in_dims = TRUE, normalise_var = TRUE, ...) {
+                             var_in_dims = TRUE, normalise_var = TRUE,
+                             reference = FALSE, ...) {
   if(check_installed) .py_pcha_installed()
   # single process -------------------------------------------------------------
   if(type == "s"){
@@ -324,16 +326,26 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
     })
   }
   # combine results ------------------------------------------------------------
+
   res = list(call = match.call(),
              pch_fits = .c_pch_fit_list(res))
   class(res) = "b_pch_fit"
+
   # match archetypes and reorder results ---------------------------------------
+
   if(isTRUE(order_type == "align")){
-    suppressMessages({
-      ref = fit_pch(data = data, order_type = order_type,
-                    converge_else_fail = FALSE, ...)
-      if(is.null(ref)) return(NULL)
-    })
+    # align to reference based on all data
+    if(isTRUE(reference)){
+      suppressMessages({
+        ref = fit_pch(data = data, order_type = order_type,
+                      converge_else_fail = FALSE, ...)
+        if(is.null(ref)) return(NULL)
+      })
+      ref_XC = ref$XC
+    } else {
+      # align to reference - first polytope from bootstraping
+      ref_XC = res$pch_fits$XC[[1]]
+    }
     for (i in seq_len(length(res$pch_fits$XC))) {
       ind = align_arc(ref$XC, res$pch_fits$XC[[i]])$ind
       res$pch_fits$XC[[i]] = res$pch_fits$XC[[i]][, ind]
@@ -341,7 +353,9 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
       res$pch_fits$C[[i]] = res$pch_fits$C[[i]][ind, ]
     }
   }
+
   # extract XC matrix for calculating averages and variance --------------------
+
   XC_array = simplify2array(res$pch_fits$XC)
   # average results ------------------------------------------------------------
   # update summary data.table
@@ -353,7 +367,9 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
   if(isTRUE(average)){
     res = average_pch_fits(res = res, XC_array = XC_array)
   }
+
   # calculate and include variance in positions --------------------------------
+
   dim. = c(dim(XC_array)[1] * dim(XC_array)[2], dim(XC_array)[3])
   res$var = matrix(matrixStats::rowVars(XC_array, dim. = dim.),
                    dim(XC_array)[1], dim(XC_array)[2])

@@ -296,7 +296,7 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
 ##' @import data.table
 find_decreasing_wilcox = function(data_attr, arc_col,
                                   features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
-                                  bin_prop = 0.1,
+                                  bin_prop = 0.1, na.rm = FALSE,
                                   type = c("s", "m", "cmq")[1],
                                   clust_options = list(),
                                   method = c("BioQC", "r_stats")[1]) {
@@ -331,11 +331,11 @@ find_decreasing_wilcox = function(data_attr, arc_col,
                                  value.name = "p", variable.name = "y_name")
     # find mean and median difference between bin closest to vertex vs other bins
     decreasing[, c("median_diff", "mean_diff") := .({
-      median(feature_mat[arch_bin[x_name][[1]], y_name]) -
-        median(feature_mat[-arch_bin[x_name][[1]], y_name])
+      median(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm) -
+        median(feature_mat[-arch_bin[x_name][[1]], y_name], na.rm = na.rm)
     }, {
-      mean(feature_mat[arch_bin[x_name][[1]], y_name]) -
-        mean(feature_mat[-arch_bin[x_name][[1]], y_name])
+      mean(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm) -
+        mean(feature_mat[-arch_bin[x_name][[1]], y_name], na.rm = na.rm)
     }), by = .(y_name, x_name)]
 
   } else if(method == "r_stats"){
@@ -383,13 +383,13 @@ find_decreasing_wilcox = function(data_attr, arc_col,
       # multiple cores locally or computing cluster with clustermq
       decreasing = foreach::`%dopar%`(fr_obj,
                                       ParetoTI:::.find_decreasing_wilcox_1(feature_mat, arch_bin,
-                                                                           arc_col, bin_prop))
+                                                                           arc_col, na.rm))
       if(type == "m") parallel::stopCluster(cl) # stop local cluster
     } else {
       # single core locally
       decreasing = foreach::`%do%`(fr_obj,
                                    ParetoTI:::.find_decreasing_wilcox_1(feature_mat, arch_bin,
-                                                                        arc_col, bin_prop))
+                                                                        arc_col, na.rm))
     }
   }
   setorder(decreasing, x_name, p)
@@ -398,7 +398,7 @@ find_decreasing_wilcox = function(data_attr, arc_col,
 }
 
 .find_decreasing_wilcox_1 = function(feature_mat, arch_bin,
-                                     arc_col, bin_prop) {
+                                     arc_col, na.rm) {
 
   decreasing = lapply(arch_bin, function(arc, feature_mat) {
     # select 1st bin cells with indices
@@ -407,8 +407,8 @@ find_decreasing_wilcox = function(data_attr, arc_col,
 
     data.table(p = wilcox.test(x = y1, y = y0,
                                alternative = "greater")$p.value,
-               median_diff = median(y1) - median(y0),
-               mean_diff = mean(y1) - mean(y0))
+               median_diff = median(y1, na.rm = na.rm) - median(y0, na.rm = na.rm),
+               mean_diff = mean(y1, na.rm = na.rm) - mean(y0, na.rm = na.rm))
   }, feature_mat)
   decreasing = rbindlist(decreasing)
   decreasing$x_name = names(arch_bin)

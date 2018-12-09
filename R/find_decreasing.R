@@ -262,7 +262,7 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
     }
 
     enriched_sets_lab = enriched_sets[order(get(order_by), decreasing = order_decreasing),
-                                  .(arch_name = x_name, y_name_set = y_name)]
+                                      .(arch_name = x_name, y_name_set = y_name)]
     enriched_lab = merge(enriched_lab, enriched_sets_lab, by = "arch_name",
                          all.x = T, all.y = F)
     enriched_lab[, arch_lab := paste0(arch_lab, "\n\n",
@@ -331,11 +331,11 @@ find_decreasing_wilcox = function(data_attr, arc_col,
                                  value.name = "p", variable.name = "y_name")
     # find mean and median difference between bin closest to vertex vs other bins
     decreasing[, c("median_diff", "mean_diff") := .({
-      median(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm) -
-        median(feature_mat[-arch_bin[x_name][[1]], y_name], na.rm = na.rm)
+      as.numeric(median(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm) -
+                   median(feature_mat[-arch_bin[x_name][[1]], y_name], na.rm = na.rm))
     }, {
-      mean(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm) -
-        mean(feature_mat[-arch_bin[x_name][[1]], y_name], na.rm = na.rm)
+      as.numeric(mean(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm) -
+                   mean(feature_mat[-arch_bin[x_name][[1]], y_name], na.rm = na.rm))
     }), by = .(y_name, x_name)]
 
   } else if(method == "r_stats"){
@@ -407,8 +407,10 @@ find_decreasing_wilcox = function(data_attr, arc_col,
 
     data.table(p = wilcox.test(x = y1, y = y0,
                                alternative = "greater")$p.value,
-               median_diff = median(y1, na.rm = na.rm) - median(y0, na.rm = na.rm),
-               mean_diff = mean(y1, na.rm = na.rm) - mean(y0, na.rm = na.rm))
+               median_diff = as.numeric(median(y1, na.rm = na.rm) -
+                                          median(y0, na.rm = na.rm)),
+               mean_diff = as.numeric(mean(y1, na.rm = na.rm) -
+                                        mean(y0, na.rm = na.rm)))
   }, feature_mat)
   decreasing = rbindlist(decreasing)
   decreasing$x_name = names(arch_bin)

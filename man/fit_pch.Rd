@@ -81,7 +81,7 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
   line_size = 0.5)
 }
 \arguments{
-\item{data}{numeric matrix in which to find archetypes, dim(variables/dimentions, examples)}
+\item{data}{numeric matrix or object coercible to matrix in which to find archetypes, dim(variables/dimentions, examples)}
 
 \item{noc}{integer, number of archetypes to find}
 
@@ -195,7 +195,7 @@ call - function call.
 
 \code{fit_convhulln()} list with 3 elements: hull - matrix storing positions of points dim(points, dimensions)); area - surface area for 3D or higher and perimeter for 2D; vol - volume for 3D and surface area for 2D.
 
-\code{merge_arch_dist()} list: data.table with samples in columns and features in rows (speficied by sample_id column) and column names specifying archetypes
+\code{merge_arch_dist()} list: data.table with samples in rows (speficied by sample_id column) and features in columns (including distance to archetypes); and character vectors listing names of archetypes, feature columns and colData columns.
 }
 \description{
 \code{fit_pch()} fits a polytope (Principal Convex Hull) to data using PCHA algorithm. All of the listed functions take input matrix dim(variables/dimentions, examples) and return archetype positions (XC) of dim(variables/dimentions, archetypes).

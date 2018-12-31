@@ -218,6 +218,12 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
     }
   }
   # add enriched genes and sets
+  enriched_genes = copy(enriched) # copy filtered results
+  setnames(enriched_genes, c("x_name", "y_name"), c("arch_name", "genes"))
+  enriched_genes = enriched_genes[, rank_by_vertex := frank(-get(order_by)),
+                                  by = .(arch_name)]
+  setorder(enriched_genes, arch_name, rank_by_vertex)
+  # generate labels
   enriched = enriched[order(get(order_by), decreasing = order_decreasing),
                       .(arch_name = x_name, y_name)]
   enriched[, arch_lab := paste0(arch_name, "\n\n",
@@ -281,8 +287,8 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
   for (i in seq_len(nrow(enriched_lab))) {
     cat(" -- ", enriched_lab$arch_lab[i], "\n\n", sep = " ")
   }
-  list(lab = enriched_lab,
-       enriched = enriched, enriched_sets = enriched_sets)
+  list(lab = enriched_lab, enriched = enriched,
+       enriched_genes = enriched_genes, enriched_sets = enriched_sets)
 }
 
 
@@ -330,13 +336,15 @@ find_decreasing_wilcox = function(data_attr, arc_col,
     decreasing = melt.data.table(decreasing, id.vars = "x_name",
                                  value.name = "p", variable.name = "y_name")
     # find mean and median difference between bin closest to vertex vs other bins
-    decreasing[, c("median_diff", "mean_diff") := .({
+    decreasing[, c("median_diff", "mean_diff", "top_bin_mean") := .({
       as.numeric(median(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm) -
                    median(feature_mat[-arch_bin[x_name][[1]], y_name], na.rm = na.rm))
     }, {
       as.numeric(mean(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm) -
                    mean(feature_mat[-arch_bin[x_name][[1]], y_name], na.rm = na.rm))
-    }), by = .(y_name, x_name)]
+    },
+    as.numeric(mean(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm))),
+    by = .(y_name, x_name)]
 
   } else if(method == "r_stats"){
 
@@ -394,7 +402,7 @@ find_decreasing_wilcox = function(data_attr, arc_col,
   }
   setorder(decreasing, x_name, p)
   decreasing$metric = "wilcoxon_p_val"
-  decreasing[,.(x_name, y_name, p, median_diff, mean_diff, metric)]
+  decreasing[,.(x_name, y_name, p, median_diff, mean_diff, top_bin_mean, metric)]
 }
 
 .find_decreasing_wilcox_1 = function(feature_mat, arch_bin,
@@ -404,13 +412,15 @@ find_decreasing_wilcox = function(data_attr, arc_col,
     # select 1st bin cells with indices
     y1 = feature_mat[arc, 1]
     y0 = feature_mat[-arc, 1]
+    y1_mean = mean(y1, na.rm = na.rm)
 
     data.table(p = wilcox.test(x = y1, y = y0,
                                alternative = "greater")$p.value,
                median_diff = as.numeric(median(y1, na.rm = na.rm) -
                                           median(y0, na.rm = na.rm)),
-               mean_diff = as.numeric(mean(y1, na.rm = na.rm) -
-                                        mean(y0, na.rm = na.rm)))
+               mean_diff = as.numeric(y1_mean -
+                                        mean(y0, na.rm = na.rm)),
+               top_bin_mean = as.numeric(y1_mean))
   }, feature_mat)
   decreasing = rbindlist(decreasing)
   decreasing$x_name = names(arch_bin)

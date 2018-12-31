@@ -4,7 +4,7 @@
 ##' @author Vitalii Kleshchevnikov
 ##' @description \code{fit_pch()} fits a polytope (Principal Convex Hull) to data using PCHA algorithm. All of the listed functions take input matrix dim(variables/dimentions, examples) and return archetype positions (XC) of dim(variables/dimentions, archetypes).
 ##' @details \code{fit_pch()} provides an R interface to python implementation of PCHA algorithm (Principal Convex Hull Analysis) by Ulf Aslak (https://github.com/ulfaslak/py_pcha) which was originally developed for Archetypal Analysis by Mørup et. al.
-##' @param data numeric matrix in which to find archetypes, dim(variables/dimentions, examples)
+##' @param data numeric matrix or object coercible to matrix in which to find archetypes, dim(variables/dimentions, examples)
 ##' @param noc integer, number of archetypes to find
 ##' @param I vector, entries of data to use for dictionary in C (optional)
 ##' @param U vector, entries of data to model in S (optional)
@@ -83,6 +83,9 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    converge_else_fail = TRUE,
                    var_in_dims = FALSE, normalise_var = TRUE) {
   if(check_installed) .py_pcha_installed()
+  # coerce to matrix
+  if(!is.matrix(data)) data = as.matrix(data)
+
   # run PCHA
   res = tryCatch({
     res = py_PCHA$PCHA(X = data, noc = as.integer(noc), I = I, U = U,
@@ -200,7 +203,11 @@ k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
                      bootstrap_type = c("s", "m", "cmq")[1],
                      seed = 345, simplex = FALSE,
                      var_in_dims = FALSE, normalise_var = TRUE, ...) {
+
   if(check_installed) .py_pcha_installed()
+  # coerce to matrix
+  if(!is.matrix(data)) data = as.matrix(data)
+
   # check that ks do not exceed dimensions when simplex is true
   if(nrow(data) < (max(ks) - 1) & isTRUE(simplex)) stop("simplex = TRUE but number of vertices (",
                                                         max(ks),") exceeds number of dimensions - 1 (", nrow(data),")")
@@ -269,6 +276,9 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
                              var_in_dims = TRUE, normalise_var = TRUE,
                              reference = FALSE, ...) {
   if(check_installed) .py_pcha_installed()
+  # coerce to matrix
+  if(!is.matrix(data)) data = as.matrix(data)
+
   # single process -------------------------------------------------------------
   if(type == "s"){
     set.seed(seed)
@@ -463,6 +473,8 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
                              clust_options = list(), normalise_var = TRUE,
                              check_installed = T, ...) {
   if(check_installed) .py_pcha_installed()
+  # coerce to matrix
+  if(!is.matrix(data)) data = as.matrix(data)
 
   # extract some parameters of observed fit
   ks = sort(unique(arc_data$summary$k))
@@ -735,7 +747,7 @@ fit_convhulln = function(data, positions = TRUE) {
 ##' @param colData_id column in colData that contains values matching colnames of feature_data.
 ##' @param dist_metric how to describe distance to archetypes. Currently euclidian distance is implemented.
 ##' @param rank rank by distance metric (euclidian distance)?
-##' @return \code{merge_arch_dist()} list: data.table with samples in columns and features in rows (speficied by sample_id column) and column names specifying archetypes
+##' @return \code{merge_arch_dist()} list: data.table with samples in rows (speficied by sample_id column) and features in columns (including distance to archetypes); and character vectors listing names of archetypes, feature columns and colData columns.
 ##' @export merge_arch_dist
 ##' @import data.table
 merge_arch_dist = function(arch_data, data, feature_data,
@@ -768,8 +780,9 @@ merge_arch_dist = function(arch_data, data, feature_data,
     features = merge(features, colData, by.x = "sample_id", by.y = colData_id,
                      all.x = T, all.y = F)
   }
-  list(data = features,
-       arc_col = arc_col)
+  list(data = features, arc_col = arc_col,
+       features_col = rownames(feature_data),
+       colData_col = colnames(colData)[!colnames(colData) %in% colData_id])
 }
 
 .c_pch_fit_list = function(pch_fit_list){
@@ -952,7 +965,7 @@ plot_dim_var = function(rand_arch,
 }
 
 .cacl_var_in_dims = function(res, data, var_in_dims, normalise_var,
-                             XC_array = NULL) {
+                             XC_array = NULL, most_extreme = NULL) {
   if(var_in_dims){
     # calculate variance in vertex positions in each dimension
     if(is(res, "pch_fit")){
@@ -966,8 +979,26 @@ plot_dim_var = function(rand_arch,
       noc = dim(XC_array)[2]
     }
     # normalise by variance of data in each dimension
-    if(normalise_var) res$var_dim = res$var_dim / matrix(matrixStats::rowVars(data),
-                                                         nrow = 1, ncol = nrow(data))
+    if(normalise_var) {
+      # union of 100 most extreme points (20%, n%/ n dimensions) in each dimention
+      if(is.null(most_extreme)){
+        data_var = matrix(matrixStats::rowVars(data),
+                          nrow = 1, ncol = nrow(data))
+      } else {
+        n_examples = ncol(data)
+        n_dim = nrow(data)
+        n_top_points = floor(n_examples * most_extreme * (1 / n_dim) / 2)
+        data_var = apply(data, 1, function(x) {
+          top_points = order(x)[c(seq(1, n_top_points),
+                                  seq(n_examples - n_top_points + 1,
+                                      n_examples))]
+          top_points = unique(as.integer(top_points))
+          var(x[top_points])
+        })
+        data_var = matrix(data_var, nrow = 1, ncol = nrow(data))
+      }
+      res$var_dim = res$var_dim / data_var
+    }
     res$var_dim = data.table::data.table(res$var_dim)
     if(!is.null(rownames(data))) {
       data.table::setnames(res$var_dim, colnames(res$var_dim), rownames(data))

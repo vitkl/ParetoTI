@@ -69,7 +69,7 @@ plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl",
       ggplot2::geom_line() +
       ggplot2::facet_wrap(~ k) +
       ggplot2::xlab("dimension name") +
-      ggplot2::ylab("variance in position across vertices")
+      ggplot2::ylab("Variance in position across vertices")
   }
 
 }
@@ -78,7 +78,7 @@ plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl",
   if(short) {
     type_lab = c("Variance explained", "Sum of squared errors", "Residual \nvariance explained", "Variance in positions", "Volume of polytope /\n convex hull")
   } else {
-    type_lab = c("Variance explained", "Sum of squared errors", "Variance explained on top of k-1 model", "total variance in position of vertices", "T-ratio of volume of polytope by volume of convex hull")
+    type_lab = c("Variance explained", "Sum of squared errors", "Variance explained on top of k-1 model", "Mean variance in position of vertices", "T-ratio of volume of polytope by volume of convex hull")
   }
   names_type_lab = c("varexpl", "SSE", "res_varexpl", "total_var", "t_ratio")
   type_lab[names_type_lab %in% type]

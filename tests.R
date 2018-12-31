@@ -60,6 +60,8 @@ install_py_pcha(method = "conda")
 ParetoTI::install_py_pcha(method = "virtualenv")
 reticulate::py_discover_config("py_pcha")
 
+R.utils::setOption("ParetoTI_envname", "py_pcha_cython")
+getOption("ParetoTI_envname")
 library(ParetoTI)
 library(ggplot2)
 # Random data that fits into the triangle (2D)
@@ -248,3 +250,68 @@ org_db = hub[[selected_name]]
 org_db
 
 pkgdown::build_site()
+
+
+## illustrations for rotation report
+
+
+plot_arc(arch_data = arc_data, data = data,
+         which_dimensions = 1:2,
+         nudge = c(0, 0.1),
+         colors = c("#FFC003", "#D62728")) +
+  theme_bw() +
+  xlab("PC1") + ylab("PC2")
+
+archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-20, 10, 0), c(-10, -10, -5)),
+                          mean = 0, sd = 1)
+data = generate_data(archetypes$XC, N_examples = 5*1e2, jiiter = 0.04, size = 0.9)
+arc_data = fit_pch(data, noc = as.integer(3), # number of vertices = 3
+                   delta = 0)
+plot_arc(arch_data = arc_data, data = data,
+         which_dimensions = 1:2,
+         nudge = c(0, 0.1),
+         colors = c("#747171", "#D62728")) +
+  theme_bw() +
+  xlab("PC1") + ylab("PC2")
+
+
+## testing cython PCHA
+python -m timeit -n 1 -r 100 --verbose -s 'import numpy as np; from py_pcha.PCHA import PCHA; dimensions = 15; examples = 1000; X = np.random.random((dimensions, examples))' 'XC, S, C, SSE, varexpl = PCHA(X, noc=3, delta=0, maxiter = 2000)'
+
+
+
+# profile.py
+
+import pstats, cProfile
+
+import numpy as np; from py_pcha.PCHA import PCHA;
+dimensions = 15; examples = 10000; X = np.random.random((dimensions, examples))
+
+cProfile.runctx("PCHA(X, noc=3, delta=0, maxiter = 2000)", globals(), locals(), "Profile.prof")
+
+s = pstats.Stats("Profile.prof")
+s.strip_dirs().sort_stats("time").print_stats()
+
+
+X; noc = 3; I=None; U=None; delta=0; verbose=False; conv_crit=1E-6; maxiter=2000
+
+export CFLAGS=-I/Users/vk7/anaconda3/envs/py_pcha_cython/lib/python2.7/site-packages/numpy/core/include
+python setup.py build_ext --inplace
+
+import numpy as np
+from py_pcha.PCHA import PCHA
+
+dimensions = 15
+examples = 100
+X = np.random.random((dimensions, examples))
+
+XC, S, C, SSE, varexpl = PCHA(X, noc=3, delta=0)
+
+
+X_array = X
+X = np.asmatrix(X)
+N, M = X.shape
+I = range(M)
+U = range(M)
+
+SST = np.sum(np.diag(X[:, U] * X[:, U].T))

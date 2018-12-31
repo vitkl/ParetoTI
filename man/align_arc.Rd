@@ -6,7 +6,7 @@
 \alias{align_arc_opt}
 \title{Match/align arhetypes}
 \usage{
-align_arc(arc1, arc2)
+align_arc(arc1, arc2, type = c("lpsolve", "exhaustive")[1])
 
 gen_permut(n)
 
@@ -17,6 +17,8 @@ align_arc_opt(arc1, arc2, control = list(maxit = 10000, temp = 2000,
 \item{arc1}{reference matrix of archetype positions dim(dimensions, archetypes)}
 
 \item{arc2}{matrix of archetype positions dim(dimensions, archetypes) to be aligned with arc1}
+
+\item{type}{method for finding matching vertices. Linear programming (lpsolve) or exhaustive search (do not use for more than 10 vertices)}
 
 \item{n}{number of element to permute}
 
@@ -46,7 +48,7 @@ Exhaustive search works better than optimisation using SANN method for k=2:9 (16
 set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
                           mean = 0, sd = 1)
-data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 dim(data)
 # fit polytopes to 2 subsamples of the data
 arc_data = fit_pch_bootstrap(data, n = 2, sample_prop = 0.65, seed = 2543,

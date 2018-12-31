@@ -23,7 +23,10 @@ install_py_pcha(method = "auto", conda = "auto",
 
 \item{extra_packages}{specify python libraries not needed for ParetoTI to work but desirable in the same conda environment}
 
-\item{packages}{specify python libraries needed for ParetoTI to work. Normally do not need changing.}
+\item{packages}{specify python libraries needed for ParetoTI to work. Normally do not need changing.
+export PYTHONUSERBASE=/some_dir/python_libs/
+python -m pip install --user -i https://pypi.python.org/simple -U pip distribute
+python -m pip install --user -i https://pypi.python.org/simple --upgrade pip setuptools wheel}
 }
 \value{
 path to python enviroment with py_pcha module installed
@@ -33,18 +36,17 @@ path to python enviroment with py_pcha module installed
 
 \code{select_conda} is a helper function that tells R to use python conda environment created specifically for this package using \code{install_py_pcha}. This environment is used by default whe package is loaded. Set options(disable_ParetoTI_envname = TRUE) if you want to use other python installation. Set options(ParetoTI_envname = "other_env_name") if you want to use other conda environment.
 }
-\details{
-If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution: "Older versions of pip and distribute default to http://pypi.python.org/simple, which no longer works. A solution is to install an up-to-date pip and distribute using pip install -i https://pypi.python.org/simple -U pip distribute into the virtual environment before running the rest of the build process."
-# use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir
-export PYTHONUSERBASE=/some_dir/python_libs/
-python -m pip install --user -i https://pypi.python.org/simple -U pip distribute
-python -m pip install --user -i https://pypi.python.org/simple --upgrade pip setuptools wheel
-}
 \examples{
 \dontrun{
 install_py_pcha()
 install_py_pcha(extra_packages = c("tensorflow", "pandas", "keras",
                                    "h5py", "pydot", "sklearn"))
+
+## If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution:
+
+# "Older versions of pip and distribute default to http://pypi.python.org/simple, which no longer works. A solution is to install an up-to-date pip and distribute using pip install -i https://pypi.python.org/simple -U pip distribute into the virtual environment before running the rest of the build process."
+
+# use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir
 }
 }
 \author{

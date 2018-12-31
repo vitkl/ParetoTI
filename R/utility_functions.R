@@ -11,8 +11,6 @@
 ##' @param overwrite_env It TRUE overwrites conda environment.
 ##' @param extra_packages specify python libraries not needed for ParetoTI to work but desirable in the same conda environment
 ##' @param packages specify python libraries needed for ParetoTI to work. Normally do not need changing.
-##' @details If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution: "Older versions of pip and distribute default to http://pypi.python.org/simple, which no longer works. A solution is to install an up-to-date pip and distribute using pip install -i https://pypi.python.org/simple -U pip distribute into the virtual environment before running the rest of the build process."
-##' # use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir
 ##' export PYTHONUSERBASE=/some_dir/python_libs/
 ##' python -m pip install --user -i https://pypi.python.org/simple -U pip distribute
 ##' python -m pip install --user -i https://pypi.python.org/simple --upgrade pip setuptools wheel
@@ -24,6 +22,12 @@
 ##' install_py_pcha()
 ##' install_py_pcha(extra_packages = c("tensorflow", "pandas", "keras",
 ##'                                    "h5py", "pydot", "sklearn"))
+##'
+##' ## If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution:
+##'
+##' # "Older versions of pip and distribute default to http://pypi.python.org/simple, which no longer works. A solution is to install an up-to-date pip and distribute using pip install -i https://pypi.python.org/simple -U pip distribute into the virtual environment before running the rest of the build process."
+##'
+##' # use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir
 ##' }
 install_py_pcha = function(method = "auto", conda = "auto",
                            python_version = c("python 2.7.10", "python 3.6.4")[1],

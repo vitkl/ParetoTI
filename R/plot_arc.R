@@ -1,11 +1,11 @@
-##' Plot data with archetypes in 2D and 3D
+##' Plot data with archetypes in 2D, 3D and a panel of 2D
 ##' @rdname plot_arc
 ##' @name plot_arc
 ##' @author Vitalii Kleshchevnikov
 ##' @description \code{plot_arc()} plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "b_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").
 ##' @param arc_data objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm. Set to NULL if you want to show data alone.
 ##' @param data matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)
-##' @param which_dimensions indices or character vector specifying dimension names. When \code{which_dimensions} exceeds the number of dimensions in arc_data these archetypes will be omitted. This can happen when fitting simplexes: lines and triangles are only 2D, so will be omitted from 3D plots.
+##' @param which_dimensions indices or character vector specifying dimension names. 2D plot, 3D plot or a panel for 2D plots when more than 3 dimensions. When \code{which_dimensions} exceeds the number of dimensions in arc_data these archetypes will be omitted. This can happen when fitting simplexes: lines and triangles are only 2D, so will be omitted from 3D plots.
 ##' @param type used when arc_data is "b_pch_fit", one of "average", "all"
 ##' @param average_func used when arc_data is "b_pch_fit", function telling how to find average position of vertices
 ##' @param geom plotting function to plot data in 2D, useful options are ggplot2::geom_point (scatterplot) and ggplot2::geom_bin2d (density)
@@ -175,8 +175,17 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
       }
     }
     plot = plot + ggplot2::xlab(x) + ggplot2::ylab(y)
+
+    if(is.numeric(for_plot$data$lab)){
+      # if cells are colored on a gradient - add nice palette
+      plot = plot + ggplot2::scale_color_viridis_c()
+    }
+
+
     ## 3D plot ===================================================================##
+
   } else if(length(which_dimensions) == 3 & nrow(data) >= 3) {
+
     if(is.integer(which_dimensions)){
       z = colnames(for_plot$data)[3]
     } else if (is.character(which_dimensions)) {
@@ -230,6 +239,40 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                         text = ~ arch_id)
       }
     }
-  } else stop("asked to plot < 2 or > 3 dimensions, or dataset has less dimensions than specified by which_dimensions")
+  } else if (length(which_dimensions) > 3 & nrow(data) >= length(which_dimensions)) {
+
+    # create a matrix of possible pairwise combinations
+    combs = expand.grid(which_dimensions, which_dimensions)
+    # remove the same dimension
+    combs = combs[combs[, 1] != combs[, 2],]
+    # remove the same pair in reverse order
+    pair_id = apply(combs, 1, function(x) paste0(sort(x), collapse = ""))
+    combs = split(combs, pair_id)
+    combs = t(vapply(combs, function(x) as.integer(x[1,]), integer(2)))
+
+    # remove row names that screw up subsetting
+    rownames(combs) = NULL
+
+    plot = list()
+    for (i in seq_len(nrow(combs))) {
+      dims = as.integer(combs[i, ])
+
+      p_pca = plot_arc(arch_data = arch_data, data = data,
+                       which_dimensions = dims,
+                       type = type, average_func = average_func,
+                       geom = geom, colors = colors,
+                       arch_size = arch_size, line_size = line_size,
+                       data_size = data_size, arch_alpha = arch_alpha,
+                       data_lab = data_lab, arc_lab = arc_lab,
+                       legend_name = legend_name,
+                       text_size = text_size, nudge = nudge)
+
+      plot = c(plot, list(p_pca + theme(legend.position = "none")))
+    }
+    plot = plot_grid(plotlist = plot)
+
+  } else stop("dataset has less dimensions than specified by which_dimensions")
+
   plot
+
 }

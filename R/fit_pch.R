@@ -416,7 +416,7 @@ average_pch_fits = function(res, XC_array = NULL){
   if(!is(res, "b_pch_fit")) stop("average_pch_fits(): res object provided is not b_pch_fit")
   if(is.null(XC_array)) XC_array = simplify2array(res$pch_fits$XC)
   res_aver = list(call = res$call)
-  # calculate average XC matrix, set other S and C to NA
+  # calculate average XC matrix, set other C and S to NA because cells come from different samples
   res_aver$XC = rowMeans(XC_array, dims = 2)
   res_aver$S = NA
   res_aver$C = NA
@@ -779,10 +779,13 @@ merge_arch_dist = function(arch_data, data, feature_data,
   if(!is.null(colData)) {
     features = merge(features, colData, by.x = "sample_id", by.y = colData_id,
                      all.x = T, all.y = F)
+    colData_col = colnames(colData)[!colnames(colData) %in% colData_id]
+  } else {
+    colData_col = NULL
   }
   list(data = features, arc_col = arc_col,
        features_col = rownames(feature_data),
-       colData_col = colnames(colData)[!colnames(colData) %in% colData_id])
+       colData_col = colData_col)
 }
 
 .c_pch_fit_list = function(pch_fit_list){

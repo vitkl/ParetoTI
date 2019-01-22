@@ -226,8 +226,7 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
   # generate labels
   enriched = enriched[order(get(order_by), decreasing = order_decreasing),
                       .(arch_name = x_name, y_name)]
-  enriched[, arch_lab := paste0(arch_name, "\n\n",
-                                paste0(y_name[1:4][!is.na(y_name[1:4])],
+  enriched[, arch_lab := paste0(paste0(y_name[1:4][!is.na(y_name[1:4])],
                                        collapse = ", "), "\n",
                                 paste0(y_name[5:8][!is.na(y_name[5:8])],
                                        collapse = ", "), "\n",
@@ -270,7 +269,7 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
     enriched_sets_lab = enriched_sets[order(get(order_by), decreasing = order_decreasing),
                                       .(arch_name = x_name, y_name_set = y_name)]
     enriched_lab = merge(enriched_lab, enriched_sets_lab, by = "arch_name",
-                         all.x = T, all.y = F)
+                         all.x = T, all.y = T)
     enriched_lab[, arch_lab := paste0(arch_lab, "\n\n",
                                       paste0(y_name_set[1][!is.na(y_name_set[1])],
                                              collapse = ", "), "\n",
@@ -280,10 +279,15 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
                                              collapse = ", ")),
                  by = arch_name]
     enriched_lab = unique(enriched_lab[, .(arch_name, arch_lab)])
-    while(sum(grepl("\n\n\n", enriched_lab$arch_lab))){
-      enriched_lab$arch_lab = gsub("\n\n\n", "\n\n", enriched_lab$arch_lab)
-    }
   }
+
+  # add vertex label
+  enriched_lab[, arch_lab := paste0(arch_name, "\n\n", arch_lab), by = arch_name]
+  # remove excessive empty lines
+  while(sum(grepl("\n\n\n", enriched_lab$arch_lab))){
+    enriched_lab$arch_lab = gsub("\n\n\n", "\n\n", enriched_lab$arch_lab)
+  }
+
   for (i in seq_len(nrow(enriched_lab))) {
     cat(" -- ", enriched_lab$arch_lab[i], "\n\n", sep = " ")
   }

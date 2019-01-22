@@ -5,7 +5,7 @@
 \alias{make_features}
 \alias{predict_vert}
 \alias{split_train_val}
-\alias{plot_confusion}
+\alias{plot_confusion_vert}
 \alias{get_feature_weights}
 \title{Logistic regression model to classify vertices}
 \usage{
@@ -19,11 +19,16 @@ make_features(data_attr, features_list, n_bins = 10, n_samples = 10,
 
 predict_vert(vert_model, data_attr, features_data)
 
-split_train_val(features_data, val_sampl_per_y = 3)
+split_train_val(features_data, val_prop = 0.3, per_class = TRUE)
 
-plot_confusion(predicted)
+plot_confusion_vert(predicted)
 
 get_feature_weights(vert_model, features_data)
+}
+\arguments{
+\item{val_prop}{proportion of samples used for validation.}
+
+\item{per_class}{Use proportion of samples within each class for validation? By default the function takes class into account when splitting data (TRUE)}
 }
 \description{
 build_logit_vert() defines keras model
@@ -34,7 +39,7 @@ predict_vert() predict vertices using a model and attribute data (distance to ve
 
 split_train_val() split data into training and validation. Shuffle examples to ensure that model sees all vertices in training and validation
 
-plot_confusion() plot prediction probabilities as confusion matrix
+plot_confusion_vert() plot vertex probabilities as confusion matrix
 
 get_feature_weights() get gene weights and ranked features from keras model
 }

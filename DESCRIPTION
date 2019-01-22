@@ -1,7 +1,7 @@
 Package: ParetoTI
 Type: Package
 Title: Pareto Task Inference In R (based on ParTI)
-Version: 0.1.3
+Version: 0.1.4
 Author: Vitalii Kleshchevnikov
 Maintainer: Vitalii Kleshchevnikov <vk7@sanger.ac.uk>
 Authors@R: c(person("Vitalii", "Kleshchevnikov",, "vk7@sanger.ac.uk", role = c("aut", "cre")))
@@ -26,4 +26,4 @@ URL: https://vitkl.github.io/ParetoTI/
 BugReports: https://github.com/vitkl/ParetoTI/issues
 Depends: reticulate, data.table, lpSolve
 Imports: parallel, plotly, BioQC, geometry, ggplot2, AnnotationHub, GO.db, ontologyIndex, Biobase, SummarizedExperiment, corpcor
-Suggests: voxel, clustermq, cowplot, keras
+Suggests: voxel, clustermq, cowplot, keras, SingleCellExperiment

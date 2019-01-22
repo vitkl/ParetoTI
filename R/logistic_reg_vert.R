@@ -85,7 +85,10 @@ make_features = function(data_attr, features_list, n_bins = 10, n_samples = 10,
                        example ~ label, fun.aggregate = length,
                        value.var = "label", fill = 0)
   y = as.matrix(y, rownames = "example")
-  list(X = X, y = y, X_dt = X_dt)
+  list(X = X, y = y, X_dt = X_dt,
+       settings = list(features_list = features_list, n_bins = n_bins,
+                       n_samples = n_samples, select_bins = select_bins,
+                       combine_bins = combine_bins))
 }
 
 ##' @rdname predict_vert
@@ -94,11 +97,12 @@ make_features = function(data_attr, features_list, n_bins = 10, n_samples = 10,
 ##' @export predict_vert
 ##' @import data.table
 predict_vert = function(vert_model, data_attr, features_data) {
-  # generate features as is feature data
-  all_X = make_features(data_attr, features_list = features_list_1,
-                        n_bins = unique(features_data$X_dt[, uniqueN(predictor),
-                                                           by = .(gene, example)]$V1),
-                        n_samples = 1)#, select_bins = c(1, 2, 9, 10))
+  # generate features the same way as feature data
+  all_X = make_features(data_attr,
+                        features_list = features_data$settings$features_list,
+                        n_bins = features_data$settings$n_bins, n_samples = 1,
+                        select_bins = features_data$settings$select_bins,
+                        combine_bins = features_data$settings$combine_bins)
 
   # predict classes
   classes = predict_classes(vert_model, all_X$X, batch_size = NULL, verbose = 0,
@@ -115,12 +119,22 @@ predict_vert = function(vert_model, data_attr, features_data) {
 ##' @rdname predict_vert
 ##' @name split_train_val
 ##' @description split_train_val() split data into training and validation. Shuffle examples to ensure that model sees all vertices in training and validation
+##' @param val_prop proportion of samples used for validation.
+##' @param per_class Use proportion of samples within each class for validation? By default the function takes class into account when splitting data (TRUE)
 ##' @export split_train_val
 ##' @import data.table
-split_train_val = function(features_data, val_sampl_per_y = 3) {
-  val_ind = as.integer(apply(features_data$y, 2, FUN = function(x){
-    sample(which(x == 1), val_sampl_per_y)
-  }))
+split_train_val = function(features_data, val_prop = 0.3, per_class = TRUE) {
+
+  if(isTRUE(per_class)) {
+    val_ind = as.integer(unlist(apply(features_data$y, 2, FUN = function(x){
+      class_ind = which(x == 1)
+      sample(class_ind, round(length(class_ind) * val_prop, digits = 0))
+    })))
+  } else {
+    val_ind = sample.int(nrow(features_data$y),
+                         round(nrow(features_data$y) * val_prop, digits = 0))
+  }
+
   list(val_data = list(features_data$X[val_ind,],
                        features_data$y[val_ind,]),
        train_data = list(X = features_data$X[-val_ind,],
@@ -128,11 +142,11 @@ split_train_val = function(features_data, val_sampl_per_y = 3) {
 }
 
 ##' @rdname predict_vert
-##' @name plot_confusion
-##' @description plot_confusion() plot prediction probabilities as confusion matrix
-##' @export plot_confusion
+##' @name plot_confusion_vert
+##' @description plot_confusion_vert() plot vertex probabilities as confusion matrix
+##' @export plot_confusion_vert
 ##' @import data.table
-plot_confusion = function(predicted) {
+plot_confusion_vert = function(predicted) {
   predicted = as.data.table(predicted, keep.rownames = "observed_vertex")
   predicted = melt.data.table(predicted, id.vars = "observed_vertex",
                               variable.name = "predicted_vertex",

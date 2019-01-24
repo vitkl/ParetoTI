@@ -41,7 +41,7 @@ map_gwas_annot(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
 
 \item{columns}{columns to retrieve. Default is GOALL: GO Identifiers (includes less specific terms), \link[AnnotationDbi]{colsAndKeytypes}.}
 
-\item{keytype}{type of \code{keys} identifiers. Use \code{keytypes(map_go_annot(..., return_org_db = T))} to find which keytypes are available.}
+\item{keytype}{type of \code{keys} identifiers. Use \code{keytypes(map_go_annot(taxonomy_id = 9606, return_org_db = T))} to find which keytypes are available.}
 
 \item{ontology_type}{specify which branch of gene ontology to retrieve annotations from.}
 

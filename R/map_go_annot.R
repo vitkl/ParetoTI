@@ -7,7 +7,7 @@
 ##' @param taxonomy_id Taxonomy id of your species. 9606 is human, 10090 is mouse. Find your species id using taxonomy search by UniProt: https://www.uniprot.org/taxonomy/.
 ##' @param keys gene or protein identifiers of \code{keytype}
 ##' @param columns columns to retrieve. Default is GOALL: GO Identifiers (includes less specific terms), \link[AnnotationDbi]{colsAndKeytypes}.
-##' @param keytype type of \code{keys} identifiers. Use \code{keytypes(map_go_annot(..., return_org_db = T))} to find which keytypes are available.
+##' @param keytype type of \code{keys} identifiers. Use \code{keytypes(map_go_annot(taxonomy_id = 9606, return_org_db = T))} to find which keytypes are available.
 ##' @param ontology_type specify which branch of gene ontology to retrieve annotations from.
 ##' @param evidence_code specify which evidence should have been used to annotate genes with GO terms. Use \code{keys(map_go_annot(..., return_org_db = T), "EVIDENCE")} to find which codes exist. See http://www.geneontology.org/page/guide-go-evidence-codes for explanations and details.
 ##' @param localHub set localHub = FALSE for working offline. Details \link[AnnotationHub]{AnnotationHub}.

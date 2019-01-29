@@ -1,10 +1,10 @@
-##' Plot SSE and variance explained by polytope fit
+##' Plot variance in positions, t-ratios and variance explained by polytope fit
 ##' @rdname plot_arc_var
 ##' @name plot_arc_var
 ##' @author Vitalii Kleshchevnikov
-##' @description \code{plot_arc_var()} shows SSE and variance explained by polytope models with different number of vertices (k)
+##' @description \code{plot_arc_var()} shows variance in positions (total_var), t-ratios, SSE and variance explained (cumulative - varexpl, each vertex - res_varexpl) by polytope models with different number of vertices (k)
 ##' @param arc_data object of class "k_pch_fit", storing the position of vertices of best fit polytopes with different k, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is a list where each element is XC matrix of dim(dimensions, archetypes) storing positions of vertices with different k.
-##' @param type which measure to plot as a function of k, one of "varexpl", "SSE", "res_varexpl", "dim". Use dim to plot variance in position in each dimension.
+##' @param type which measure to plot as a function of k, one of "varexpl", "SSE", "res_varexpl", "total_var", "t_ratio, "dim". Use dim to plot variance in position in each dimension.
 ##' @param arch_size size of archetype point
 ##' @param line_size width of lines connecting archetypes
 ##' @param reorder reorder dimensions based on variance in position (type = "dim).
@@ -29,7 +29,7 @@
 ##' plot_arc_var(arc_data, type = c("varexpl", "SSE", "res_varexpl")[1],
 ##'              point_size = 2, line_size = 1.5) + theme_bw()
 plot_arc_var = function(arc_data, type = c("varexpl", "SSE", "res_varexpl",
-                                           "total_var", "dim")[1],
+                                           "total_var", "t_ratio", "dim")[1],
                         point_size = 2, line_size = 1.5, reorder = FALSE){
   if(!(is(arc_data, "k_pch_fit") | is(arc_data, "b_pch_fit") |
        is(arc_data, "pch_fit"))) {

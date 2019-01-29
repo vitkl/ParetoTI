@@ -2,16 +2,16 @@
 % Please edit documentation in R/plot_arc_var.R
 \name{plot_arc_var}
 \alias{plot_arc_var}
-\title{Plot SSE and variance explained by polytope fit}
+\title{Plot variance in positions, t-ratios and variance explained by polytope fit}
 \usage{
 plot_arc_var(arc_data, type = c("varexpl", "SSE", "res_varexpl",
-  "total_var", "dim")[1], point_size = 2, line_size = 1.5,
+  "total_var", "t_ratio", "dim")[1], point_size = 2, line_size = 1.5,
   reorder = FALSE)
 }
 \arguments{
 \item{arc_data}{object of class "k_pch_fit", storing the position of vertices of best fit polytopes with different k, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is a list where each element is XC matrix of dim(dimensions, archetypes) storing positions of vertices with different k.}
 
-\item{type}{which measure to plot as a function of k, one of "varexpl", "SSE", "res_varexpl", "dim". Use dim to plot variance in position in each dimension.}
+\item{type}{which measure to plot as a function of k, one of "varexpl", "SSE", "res_varexpl", "total_var", "t_ratio, "dim". Use dim to plot variance in position in each dimension.}
 
 \item{line_size}{width of lines connecting archetypes}
 
@@ -23,7 +23,7 @@ plot_arc_var(arc_data, type = c("varexpl", "SSE", "res_varexpl",
 \code{plot_arc_var()} ggplot2 (2D) plot
 }
 \description{
-\code{plot_arc_var()} shows SSE and variance explained by polytope models with different number of vertices (k)
+\code{plot_arc_var()} shows variance in positions (total_var), t-ratios, SSE and variance explained (cumulative - varexpl, each vertex - res_varexpl) by polytope models with different number of vertices (k)
 }
 \examples{
 library(ParetoTI)

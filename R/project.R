@@ -10,6 +10,8 @@
 ##'                           mean = 0, sd = 1, N_dim = 2)
 ##' data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 project = function(arc_data, data, n_dim = 3, proj_matrix = NULL){
+  s = irlba::irlba(data, 50)
+  cds@reducedDimK = tcrossprod(diag(s$d), s$v)
   s = svd::propack.svd(X = data, neig = n_dim)
 
   crossprod(s$u, logcounts(data_run))

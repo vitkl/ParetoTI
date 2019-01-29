@@ -269,7 +269,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
 
       plot = c(plot, list(p_pca + theme(legend.position = "none")))
     }
-    plot = plot_grid(plotlist = plot)
+    plot = cowplot::plot_grid(plotlist = plot)
 
   } else stop("dataset has less dimensions than specified by which_dimensions")
 

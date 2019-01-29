@@ -26,4 +26,5 @@ URL: https://vitkl.github.io/ParetoTI/
 BugReports: https://github.com/vitkl/ParetoTI/issues
 Depends: reticulate, data.table, lpSolve
 Imports: parallel, plotly, BioQC, geometry, ggplot2, AnnotationHub, GO.db, ontologyIndex, Biobase, SummarizedExperiment, corpcor, AUCell
-Suggests: voxel, clustermq, cowplot, keras, SingleCellExperiment
+Suggests: voxel, doMC, cowplot, keras, SingleCellExperiment
+Enhances: clustermq

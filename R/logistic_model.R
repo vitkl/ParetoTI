@@ -127,7 +127,7 @@ fit_logistic_model = function(sce, y = NULL,
       ggtitle("N cells with strong prediction for one or several classes (p > 0.3)")
     print(p1)
     # and max prediction for any class
-    p2 = ggplot2::qplot(rowMax(probabilities), geom = "histogram") +
+    p2 = ggplot2::qplot(matrixStats::rowMaxs(probabilities), geom = "histogram") +
       ggtitle("Max probability for any class")
     print(p2)
   }
@@ -214,11 +214,12 @@ predict_logistic_prob = function(sce, model_res, assay_slot = "logcounts",
 
   if(verbose){
     # cells with strong prediction for several classes
-    p1 = ggplot2::qplot(rowSums(probabilities > 0.3), geom = "histogram") +
+    p1 = ggplot2::qplot(Matrix::rowSums(probabilities > 0.3), geom = "histogram") +
       ggtitle("N cells with strong prediction for one or several classes (p > 0.3)")
     print(p1)
     # and max prediction for any class
-    p2 = ggplot2::qplot(rowMax(probabilities), geom = "histogram") +
+    p2 = ggplot2::qplot(matrixStats::rowMaxs(probabilities),
+                        geom = "histogram") +
       ggtitle("Max probability for any class")
     print(p2)
   }

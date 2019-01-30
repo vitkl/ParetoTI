@@ -48,13 +48,13 @@ fit_logistic_model = function(sce, y = NULL,
 
   if(is.null(y)) { # if label matrix is not provided - create
     # generate label matrix
-    y = data.table(ident = colData(sce)[, y_col], cell_id = colnames(sce))
+    y = data.table(ident = SummarizedExperiment::colData(sce)[, y_col], cell_id = colnames(sce))
     y = dcast.data.table(y, cell_id ~ ident, fun.aggregate = length)
     y = as.matrix(y, rownames = "cell_id")
     y = as(y, "dgCMatrix")
   }
 
-  features_data = list(y = y, X = Matrix::t(as(assay(sce, assay_slot), "dgCMatrix")))
+  features_data = list(y = y, X = Matrix::t(as(SummarizedExperiment::assay(sce, assay_slot), "dgCMatrix")))
 
   if(!is.null(regularizer)) regularizer = regularizer(l = penalty)
 
@@ -115,7 +115,7 @@ fit_logistic_model = function(sce, y = NULL,
   if(verbose) print(top[1:10])
 
   # Caclculate probability for each cluster
-  probabilities = keras::predict_proba(model, Matrix::t(as(assay(sce, assay_slot), "dgCMatrix")),
+  probabilities = keras::predict_proba(model, Matrix::t(as(SummarizedExperiment::assay(sce, assay_slot), "dgCMatrix")),
                                        batch_size = batch_size,
                                        verbose = 0, steps = NULL)
   colnames(probabilities) = colnames(y)
@@ -139,7 +139,7 @@ fit_logistic_model = function(sce, y = NULL,
   pred_class = colnames(probabilities)[apply(probabilities, 1, which.max)]
 
   # calculate and plot confusion matrix for classes
-  confusion = table(colData(sce)[, y_col], pred_class)
+  confusion = table(SummarizedExperiment::colData(sce)[, y_col], pred_class)
   if(verbose) print(plot_confusion(confusion) + ggtitle("Confusion between classes"))
 
   structure(list(probabilities = probabilities,
@@ -206,7 +206,7 @@ predict_logistic_prob = function(sce, model_res, assay_slot = "logcounts",
 
   # Caclculate probability for each cluster
   probabilities = keras::predict_proba(model_res$model,
-                                       Matrix::t(as(assay(sce[gene_names,], assay_slot), "dgCMatrix")),
+                                       Matrix::t(as(SummarizedExperiment::assay(sce[gene_names,], assay_slot), "dgCMatrix")),
                                        batch_size = batch_size,
                                        verbose = 0, steps = NULL)
   colnames(probabilities) = colnames(model_res$y)
@@ -232,7 +232,7 @@ predict_logistic_prob = function(sce, model_res, assay_slot = "logcounts",
   # calculate and plot confusion matrix for classes
   if(!is.null(ref_y_col)) {
     # discrete labels
-    confusion = table(colData(sce)[, ref_y_col], pred_class)
+    confusion = table(SummarizedExperiment::colData(sce)[, ref_y_col], pred_class)
     if(verbose) print(plot_confusion(confusion) + ggtitle("Confusion between classes"))
 
   } else if(!is.null(ref_y)) {

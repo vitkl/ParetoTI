@@ -133,7 +133,9 @@ fit_logistic_model = function(sce, y = NULL,
   }
 
   # use entropy to measure strength in predictions
-  class_entropy = apply(probabilities, 1, FUN = entropy::entropy.plugin)
+  class_entropy = apply(probabilities, 1, FUN = function(x){
+    -sum(x * log2(x), na.rm = TRUE)
+  })
 
   # compute class labels by selecting a label with max probability
   pred_class = colnames(probabilities)[apply(probabilities, 1, which.max)]
@@ -225,7 +227,9 @@ predict_logistic_prob = function(sce, model_res, assay_slot = "logcounts",
   }
 
   # use entropy to measure strength in predictions
-  class_entropy = apply(probabilities, 1, FUN = entropy::entropy.plugin)
+  class_entropy = apply(probabilities, 1, FUN = function(x){
+    -sum(x * log2(x), na.rm = TRUE)
+  })
 
   # compute class labels by selecting a label with max probability
   pred_class = colnames(probabilities)[apply(probabilities, 1, which.max)]

@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.5</span>
       </span>
     </div>
 
@@ -117,7 +117,7 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>arch_dist</span>(<span class='no'>data</span>, <span class='no'>archetypes</span>)</pre>
+    <pre class="usage"><span class='fu'>arch_dist</span>(<span class='no'>data</span>, <span class='no'>archetypes</span>, <span class='kw'>dist_metric</span> <span class='kw'>=</span> <span class='st'>"euclidian"</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -129,6 +129,10 @@
     <tr>
       <th>archetypes</th>
       <td><p>matrix of dim(variables/dimentions, archetypes)</p></td>
+    </tr>
+    <tr>
+      <th>dist_metric</th>
+      <td><p>distance metric, currently only "euclidian" implemented</p></td>
     </tr>
     </table>
     
@@ -143,11 +147,11 @@
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Triangle with sides of 3,4,5 units length</span>
-<span class='fu'>arch_dist</span>(<span class='fu'>matrix</span>(<span class='fu'>c</span>(<span class='fl'>0</span>,<span class='fl'>0</span>),<span class='fl'>1</span>,<span class='fl'>2</span>), <span class='fu'>matrix</span>(<span class='fu'>c</span>(<span class='fl'>3</span>,<span class='fl'>4</span>),<span class='fl'>1</span>,<span class='fl'>2</span>))</div><div class='output co'>#&gt;      archetype_1 archetype_2
+<span class='fu'>arch_dist</span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>0</span>,<span class='fl'>0</span>),<span class='fl'>1</span>,<span class='fl'>2</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>3</span>,<span class='fl'>4</span>),<span class='fl'>1</span>,<span class='fl'>2</span>))</div><div class='output co'>#&gt;      archetype_1 archetype_2
 #&gt; [1,]           3           4
 #&gt; [2,]           3           4</div><div class='input'><span class='co'># Random data that fits into the triangle</span>
-<span class='fu'>set.seed</span>(<span class='fl'>4355</span>)
-<span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='fu'>c</span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'>c</span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'>c</span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4355</span>)
+<span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
                           <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>N_dim</span> <span class='kw'>=</span> <span class='fl'>2</span>)</div><div class='output co'>#&gt; <span class='error'>Error in generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),     mean = 0, sd = 1, N_dim = 2): unused argument (N_dim = 2)</span></div><div class='input'><span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>archetypes</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='co'># Find Euclidian distance between data points and archetypes</span>
 <span class='no'>distance</span> <span class='kw'>=</span> <span class='fu'>arch_dist</span>(<span class='no'>data</span>, <span class='no'>archetypes</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='co'># Find Euclidian distance between archetypes</span>
 <span class='no'>arc_distance</span> <span class='kw'>=</span> <span class='fu'>arch_dist</span>(<span class='no'>archetypes</span>, <span class='no'>archetypes</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div></pre>
@@ -165,9 +169,7 @@
     </ul>
 
     <h2>Author</h2>
-    
-Vitalii Kleshchevnikov
-
+    <p>Vitalii Kleshchevnikov</p>
   </div>
 </div>
 
@@ -177,7 +179,7 @@ Vitalii Kleshchevnikov
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> .</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
 </div>
       </footer>
    </div>

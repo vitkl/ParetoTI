@@ -64,7 +64,7 @@ generate_data() produces matrix of random data that fits a polytope defined by a
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.5</span>
       </span>
     </div>
 
@@ -119,7 +119,7 @@ generate_data() produces matrix of random data that fits a polytope defined by a
     
     </div>
 
-    <pre class="usage"><span class='fu'>generate_arc</span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='fu'>c</span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'>c</span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'>c</span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
+    <pre class="usage"><span class='fu'>generate_arc</span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
   <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>)
 
 <span class='fu'>generate_data</span>(<span class='no'>archetypes</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>10000</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
@@ -173,11 +173,11 @@ generate_data() produces matrix of random data that fits a polytope defined by a
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Random data that fits into the triangle</span>
-<span class='fu'>set.seed</span>(<span class='fl'>4355</span>)
-<span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'>generate_arc</span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='fu'>c</span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'>c</span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'>c</span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4355</span>)
+<span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'>generate_arc</span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
                           <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>N_dim</span> <span class='kw'>=</span> <span class='fl'>2</span>)</div><div class='output co'>#&gt; <span class='error'>Error in generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),     mean = 0, sd = 1, N_dim = 2): unused argument (N_dim = 2)</span></div><div class='input'><span class='no'>data</span> <span class='kw'>=</span> <span class='fu'>generate_data</span>(<span class='no'>archetypes</span>$<span class='no'>XC</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='co'># Find Euclidian distance between data points and archetypes</span>
-<span class='no'>distance</span> <span class='kw'>=</span> <span class='fu'>sqrt</span>(<span class='fu'><a href='arch_dist.html'>arch_dist</a></span>(<span class='no'>data</span>, <span class='no'>archetypes</span>))</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='co'># Find Euclidian distance between archetypes</span>
-<span class='no'>arc_distance</span> <span class='kw'>=</span> <span class='fu'>sqrt</span>(<span class='fu'><a href='arch_dist.html'>arch_dist</a></span>(<span class='no'>archetypes</span>, <span class='no'>archetypes</span>))</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div></pre>
+<span class='no'>distance</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/MathFun'>sqrt</a></span>(<span class='fu'><a href='arch_dist.html'>arch_dist</a></span>(<span class='no'>data</span>, <span class='no'>archetypes</span>))</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='co'># Find Euclidian distance between archetypes</span>
+<span class='no'>arc_distance</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/MathFun'>sqrt</a></span>(<span class='fu'><a href='arch_dist.html'>arch_dist</a></span>(<span class='no'>archetypes</span>, <span class='no'>archetypes</span>))</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -192,9 +192,7 @@ generate_data() produces matrix of random data that fits a polytope defined by a
     </ul>
 
     <h2>Author</h2>
-    
-Vitalii Kleshchevnikov
-
+    <p>Vitalii Kleshchevnikov</p>
   </div>
 </div>
 
@@ -204,7 +202,7 @@ Vitalii Kleshchevnikov
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> .</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
 </div>
       </footer>
    </div>

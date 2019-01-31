@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Plot data with archetypes in 2D and 3D — plot_arc • ParetoTI</title>
+<title>Plot data with archetypes in 2D, 3D and a panel of 2D — plot_arc • ParetoTI</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,7 +30,7 @@
 
 
 
-<meta property="og:title" content="Plot data with archetypes in 2D and 3D — plot_arc" />
+<meta property="og:title" content="Plot data with archetypes in 2D, 3D and a panel of 2D — plot_arc" />
 
 <meta property="og:description" content="plot_arc() plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is &quot;b_pch_fit&quot; all archetype locations from each subsample are shown with lines connecting the average location (type &quot;average&quot;); or lines connecting archetypes in each of the experiments (colored differently, type &quot;all&quot;)." />
 <meta name="twitter:card" content="summary" />
@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.5</span>
       </span>
     </div>
 
@@ -106,7 +106,7 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Plot data with archetypes in 2D and 3D</h1>
+    <h1>Plot data with archetypes in 2D, 3D and a panel of 2D</h1>
     
     <div class="hidden name"><code>plot_arc.Rd</code></div>
     </div>
@@ -117,13 +117,13 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>plot_arc</span>(<span class='kw'>arch_data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>data</span>, <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fu'>as.integer</span>(<span class='fl'>1</span>:<span class='fl'>2</span>),
-  <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"average"</span>, <span class='st'>"all"</span>)[<span class='fl'>1</span>], <span class='kw'>average_func</span> <span class='kw'>=</span> <span class='no'>mean</span>,
-  <span class='kw'>geom</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw pkg'>ggplot2</span><span class='kw ns'>::</span><span class='no'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span>, <span class='kw pkg'>ggplot2</span><span class='kw ns'>::</span><span class='no'><a href='https://ggplot2.tidyverse.org/reference/geom_bin2d.html'>geom_bin2d</a></span>)<span class='kw'>[[</span><span class='fl'>1</span>]],
-  <span class='kw'>colors</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='st'>"#1F77B4"</span>, <span class='st'>"#D62728"</span>, <span class='st'>"#2CA02C"</span>, <span class='st'>"#17BED0"</span>, <span class='st'>"#006400"</span>,
-  <span class='st'>"#FF7E0F"</span>), <span class='kw'>arch_size</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>line_size</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>data_size</span> <span class='kw'>=</span> <span class='fl'>2</span>,
+    <pre class="usage"><span class='fu'>plot_arc</span>(<span class='kw'>arch_data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>data</span>, <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>1</span>:<span class='fl'>2</span>),
+  <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"average"</span>, <span class='st'>"all"</span>)[<span class='fl'>1</span>], <span class='kw'>average_func</span> <span class='kw'>=</span> <span class='no'>mean</span>,
+  <span class='kw'>geom</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw pkg'>ggplot2</span><span class='kw ns'>::</span><span class='no'><a href='https://ggplot2.tidyverse.org/reference/geom_point.html'>geom_point</a></span>, <span class='kw pkg'>ggplot2</span><span class='kw ns'>::</span><span class='no'><a href='https://ggplot2.tidyverse.org/reference/geom_bin2d.html'>geom_bin2d</a></span>)<span class='kw'>[[</span><span class='fl'>1</span>]],
+  <span class='kw'>colors</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"#1F77B4"</span>, <span class='st'>"#D62728"</span>, <span class='st'>"#2CA02C"</span>, <span class='st'>"#17BED0"</span>, <span class='st'>"#006400"</span>,
+  <span class='st'>"#FF7E0F"</span>), <span class='kw'>arch_size</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>line_size</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>data_size</span> <span class='kw'>=</span> <span class='fl'>4</span>,
   <span class='kw'>arch_alpha</span> <span class='kw'>=</span> <span class='fl'>0.4</span>, <span class='kw'>data_lab</span> <span class='kw'>=</span> <span class='st'>"data"</span>, <span class='kw'>arc_lab</span> <span class='kw'>=</span> <span class='st'>"archetypes"</span>,
-  <span class='kw'>legend_name</span> <span class='kw'>=</span> <span class='st'>"data"</span>, <span class='kw'>text_size</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>nudge</span> <span class='kw'>=</span> <span class='fu'>c</span>(<span class='fl'>0.05</span>, <span class='fl'>0.1</span>))</pre>
+  <span class='kw'>legend_name</span> <span class='kw'>=</span> <span class='st'>"data"</span>, <span class='kw'>text_size</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>nudge</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>0.05</span>, <span class='fl'>0.1</span>))</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -134,7 +134,7 @@
     </tr>
     <tr>
       <th>which_dimensions</th>
-      <td><p>indices or character vector specifying dimension names. When <code>which_dimensions</code> exceeds the number of dimensions in arc_data these archetypes will be omitted. This can happen when fitting simplexes: lines and triangles are only 2D, so will be omitted from 3D plots.</p></td>
+      <td><p>indices or character vector specifying dimension names. 2D plot, 3D plot or a panel for 2D plots when more than 3 dimensions. When <code>which_dimensions</code> exceeds the number of dimensions in arc_data these archetypes will be omitted. This can happen when fitting simplexes: lines and triangles are only 2D, so will be omitted from 3D plots.</p></td>
     </tr>
     <tr>
       <th>type</th>
@@ -200,19 +200,19 @@
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>library</span>(<span class='no'>ParetoTI</span>)
-<span class='fu'>library</span>(<span class='no'>ggplot2</span>)
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>ParetoTI</span>)
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>ggplot2</span>)
 <span class='co'># Random data that fits into the triangle (2D)</span>
-<span class='fu'>set.seed</span>(<span class='fl'>4355</span>)
-<span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='fu'>c</span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'>c</span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'>c</span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4355</span>)
+<span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
                           <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>N_dim</span> <span class='kw'>=</span> <span class='fl'>2</span>)</div><div class='output co'>#&gt; <span class='error'>Error in generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),     mean = 0, sd = 1, N_dim = 2): unused argument (N_dim = 2)</span></div><div class='input'><span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>archetypes</span>$<span class='no'>XC</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='fu'>plot_arc</span>(<span class='kw'>arch_data</span> <span class='kw'>=</span> <span class='no'>archetypes</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>,
     <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>) +
     <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span>()</div><div class='output co'>#&gt; <span class='error'>Error in plot_arc(arch_data = archetypes, data = data, which_dimensions = 1:2): object 'archetypes' not found</span></div><div class='input'><span class='co'># Plot data as 2D density rather than points</span>
 <span class='fu'>plot_arc</span>(<span class='kw'>arch_data</span> <span class='kw'>=</span> <span class='no'>archetypes</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>,
     <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>geom</span> <span class='kw'>=</span> <span class='kw pkg'>ggplot2</span><span class='kw ns'>::</span><span class='no'><a href='https://ggplot2.tidyverse.org/reference/geom_bin2d.html'>geom_bin2d</a></span>)</div><div class='output co'>#&gt; <span class='error'>Error in plot_arc(arch_data = archetypes, data = data, which_dimensions = 1:2,     geom = ggplot2::geom_bin2d): object 'archetypes' not found</span></div><div class='input'>
 <span class='co'># Random data that fits into the triangle (3D)</span>
-<span class='fu'>set.seed</span>(<span class='fl'>4355</span>)
-<span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='fu'>c</span>(<span class='fl'>5</span>, <span class='fl'>0</span>, <span class='fl'>4</span>), <span class='fu'>c</span>(-<span class='fl'>10</span>, <span class='fl'>15</span>, <span class='fl'>0</span>), <span class='fu'>c</span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>, -<span class='fl'>5</span>)),
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4355</span>)
+<span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5</span>, <span class='fl'>0</span>, <span class='fl'>4</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>10</span>, <span class='fl'>15</span>, <span class='fl'>0</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>, -<span class='fl'>5</span>)),
                           <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>N_dim</span> <span class='kw'>=</span> <span class='fl'>3</span>)</div><div class='output co'>#&gt; <span class='error'>Error in generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30,     -20, -5)), mean = 0, sd = 1, N_dim = 3): unused argument (N_dim = 3)</span></div><div class='input'><span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>archetypes</span>$<span class='no'>XC</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='fu'>plot_arc</span>(<span class='kw'>arch_data</span> <span class='kw'>=</span> <span class='no'>archetypes</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>,
     <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>3</span>) +
     <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span>()</div><div class='output co'>#&gt; <span class='error'>Error in plot_arc(arch_data = archetypes, data = data, which_dimensions = 1:3): object 'archetypes' not found</span></div></pre>
@@ -230,9 +230,7 @@
     </ul>
 
     <h2>Author</h2>
-    
-Vitalii Kleshchevnikov
-
+    <p>Vitalii Kleshchevnikov</p>
   </div>
 </div>
 
@@ -242,7 +240,7 @@ Vitalii Kleshchevnikov
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> .</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
 </div>
       </footer>
    </div>

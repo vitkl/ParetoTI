@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>add a line between all archetypes — .archLines • ParetoTI</title>
+<title>Logistic regression model to classify vertices — build_logit_vert • ParetoTI</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,14 @@
 
 
 
-<meta property="og:title" content="add a line between all archetypes — .archLines" />
+<meta property="og:title" content="Logistic regression model to classify vertices — build_logit_vert" />
 
-<meta property="og:description" content="add a line between all archetypes" />
+<meta property="og:description" content="build_logit_vert() defines keras model
+make_features() generate features for predicting vertex by expression profile of several genes with distance from that vertex
+predict_vert() predict vertices using a model and attribute data (distance to vertex + feature of cells)
+split_train_val() split data into training and validation. Shuffle examples to ensure that model sees all vertices in training and validation
+plot_confusion_vert() plot vertex probabilities as confusion matrix
+get_feature_weights() get gene weights and ranked features from keras model" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -106,30 +111,48 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>add a line between all archetypes</h1>
+    <h1>Logistic regression model to classify vertices</h1>
     
-    <div class="hidden name"><code>dot-archLines.Rd</code></div>
+    <div class="hidden name"><code>predict_vert.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>add a line between all archetypes</p>
+    <p>build_logit_vert() defines keras model</p>
+<p>make_features() generate features for predicting vertex by expression profile of several genes with distance from that vertex</p>
+<p>predict_vert() predict vertices using a model and attribute data (distance to vertex + feature of cells)</p>
+<p>split_train_val() split data into training and validation. Shuffle examples to ensure that model sees all vertices in training and validation</p>
+<p>plot_confusion_vert() plot vertex probabilities as confusion matrix</p>
+<p>get_feature_weights() get gene weights and ranked features from keras model</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>.archLines</span>(<span class='no'>arc_data</span>, <span class='kw'>arc_lab</span> <span class='kw'>=</span> <span class='st'>"archetypes"</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"average"</span>,
-  <span class='st'>"all"</span>)[<span class='fl'>1</span>], <span class='kw'>average_func</span> <span class='kw'>=</span> <span class='no'>mean</span>)</pre>
+    <pre class="usage"><span class='fu'>build_logit_vert</span>(<span class='no'>features_list</span>, <span class='kw'>penalty</span> <span class='kw'>=</span> <span class='fl'>0.7</span>,
+  <span class='kw'>regularizer</span> <span class='kw'>=</span> <span class='kw pkg'>keras</span><span class='kw ns'>::</span><span class='no'><a href='https://www.rdocumentation.org/packages/keras/topics/regularizer_l1'>regularizer_l2</a></span>, <span class='kw'>initializer</span> <span class='kw'>=</span> <span class='st'>"random_uniform"</span>,
+  <span class='kw'>activation</span> <span class='kw'>=</span> <span class='st'>"softmax"</span>, <span class='kw'>loss</span> <span class='kw'>=</span> <span class='st'>"categorical_crossentropy"</span>,
+  <span class='kw'>metrics</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='st'>"accuracy"</span>))
+
+<span class='fu'>make_features</span>(<span class='no'>data_attr</span>, <span class='no'>features_list</span>, <span class='kw'>n_bins</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>n_samples</span> <span class='kw'>=</span> <span class='fl'>10</span>,
+  <span class='kw'>select_bins</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/seq'>seq_len</a></span>(<span class='no'>n_bins</span>), <span class='kw'>combine_bins</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/seq'>seq_len</a></span>(<span class='no'>n_bins</span>))
+
+<span class='fu'>predict_vert</span>(<span class='no'>vert_model</span>, <span class='no'>data_attr</span>, <span class='no'>features_data</span>)
+
+<span class='fu'>split_train_val</span>(<span class='no'>features_data</span>, <span class='kw'>val_prop</span> <span class='kw'>=</span> <span class='fl'>0.3</span>, <span class='kw'>per_class</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+
+<span class='fu'>plot_confusion_vert</span>(<span class='no'>predicted</span>)
+
+<span class='fu'>get_feature_weights</span>(<span class='no'>vert_model</span>, <span class='no'>features_data</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>arc_data</th>
-      <td><p>data.table that contains positions of archetypes</p></td>
+      <th>val_prop</th>
+      <td><p>proportion of samples used for validation.</p></td>
     </tr>
     <tr>
-      <th>label</th>
-      <td><p>character specifying which data point to connect (when multiple replicates of fitted polytopes)</p></td>
+      <th>per_class</th>
+      <td><p>Use proportion of samples within each class for validation? By default the function takes class into account when splitting data (TRUE)</p></td>
     </tr>
     </table>
     

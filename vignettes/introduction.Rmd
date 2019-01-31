@@ -48,7 +48,7 @@ reticulate::py_discover_config("py_pcha")
 
 This chapter show how to fit a triange (N-dimensional polytope) to the data. This process reflects finding a Pareto front which is indentical to the convex hull of the data (see the proof of this theorem in Uri Alon 2012 Science paper [Supplement, page 24](http://science.sciencemag.org/content/sci/suppl/2012/04/25/science.1217405.DC1/Shoval.SM.v2.pdf)).
 
-```{r random_data, fig.height=2, fig.width=2.4}
+```{r random_data}
 library(ParetoTI)
 library(ggplot2)
 
@@ -80,8 +80,8 @@ plot_arc(arch_data = arc_data, data = data,
          which_dimensions = 1:2, 
          nudge = c(0, 0.1), # adjust position of vertex label
          # add extra information to color by
-         data_lab = c(rep("tissue imaging", ncol(data) * 0.7), 
-                      rep("scRNA-seq", ncol(data) * 0.3)),
+         data_lab = c(rep("p1", ncol(data) * 0.7), 
+                      rep("p2", ncol(data) * 0.3)),
          colors = c("#FFC003", "#747171", "#D62728")) +
   theme_bw() +
   xlab("PC1") + ylab("PC2")

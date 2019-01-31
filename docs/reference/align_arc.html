@@ -65,7 +65,7 @@ align_arc_opt() does the same as align_arc() but using optimisation (method = &q
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.5</span>
       </span>
     </div>
 
@@ -121,11 +121,11 @@ align_arc_opt() does the same as align_arc() but using optimisation (method = &q
     
     </div>
 
-    <pre class="usage"><span class='fu'>align_arc</span>(<span class='no'>arc1</span>, <span class='no'>arc2</span>)
+    <pre class="usage"><span class='fu'>align_arc</span>(<span class='no'>arc1</span>, <span class='no'>arc2</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"lpsolve"</span>, <span class='st'>"exhaustive"</span>)[<span class='fl'>1</span>])
 
 <span class='fu'>gen_permut</span>(<span class='no'>n</span>)
 
-<span class='fu'>align_arc_opt</span>(<span class='no'>arc1</span>, <span class='no'>arc2</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='kw'>maxit</span> <span class='kw'>=</span> <span class='fl'>10000</span>, <span class='kw'>temp</span> <span class='kw'>=</span> <span class='fl'>2000</span>,
+<span class='fu'>align_arc_opt</span>(<span class='no'>arc1</span>, <span class='no'>arc2</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>maxit</span> <span class='kw'>=</span> <span class='fl'>10000</span>, <span class='kw'>temp</span> <span class='kw'>=</span> <span class='fl'>2000</span>,
   <span class='kw'>REPORT</span> <span class='kw'>=</span> <span class='fl'>500</span>))</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -140,12 +140,16 @@ align_arc_opt() does the same as align_arc() but using optimisation (method = &q
       <td><p>matrix of archetype positions dim(dimensions, archetypes) to be aligned with arc1</p></td>
     </tr>
     <tr>
+      <th>type</th>
+      <td><p>method for finding matching vertices. Linear programming (lpsolve) or exhaustive search (do not use for more than 10 vertices)</p></td>
+    </tr>
+    <tr>
       <th>n</th>
       <td><p>number of element to permute</p></td>
     </tr>
     <tr>
       <th>control</th>
-      <td><p>options for SANN methods. See <a href='http://www.rdocumentation.org/packages/stats/topics/optim'>optim</a></p></td>
+      <td><p>options for SANN methods. See <a href='https://www.rdocumentation.org/packages/stats/topics/optim'>optim</a></p></td>
     </tr>
     </table>
     
@@ -163,22 +167,41 @@ align_arc_opt() does the same as align_arc() but using optimisation (method = &q
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='co'># Generate data</span>
-<span class='fu'>set.seed</span>(<span class='fl'>4355</span>)
-<span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'>list</span>(<span class='fu'>c</span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'>c</span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'>c</span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
-                          <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>N_dim</span> <span class='kw'>=</span> <span class='fl'>2</span>)</div><div class='output co'>#&gt; <span class='error'>Error in generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),     mean = 0, sd = 1, N_dim = 2): unused argument (N_dim = 2)</span></div><div class='input'><span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>archetypes</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='fu'>dim</span>(<span class='no'>data</span>)</div><div class='output co'>#&gt; NULL</div><div class='input'><span class='co'># fit polytopes to 2 subsamples of the data</span>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4355</span>)
+<span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
+                          <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>archetypes</span>$<span class='no'>XC</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/dim'>dim</a></span>(<span class='no'>data</span>)</div><div class='output co'>#&gt; [1]     2 10000</div><div class='input'><span class='co'># fit polytopes to 2 subsamples of the data</span>
 <span class='no'>arc_data</span> <span class='kw'>=</span> <span class='fu'><a href='fit_pch.html'>fit_pch_bootstrap</a></span>(<span class='no'>data</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>sample_prop</span> <span class='kw'>=</span> <span class='fl'>0.65</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>2543</span>,
-                        <span class='kw'>order_by_side</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>noc</span> <span class='kw'>=</span> <span class='fu'>as.integer</span>(<span class='fl'>6</span>),
-                        <span class='kw'>delta</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"s"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in if (useHash) .Internal(sample2(n, size)) else .Internal(sample(n,     size, replace, prob)): missing value where TRUE/FALSE needed</span></div><div class='input'><span class='co'># align archetypes by exhausive search</span>
-<span class='fu'>align_arc</span>(<span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>2</span>]])</div><div class='output co'>#&gt; <span class='error'>Error in all.equal(dim(arc1), dim(arc2)): object 'arc_data' not found</span></div><div class='input'><span class='co'># align archetypes by optimisation</span>
-<span class='fu'>set.seed</span>(<span class='fl'>123</span>)
-<span class='fu'>align_arc_opt</span>(<span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>2</span>]])</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'arc_data' not found</span></div><div class='input'><span class='co'># restart multiple times to see if it finds real match</span>
-<span class='no'>res</span> <span class='kw'>=</span> <span class='fu'>lapply</span>(<span class='fu'>seq</span>(<span class='fl'>1</span>, <span class='fl'>100</span>), <span class='kw'>function</span>(<span class='no'>i</span>) <span class='fu'>align_arc_opt</span>(<span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>2</span>]]))</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'arc_data' not found</span></div><div class='input'><span class='co'># show best pairing</span>
-<span class='no'>res</span><span class='kw'>[[</span><span class='fu'>which.min</span>(<span class='fu'>sapply</span>(<span class='no'>res</span>, <span class='kw'>function</span>(<span class='no'>r</span>) <span class='no'>r</span>$<span class='no'>dist</span>))]]</div><div class='output co'>#&gt; <span class='error'>Error in eval(expr, envir, enclos): object 'res' not found</span></div><div class='input'>
+                        <span class='kw'>order_type</span> <span class='kw'>=</span> <span class='st'>"align"</span>, <span class='kw'>noc</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>6</span>),
+                        <span class='kw'>delta</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"s"</span>)
+<span class='co'># align archetypes by exhausive search</span>
+<span class='fu'>align_arc</span>(<span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>2</span>]])</div><div class='output co'>#&gt; $dist
+#&gt; [1] 43.16901
+#&gt; 
+#&gt; $ind
+#&gt; [1] 1 2 3 4 5 6
+#&gt; </div><div class='input'><span class='co'># align archetypes by optimisation</span>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>123</span>)
+<span class='fu'>align_arc_opt</span>(<span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>2</span>]])</div><div class='output co'>#&gt; $dist
+#&gt; [1] 43.16901
+#&gt; 
+#&gt; $ind
+#&gt; [1] 1 2 3 4 5 6
+#&gt; </div><div class='input'><span class='co'># restart multiple times to see if it finds real match</span>
+<span class='no'>res</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/lapply'>lapply</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/seq'>seq</a></span>(<span class='fl'>1</span>, <span class='fl'>100</span>), <span class='kw'>function</span>(<span class='no'>i</span>) <span class='fu'>align_arc_opt</span>(<span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>2</span>]]))
+<span class='co'># show best pairing</span>
+<span class='no'>res</span><span class='kw'>[[</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/which.min'>which.min</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/lapply'>sapply</a></span>(<span class='no'>res</span>, <span class='kw'>function</span>(<span class='no'>r</span>) <span class='no'>r</span>$<span class='no'>dist</span>))]]</div><div class='output co'>#&gt; $dist
+#&gt; [1] 43.16901
+#&gt; 
+#&gt; $ind
+#&gt; [1] 1 2 3 4 5 6
+#&gt; </div><div class='input'>
 # Measure which approach is faster depending on k (uncomment)
 #for (i in 2:12) {
 #    # fit polytopes to 2 subsamples
 #    arc_data = fit_pch_bootstrap(data, n = 2, sample_prop = 0.65, seed = 2543,
-#                             order_by_side = F, noc = as.integer(i),
+#                             order_type = "align", noc = as.integer(i),
 #                             delta = 0, type = "s")
 #    print(i)
 #    # measure how much time each method takes
@@ -209,7 +232,7 @@ align_arc_opt() does the same as align_arc() but using optimisation (method = &q
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> .</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
 </div>
       </footer>
    </div>

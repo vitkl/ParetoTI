@@ -64,7 +64,7 @@ find_set_activity_pseudoinv() finds activity of each gene set in each cell by so
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released package">0.1.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.5</span>
       </span>
     </div>
 
@@ -114,13 +114,13 @@ find_set_activity_pseudoinv() finds activity of each gene set in each cell by so
 
     <div class="ref-description">
     
-    <p><code>find_set_activity_AUCell()</code> finds activity of each gene set in each cell by combining AUCell functions into a pipeline. Aerts lab that developed AUCell recommends adjusting the threshold when binarising activities (Details: https://www.bioconductor.org/packages/devel/bioc/vignettes/AUCell/inst/doc/AUCell.html#determine-the-cells-with-the-given-gene-signatures-or-active-gene-sets). See documentations for details: <a href='http://www.rdocumentation.org/packages/AUCell/topics/AUCell_buildRankings'>AUCell_buildRankings</a>, <a href='http://www.rdocumentation.org/packages/AUCell/topics/AUCell_calcAUC'>AUCell_calcAUC</a>, <a href='http://www.rdocumentation.org/packages/AUCell/topics/AUCell_exploreThresholds'>AUCell_exploreThresholds</a>.</p>
+    <p><code>find_set_activity_AUCell()</code> finds activity of each gene set in each cell by combining AUCell functions into a pipeline. Aerts lab that developed AUCell recommends adjusting the threshold when binarising activities (Details: https://www.bioconductor.org/packages/devel/bioc/vignettes/AUCell/inst/doc/AUCell.html#determine-the-cells-with-the-given-gene-signatures-or-active-gene-sets). See documentations for details: <a href='https://www.rdocumentation.org/packages/AUCell/topics/AUCell_buildRankings'>AUCell_buildRankings</a>, <a href='https://www.rdocumentation.org/packages/AUCell/topics/AUCell_calcAUC'>AUCell_calcAUC</a>, <a href='https://www.rdocumentation.org/packages/AUCell/topics/AUCell_exploreThresholds'>AUCell_exploreThresholds</a>.</p>
 <p><code>find_set_activity_pseudoinv()</code> finds activity of each gene set in each cell by solving this matrix equation: expression = activities x gene_assignment_to_sets =&gt; activities = pseudoinverse(gene_assignment_to_sets) x expression. Based on code from Inferelator package by Richard Bonneau lab.</p>
     
     </div>
 
     <pre class="usage"><span class='fu'>find_set_activity_AUCell</span>(<span class='no'>expr_mat</span>, <span class='kw'>assay_name</span> <span class='kw'>=</span> <span class='st'>"logcounts"</span>,
-  <span class='kw'>aucMaxRank</span> <span class='kw'>=</span> <span class='fu'>nrow</span>(<span class='no'>expr_mat</span>) * <span class='fl'>0.05</span>, <span class='no'>gene_sets</span>, <span class='kw'>gene_col</span> <span class='kw'>=</span> <span class='st'>"ALIAS"</span>,
+  <span class='kw'>aucMaxRank</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>nrow</a></span>(<span class='no'>expr_mat</span>) * <span class='fl'>0.05</span>, <span class='no'>gene_sets</span>, <span class='kw'>gene_col</span> <span class='kw'>=</span> <span class='st'>"ALIAS"</span>,
   <span class='kw'>set_id_col</span> <span class='kw'>=</span> <span class='st'>"GOALL"</span>, <span class='kw'>set_name_col</span> <span class='kw'>=</span> <span class='st'>"TERM"</span>, <span class='kw'>binary</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>nCores</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>plotHist</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>plotStats</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='no'>...</span>)
 
@@ -141,7 +141,7 @@ find_set_activity_pseudoinv() finds activity of each gene set in each cell by so
     </tr>
     <tr>
       <th>aucMaxRank</th>
-      <td><p>argument for <a href='http://www.rdocumentation.org/packages/AUCell/topics/AUCell_calcAUC'>AUCell_calcAUC</a>. Threshold to calculate the AUC.In a simplified way, the AUC value represents the fraction of genes, within the top X genes in the ranking, that are included in the signature. The parameter 'aucMaxRank' allows to modify the number of genes (maximum ranking) that is used to perform this computation. By default, it is set to 0.05 of the total number of genes in the rankings. Common values may range from 0.01 to 0.3.</p></td>
+      <td><p>argument for <a href='https://www.rdocumentation.org/packages/AUCell/topics/AUCell_calcAUC'>AUCell_calcAUC</a>. Threshold to calculate the AUC.In a simplified way, the AUC value represents the fraction of genes, within the top X genes in the ranking, that are included in the signature. The parameter 'aucMaxRank' allows to modify the number of genes (maximum ranking) that is used to perform this computation. By default, it is set to 0.05 of the total number of genes in the rankings. Common values may range from 0.01 to 0.3.</p></td>
     </tr>
     <tr>
       <th>gene_sets</th>
@@ -161,7 +161,7 @@ find_set_activity_pseudoinv() finds activity of each gene set in each cell by so
     </tr>
     <tr>
       <th>binary</th>
-      <td><p>binarise gene set activities using <a href='http://www.rdocumentation.org/packages/AUCell/topics/AUCell_exploreThresholds'>AUCell_exploreThresholds</a>?</p></td>
+      <td><p>binarise gene set activities using <a href='https://www.rdocumentation.org/packages/AUCell/topics/AUCell_exploreThresholds'>AUCell_exploreThresholds</a>?</p></td>
     </tr>
     <tr>
       <th>nCores</th>
@@ -169,11 +169,11 @@ find_set_activity_pseudoinv() finds activity of each gene set in each cell by so
     </tr>
     <tr>
       <th>plotHist</th>
-      <td><p>plot the AUC histograms? <a href='http://www.rdocumentation.org/packages/AUCell/topics/AUCell_exploreThresholds'>AUCell_exploreThresholds</a>.</p></td>
+      <td><p>plot the AUC histograms? <a href='https://www.rdocumentation.org/packages/AUCell/topics/AUCell_exploreThresholds'>AUCell_exploreThresholds</a>.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>other arguments passed to <a href='http://www.rdocumentation.org/packages/AUCell/topics/AUCell_exploreThresholds'>AUCell_exploreThresholds</a>.</p></td>
+      <td><p>other arguments passed to <a href='https://www.rdocumentation.org/packages/AUCell/topics/AUCell_exploreThresholds'>AUCell_exploreThresholds</a>.</p></td>
     </tr>
     <tr>
       <th>noself</th>
@@ -204,7 +204,7 @@ find_set_activity_pseudoinv() finds activity of each gene set in each cell by so
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> .</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
 </div>
       </footer>
    </div>

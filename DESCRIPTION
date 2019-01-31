@@ -1,7 +1,7 @@
 Package: ParetoTI
 Type: Package
 Title: Pareto Task Inference In R (based on ParTI)
-Version: 0.1.4
+Version: 0.1.5
 Author: Vitalii Kleshchevnikov
 Maintainer: Vitalii Kleshchevnikov <vk7@sanger.ac.uk>
 Authors@R: c(person("Vitalii", "Kleshchevnikov",, "vk7@sanger.ac.uk", role = c("aut", "cre")))

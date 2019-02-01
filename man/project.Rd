@@ -22,6 +22,6 @@ Project polytope fit and data in low dimentions (PCA)
 # Random data that fits into the triangle
 set.seed(4355)
 arc_data = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
-                          mean = 0, sd = 1, N_dim = 2)
-data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+                          mean = 0, sd = 1)
+data = generate_data(arc_data$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 }

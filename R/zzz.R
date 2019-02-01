@@ -17,4 +17,14 @@
   assign("py_furthest_sum",
          reticulate::import("py_pcha.furthest_sum", delay_load = TRUE),
          envir = parent.env(environment()))
+
+  # add geometric sketch to namespace
+  assign("geosketch",
+         reticulate::import("geosketch", delay_load = TRUE),
+         envir = parent.env(environment()))
+
+  # add facebook pca to namespace
+  assign("fbpca",
+         reticulate::import("fbpca", delay_load = TRUE),
+         envir = parent.env(environment()))
 }

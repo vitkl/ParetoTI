@@ -7,8 +7,8 @@
 ##' # Random data that fits into the triangle
 ##' set.seed(4355)
 ##' arc_data = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
-##'                           mean = 0, sd = 1, N_dim = 2)
-##' data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+##'                           mean = 0, sd = 1)
+##' data = generate_data(arc_data$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 project = function(arc_data, data, n_dim = 3, proj_matrix = NULL){
   s = irlba::irlba(data, 50)
   cds@reducedDimK = tcrossprod(diag(s$d), s$v)
@@ -16,6 +16,7 @@ project = function(arc_data, data, n_dim = 3, proj_matrix = NULL){
 
   crossprod(s$u, logcounts(data_run))
   tcrossprod(diag(s$d), s$v)
+  all.equal(tcrossprod(diag(s$d), s$v), crossprod(diag(s$d), t(s$v)))
 
   crossprod(svd_pc$u, counts(sc))[,1:5];
   tcrossprod(diag(svd_pc$d[1:3]), svd_pc$v)[,1:5];

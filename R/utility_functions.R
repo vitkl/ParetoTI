@@ -33,7 +33,7 @@ install_py_pcha = function(method = "auto", conda = "auto",
                            python_version = c("python 2.7.10", "python 3.6.4")[1],
                            envname = c("reticulate_PCHA", "reticulate_PCHA_36")[1],
                            overwrite_env = F, extra_packages = character(0),
-                           packages = c("pip", "py_pcha", "numpy", "scipy", "datetime")) {
+                           packages = c("pip", "py_pcha", "numpy", "scipy", "datetime", "geosketch")) {
   packages = c(packages, extra_packages)
   if(method == "virtualenv") {
     reticulate::py_install(packages = packages, envname = envname,

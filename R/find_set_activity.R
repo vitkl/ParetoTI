@@ -52,18 +52,28 @@ find_set_activity_AUCell = function(expr_mat, assay_name = "logcounts",
                                   sets = names(cells_assignment))
     # Map set names
     ids = unique(cells_assignment$sets)
+
     if(set_id_col == set_name_col) {
+      # when GO term id should be used as name
       GO_names = gene_sets[match(ids, get(set_id_col)),
                            .(get(set_name_col))]
       setnames(GO_names, colnames(GO_names), "sets")
     } else {
+      # when GO term name should be used as name
       GO_names = gene_sets[match(ids, get(set_id_col)),
                            .(get(set_id_col), get(set_name_col))]
       setnames(GO_names, colnames(GO_names), c("sets", set_name_col))
+
+      # for GO terms with the same term name add id to term name
+      dupl = duplicated(cells_assignment[,.(get(set_name_col))])
+      terms[dupl] = paste0(terms[dupl], "_", ids[dupl])
+      # change names of the matrix
+      setnames(cells_assignment, ids, terms)
     }
 
     cells_assignment = merge(cells_assignment, GO_names,
                              by = "sets", all.x = T, all.y = F)
+
     # convert to cells * sets matrix
     cells_assignment = dcast.data.table(cells_assignment, cells ~ get(set_name_col),
                                         value.var = set_name_col,
@@ -74,6 +84,10 @@ find_set_activity_AUCell = function(expr_mat, assay_name = "logcounts",
     ids = colnames(cells_assignment)
     ids = ids[ids != "cells"]
     terms = gene_sets[match(ids, get(set_id_col)), get(set_name_col)]
+    # for GO terms with the same term name add id to term name
+    dupl = duplicated(terms)
+    terms[dupl] = paste0(terms[dupl], "_", ids[dupl])
+    # change names of the matrix
     setnames(cells_assignment, ids, terms)
   }
   cells_assignment

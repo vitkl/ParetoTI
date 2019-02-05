@@ -5,7 +5,7 @@
 \title{Create downsampled representation of the data with Geometric Sketch}
 \usage{
 geo_sketch(data, N, assay_slot = "logcounts", use_PCs = TRUE,
-  PCs = 100, k = "auto", seed = NULL, replace = FALSE,
+  PCs = 100, k = "auto", seed = 5232, replace = FALSE,
   alpha = 0.1, max_iter = 200, verbose = 0)
 }
 \arguments{

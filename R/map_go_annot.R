@@ -180,8 +180,13 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC", "gwas", "promo
     if(!keytype %in% c("SYMBOL", "ENSEMBL")) stop("When which == \"promoter_TF\", the keytype should be SYMBOL or ENSEMBL")
 
     data("promoter_TF_motifs", package = "ParetoTI", envir = environment())
-    promoter_TF_motifs = promoter_TF_motifs[, c("TF", keytype)]
-    promoter_TF_motifs = promoter_TF_motifs[promoter_TF_motifs[, keytype] %in% keys,]
+    promoter_TF_motifs = unique(promoter_TF_motifs[, c("TF", keytype)])
+    # find number of targets per TF
+    n_targ = table(promoter_TF_motifs$TF)
+    # keep TFs between upper and lower boundary
+    tf_size_filter = names(n_targ)[n_targ >= lower & n_targ <= upper]
+    promoter_TF_motifs = promoter_TF_motifs[promoter_TF_motifs[, keytype] %in% keys &
+                                              promoter_TF_motifs$TF %in% tf_size_filter,]
     colnames(promoter_TF_motifs) = c("TF", "TARGET")
     annot = list(annot_dt = promoter_TF_motifs)
     set_id_col = "TF"

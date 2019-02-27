@@ -188,6 +188,9 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC", "gwas", "promo
     promoter_TF_motifs = promoter_TF_motifs[promoter_TF_motifs[, keytype] %in% keys &
                                               promoter_TF_motifs$TF %in% tf_size_filter,]
     colnames(promoter_TF_motifs) = c("TF", "TARGET")
+    # check that only letters, numbers and underscores are present - remove dots
+    promoter_TF_motifs$TF = gsub("\\.", "_", promoter_TF_motifs$TF)
+
     annot = list(annot_dt = promoter_TF_motifs)
     set_id_col = "TF"
     set_name_col = set_id_col

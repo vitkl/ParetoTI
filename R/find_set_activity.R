@@ -35,7 +35,7 @@ find_set_activity_AUCell = function(expr_mat, assay_name = "logcounts",
                                                   plotStats = plotStats)
   }
 
-  gene_set_list = split(gene_sets[, get(gene_col)],
+  gene_set_list = split(as.character(gene_sets[, get(gene_col)]),
                         gene_sets[, get(set_id_col)])
 
   cells_AUC = AUCell::AUCell_calcAUC(gene_set_list, cells_rankings,

@@ -59,7 +59,7 @@ fit_logistic_model = function(sce, y = NULL,
   if(!is.null(regularizer)) regularizer = regularizer(l = penalty)
 
   if(is.null(model)) {
-    # define logistic regression keras model
+    # define logistic regression model with keras
     build_log_reg = function() {
       model = keras::keras_model_sequential()
       model = keras::layer_dense(object = model, units = ncol(y), activation = activation,
@@ -68,7 +68,7 @@ fit_logistic_model = function(sce, y = NULL,
                                  kernel_initializer = initializer,
                                  bias_initializer = initializer,
                                  input_shape = nrow(sce))
-      model = keras::compile(object = model, loss = loss,
+      model = c(object = model, loss = loss,
                              optimizer = optimizer,
                              metrics = metrics)
       model

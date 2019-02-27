@@ -118,9 +118,10 @@ filter_go_annot = function(annot, ontology_file = NULL, lower = 1, upper = Inf,
 ##' @name measure_activity
 ##' @description measure_activity() annotates genes with GO terms and measures their activities
 ##' @param expr_mat expression matrix (genes in rows, cells in columns) or one of: dgCMatrix, ExpressionSet, and SummarizedExperiment or SingleCellExperiment both of which require assay_name.
-##' @param which which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets. Use "gwas" for constructing gene sets with gwas_catalog v1.0.2. GWAS option works only with human hgnc identifiers.
+##' @param which which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets. Use "gwas" for constructing gene sets with gwas_catalog v1.0.2. GWAS option works only with human hgnc identifiers. Use "promoter_TF" to look at TF activities measured by mapping TF->target gene regulation via co-occurence of multiple motifs for the same TF in promoters (courtesy of Krzysztof Polanski who generated this resource). TF data is added supplied with the package and works only for human data, only SYMBOL and ENSEMBL can be used as keytype. Use "custom" to provide your own gene sets in \code{annot_dt} table.
 ##' @param activity_method find activities using \link[ParetoTI]{find_set_activity_AUCell} or \link[ParetoTI]{find_set_activity_pseudoinv}?
 ##' @param return_as_matrix return matrix (TRUE) or data.table (FALSE)
+##' @param annot_dt data.table, data.frame or matrix containing custom gene set annotations. The 1st column should contain gene set identifier or name, the 2nd column should contain gene identifiers matching \code{keys}.
 ##' @param assay_name name of assay in SummarizedExperiment or SingleCellExperiment, normally counts or logcounts
 ##' @param aucell_options additional options specific to AUCell, details: \link[ParetoTI]{find_set_activity_AUCell}
 ##' @export measure_activity
@@ -131,7 +132,7 @@ filter_go_annot = function(annot, ontology_file = NULL, lower = 1, upper = Inf,
 ##'                          taxonomy_id = 9606, keytype = "ALIAS",
 ##'                          ontology_file = load_go_ontology("./data/",
 ##'                                                   "goslim_generic.obo"))
-measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
+measure_activity = function(expr_mat, which = c("BP", "MF", "CC", "gwas", "promoter_TF", "custom")[1],
                             activity_method = c("AUCell", "pseudoinverse")[1],
                             keys = rownames(expr_mat), keytype = "ALIAS",
                             ontology_file = NULL, taxonomy_id = 10090,
@@ -139,10 +140,13 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
                             ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
                             lower = 1, upper = Inf,
                             return_as_matrix = FALSE,
+                            annot_dt = NULL,
                             assay_name = "logcounts",
                             aucell_options = list(aucMaxRank = nrow(expr_mat) * 0.05,
                                                   binary = F, nCores = 3,
                                                   plotStats = TRUE)) {
+  if(!which %in% c("BP", "MF", "CC", "gwas", "promoter_TF", "custom")) stop("which should be one of c(\"BP\", \"MF\", \"CC\", \"gwas\", \"promoter_TF\", \"custom\")")
+
   # Retrieve annotations ---------------------------------------------------------
   if(mean(which %in% c("BP", "MF", "CC")) == 1){
     # Map GO annotations using AnnotationHub -------------------------------------
@@ -158,7 +162,9 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
                             ontology_type = which)
     set_id_col = "GOALL"
     set_name_col = "TERM"
+
   } else if(which == "gwas") {
+
     # Map GWAS phenotype and disease associations GWAS Catalog -------------------
     annot = map_gwas_annot(taxonomy_id = taxonomy_id, keys = keys,
                            keytype = keytype, localHub = localHub,
@@ -167,10 +173,35 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
                            gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2018-11-19.tsv")
     set_id_col = "MAPPED_TRAIT_ID"
     set_name_col = "MAPPED_TRAIT_NAME"
+
+  } else if(which == "promoter_TF") {
+
+    # Load TF-target map  --------------------------------------------------------
+    if(!keytype %in% c("SYMBOL", "ENSEMBL")) stop("When which == \"promoter_TF\", the keytype should be SYMBOL or ENSEMBL")
+
+    data("promoter_TF_motifs", package = "ParetoTI", envir = environment())
+    promoter_TF_motifs = promoter_TF_motifs[, c("TF", keytype)]
+    promoter_TF_motifs = promoter_TF_motifs[promoter_TF_motifs[, keytype] %in% keys,]
+    colnames(promoter_TF_motifs) = c("TF", "TARGET")
+    annot = list(annot_dt = promoter_TF_motifs)
+    set_id_col = "TF"
+    set_name_col = set_id_col
+    keytype = "TARGET"
+
+  } else if(which == "custom") {
+
+    # Use custom annotations  ----------------------------------------------------
+
+    annot = list(annot_dt = as.data.frame(annot_dt))
+    set_id_col = colnames(annot_dt)[1]
+    set_name_col = colnames(annot_dt)[1]
+    keytype = colnames(annot_dt)[2]
+
   }
 
   # Find "activity" of each functional gene group  -------------------------------
   if(activity_method == "AUCell"){
+
     # using AUCell  --------------------------------------------------------------
     activ = find_set_activity_AUCell(expr_mat, assay_name = assay_name,
                                      aucMaxRank = aucell_options$aucMaxRank,
@@ -182,7 +213,9 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
                                      nCores = aucell_options$nCores,
                                      plotHist = FALSE,
                                      plotStats = aucell_options$plotStats)
+
   } else if (activity_method == "pseudoinverse") {
+
     # or pseudoinverse(annotation_matrix) * expression ---------------------------
     activ = find_set_activity_pseudoinv(expr_mat,
                                         assay_name = assay_name,
@@ -191,6 +224,7 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC"),
                                         set_id_col = set_id_col,
                                         set_name_col = set_name_col,
                                         noself = FALSE)
+
   }
   # when naming matrix dimensions ad
   setnames(activ, colnames(activ), gsub(" ", "_", colnames(activ)))

@@ -17,14 +17,16 @@ map_go_annot(taxonomy_id = 9606, keys = c("TP53", "ALB"),
 filter_go_annot(annot, ontology_file = NULL, lower = 1, upper = Inf,
   ontology_type = c("BP", "MF", "CC"))
 
-measure_activity(expr_mat, which = c("BP", "MF", "CC"),
-  activity_method = c("AUCell", "pseudoinverse")[1],
-  keys = rownames(expr_mat), keytype = "ALIAS", ontology_file = NULL,
-  taxonomy_id = 10090, evidence_code = "all", localHub = FALSE,
+measure_activity(expr_mat, which = c("BP", "MF", "CC", "gwas",
+  "promoter_TF", "custom")[1], activity_method = c("AUCell",
+  "pseudoinverse")[1], keys = rownames(expr_mat), keytype = "ALIAS",
+  ontology_file = NULL, taxonomy_id = 10090, evidence_code = "all",
+  localHub = FALSE,
   ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
   lower = 1, upper = Inf, return_as_matrix = FALSE,
-  assay_name = "logcounts", aucell_options = list(aucMaxRank =
-  nrow(expr_mat) * 0.05, binary = F, nCores = 3, plotStats = TRUE))
+  annot_dt = NULL, assay_name = "logcounts",
+  aucell_options = list(aucMaxRank = nrow(expr_mat) * 0.05, binary = F,
+  nCores = 3, plotStats = TRUE))
 
 load_go_ontology(ont_dir = "./data/", ont_file = "goslim_generic.obo")
 
@@ -63,11 +65,13 @@ map_gwas_annot(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
 
 \item{expr_mat}{expression matrix (genes in rows, cells in columns) or one of: dgCMatrix, ExpressionSet, and SummarizedExperiment or SingleCellExperiment both of which require assay_name.}
 
-\item{which}{which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets. Use "gwas" for constructing gene sets with gwas_catalog v1.0.2. GWAS option works only with human hgnc identifiers.}
+\item{which}{which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets. Use "gwas" for constructing gene sets with gwas_catalog v1.0.2. GWAS option works only with human hgnc identifiers. Use "promoter_TF" to look at TF activities measured by mapping TF->target gene regulation via co-occurence of multiple motifs for the same TF in promoters (courtesy of Krzysztof Polanski who generated this resource). TF data is added supplied with the package and works only for human data, only SYMBOL and ENSEMBL can be used as keytype. Use "custom" to provide your own gene sets in \code{annot_dt} table.}
 
 \item{activity_method}{find activities using \link[ParetoTI]{find_set_activity_AUCell} or \link[ParetoTI]{find_set_activity_pseudoinv}?}
 
 \item{return_as_matrix}{return matrix (TRUE) or data.table (FALSE)}
+
+\item{annot_dt}{data.table, data.frame or matrix containing custom gene set annotations. The 1st column should contain gene set identifier or name, the 2nd column should contain gene identifiers matching \code{keys}.}
 
 \item{assay_name}{name of assay in SummarizedExperiment or SingleCellExperiment, normally counts or logcounts}
 

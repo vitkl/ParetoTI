@@ -22,6 +22,7 @@ set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
                           mean = 0, sd = 1)
 data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
+data = matrix(rnorm(2*1e4), 2, 1e4)
 microbenchmark::microbenchmark({
   s_a <- spams.archetypalAnalysis(X = data, p = 3, Z0 = NULL, returnAB = FALSE,
                                   robust=FALSE, epsilon=1e-3, computeXtX=TRUE,
@@ -108,7 +109,7 @@ speed_test = microbenchmark::microbenchmark({
                                    noc=as.integer(3), delta=0)
 }, {
   # Use local parallel processing to fit the 20 polytopes to subsampled datasets each time looking at 65% of examples.
-  arc_data_rob_m = fit_pch_bootstrap(data, n = 20, sample_prop = 0.65, seed = 2543,
+  arc_data_rob_m = fit_pch_bootstrap(data, n = 200, sample_prop = 0.65, seed = 2543,
                                      noc=as.integer(3), delta=0, type = "m")
 }, times = 5)
 speed_test_cmq = microbenchmark::microbenchmark({

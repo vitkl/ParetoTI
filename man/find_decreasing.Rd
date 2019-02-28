@@ -5,6 +5,7 @@
 \alias{fit_arc_gam_1}
 \alias{get_top_decreasing}
 \alias{find_decreasing_wilcox}
+\alias{bin_cells_by_arch}
 \title{Find features that are decreasing functions of distance from archetype}
 \usage{
 find_decreasing(data_attr, arc_col, features = c("Gpx1", "Alb", "Cyp2e1",
@@ -28,6 +29,9 @@ find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
   "Cyp2e1", "Apoa2")[3], bin_prop = 0.1, na.rm = FALSE, type = c("s",
   "m", "cmq")[1], clust_options = list(), method = c("BioQC",
   "r_stats")[1])
+
+bin_cells_by_arch(data_attr, arc_col, bin_prop = 0.1,
+  return_names = FALSE)
 }
 \arguments{
 \item{data_attr}{data.table dim(examples, dimensions) that includes distance of each example to archetype in columns given by \code{arc_col} and feature values given by \code{features}}
@@ -83,6 +87,8 @@ find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
 \item{bin_prop}{proportion of data to put in bin closest to archetype}
 
 \item{method}{how to find_decreasing_wilcox()? Use \link[BioQC]{wmwTest} or \link[stats]{wilcox.test}. BioQC::wmwTest can be up to 1000 times faster, so it is default.}
+
+\item{return_names}{return list of indices of cells or names of cells?}
 }
 \value{
 \code{find_decreasing()} list (S3 object, gam_deriv) containing summary p-values for features and each archetype, function call and (optionally) a data.table with values of the first derivative
@@ -92,6 +98,8 @@ find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
 \code{get_top_decreasing()} print summary to output, and return list with character vector with one element for each archetype, and 2 data.table- with selection of enriched genes and functions.
 
 \code{find_decreasing_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.
+
+\code{bin_cells_by_arch()} list of indices of cells or names of cells that are in bin closest to each vertex
 }
 \description{
 \code{find_decreasing()} Fits gam models to find features that are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.
@@ -101,4 +109,6 @@ find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
 \code{get_top_decreasing()} Get top-12 genes and top-3 gene sets for each archetype.
 
 \code{find_decreasing_wilcox()} find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to vertex (1 vs all Wilcox test).
+
+\code{bin_cells_by_arch()} find which cells are in bin closest to vertex.
 }

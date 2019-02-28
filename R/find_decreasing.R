@@ -311,17 +311,8 @@ find_decreasing_wilcox = function(data_attr, arc_col,
                                   clust_options = list(),
                                   method = c("BioQC", "r_stats")[1]) {
 
-  # extract distance to archetypes into matrix,
-  dist_to_arch = as.matrix(data_attr[, arc_col, with = FALSE])
-  # convert distances to order
-  dist_to_arch = apply(dist_to_arch, MARGIN = 2, order, decreasing = FALSE)
-
-  # find how many points fit into bin closest to archetype
-  bin1_length = round(nrow(dist_to_arch) * bin_prop, 0)
-  # pick indices of cells in 1st bin
-  dist_to_arch = dist_to_arch[seq_len(bin1_length), ]
-  arch_bin = lapply(seq(1, ncol(dist_to_arch)), function(i) dist_to_arch[,i])
-  names(arch_bin) = colnames(dist_to_arch)
+  # find which cells are in bin closest to each archetype
+  arch_bin = bin_cells_by_arch(data_attr, arc_col, bin_prop, return_names = FALSE)
 
   if(method == "BioQC"){
     ## create gene sets using bin_prop,
@@ -430,4 +421,32 @@ find_decreasing_wilcox = function(data_attr, arc_col,
   decreasing$x_name = names(arch_bin)
   decreasing$y_name = colnames(feature_mat)
   decreasing
+}
+
+##' @rdname find_decreasing
+##' @name bin_cells_by_arch
+##' @description \code{bin_cells_by_arch()} find which cells are in bin closest to vertex.
+##' @param return_names return list of indices of cells or names of cells?
+##' @return \code{bin_cells_by_arch()} list of indices of cells or names of cells that are in bin closest to each vertex
+##' @export bin_cells_by_arch
+##' @import data.table
+bin_cells_by_arch = function(data_attr, arc_col, bin_prop = 0.1, return_names = FALSE){
+
+  # extract distance to archetypes into matrix,
+  dist_to_arch = as.matrix(data_attr[, arc_col, with = FALSE])
+  # convert distances to order
+  dist_to_arch = apply(dist_to_arch, MARGIN = 2, order, decreasing = FALSE)
+
+  # find how many points fit into bin closest to archetype
+  bin1_length = round(nrow(dist_to_arch) * bin_prop, 0)
+  # pick indices of cells in 1st bin
+  dist_to_arch = dist_to_arch[seq_len(bin1_length), ]
+  arch_bin = lapply(seq(1, ncol(dist_to_arch)), function(i) dist_to_arch[,i])
+  names(arch_bin) = colnames(dist_to_arch)
+
+  # optionally: convert indices to cells
+  if(return_names) arch_bin = lapply(arch_bin, function(arch_ind) {
+    data_attr$sample_id[arch_ind]
+  })
+  arch_bin
 }

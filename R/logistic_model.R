@@ -68,7 +68,7 @@ fit_logistic_model = function(sce, y = NULL,
                                  kernel_initializer = initializer,
                                  bias_initializer = initializer,
                                  input_shape = nrow(sce))
-      model = c(object = model, loss = loss,
+      model = keras::compile(object = model, loss = loss,
                              optimizer = optimizer,
                              metrics = metrics)
       model

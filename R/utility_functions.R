@@ -30,7 +30,7 @@
 ##' # use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir
 ##' }
 install_py_pcha = function(method = "auto", conda = "auto",
-                           python_version = c("python 2.7.15", "python 3.6.4")[1],
+                           python_version = c("python 2.7.10", "python 3.6.4")[1],
                            envname = c("reticulate_PCHA", "reticulate_PCHA_36")[1],
                            overwrite_env = F, extra_packages = character(0),
                            packages = c("pip", "py_pcha", "numpy", "scipy", "datetime", "geosketch")) {

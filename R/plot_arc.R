@@ -5,7 +5,7 @@
 ##' @description \code{plot_arc()} plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "b_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").
 ##' @param arc_data objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm. Set to NULL if you want to show data alone.
 ##' @param data matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)
-##' @param which_dimensions indices or character vector specifying dimension names. 2D plot, 3D plot or a panel for 2D plots when more than 3 dimensions. When \code{which_dimensions} exceeds the number of dimensions in arc_data these archetypes will be omitted. This can happen when fitting simplexes: lines and triangles are only 2D, so will be omitted from 3D plots.
+##' @param which_dimensions indices or character vector specifying dimension names. 2D plot, 3D plot or a panel for 2D plots when more than 3 dimensions. For \code{arch_to_tsne()} use 1:2 or 1:3. When \code{which_dimensions} exceeds the number of dimensions in arc_data these archetypes will be omitted. This can happen when fitting simplexes: lines and triangles are only 2D, so will be omitted from 3D plots.
 ##' @param type used when arc_data is "b_pch_fit", one of "average", "all"
 ##' @param average_func used when arc_data is "b_pch_fit", function telling how to find average position of vertices
 ##' @param geom plotting function to plot data in 2D, useful options are ggplot2::geom_point (scatterplot) and ggplot2::geom_bin2d (density)
@@ -43,7 +43,16 @@
 ##'                           mean = 0, sd = 1, N_dim = 3)
 ##' data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 ##' plot_arc(arch_data = archetypes, data = data,
-##'     which_dimensions = 1:3) +
+##'     which_dimensions = 1:3)
+##'
+##' # TSNE representation (from 3D to 2D)
+##' set.seed(4355)
+##' archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
+##'                           mean = 0, sd = 1, N_dim = 3)
+##' data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+##' arc_tsne = arch_to_tsne(archetypes, data, which_dimensions = 1:2)
+##' plot_arc(arch_data = arc_tsne$arch_data, data = arch_data$data,
+##'     which_dimensions = 1:2) +
 ##'     theme_bw()
 plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                     type = c("average", "all")[1], average_func = mean,
@@ -275,4 +284,31 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
 
   plot
 
+}
+
+##' @rdname plot_arc
+##' @name arch_to_tsne
+##' @description arch_to_tsne() Find archetype positions in tSNE coordinates (2D or 3D).
+##' @param pca perform PCA? Argument to \code{\link[Rtsne]{Rtsne}}.
+##' @param partial_pca perform partial PCA? Argument to \code{\link[Rtsne]{Rtsne}}.
+##' @param ... additional arguments to \code{\link[Rtsne]{Rtsne}}.
+##' @return arch_to_tsne() list with: arch_data containing archetype positions in tSNE coordinates, and data positions in tSNE coordinates
+##' @export arch_to_tsne
+arch_to_tsne = function(arch_data, data, which_dimensions = 1:2,
+                     pca = FALSE, partial_pca = FALSE, ...) {
+
+  if(!is(arch_data, "pch_fit")) arch_data = average_pch_fits(arch_data)
+
+  colnames(arch_data$XC) = paste0("archetype", seq_len(ncol(arch_data$XC)))
+  for_tnse = t(cbind(data, arch_data$XC))
+
+  tnse = Rtsne::Rtsne(for_tnse, which_dimensions[2], pca = pca,
+                      partial_pca = partial_pca, ...)
+  tnse = tnse$Y
+  colnames(tnse) = paste0("TSNE", seq_len(ncol(tnse)))
+  rownames(tnse) = rownames(for_tnse)
+
+  arch_data$XC = t(tnse[colnames(arch_data$XC),])
+
+  list(arch_data = arch_data, data = t(tnse[colnames(data),]))
 }

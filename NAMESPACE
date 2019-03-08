@@ -3,6 +3,7 @@
 export(align_arc)
 export(align_arc_opt)
 export(arch_dist)
+export(arch_to_tsne)
 export(average_pch_fits)
 export(bin_cells_by_arch)
 export(build_logit_vert)

@@ -33,6 +33,8 @@ BiocManager::install("vitkl/ParetoTI", dependencies = T)
 
 # Load package
 library(ParetoTI)
+# If package does not load because "py_pcha is not found" make sure you do not have
+# a python environment already loaded in this R session (e.g. restart R and try loading again).
 
 # Install python dependency into conda python environment and install py_pcha module
 ParetoTI::install_py_pcha(method = "conda")

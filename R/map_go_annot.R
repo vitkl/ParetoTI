@@ -207,6 +207,13 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC", "gwas", "promo
 
   }
 
+  # rename rows of expression matrix to match keys
+  if(length(keys) == nrow(expr_mat)) {
+    # remove genes with NA key
+    expr_mat = expr_mat[!is.na(keys), ]
+    rownames(expr_mat) = keys[!is.na(keys)]
+  }
+
   # Find "activity" of each functional gene group  -------------------------------
   if(activity_method == "AUCell"){
 

@@ -187,7 +187,7 @@ plot_confusion = function(confusion, normalize = FALSE, text_color = "grey60") {
     ggplot2::geom_text(aes(label = N, x = predicted_class, y = observed_class),
                        color = text_color) +
     ggplot2::scale_fill_viridis_c() + ggplot2::scale_color_viridis_c() +
-    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = -25))
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 }
 
 ##' @rdname fit_logistic_model

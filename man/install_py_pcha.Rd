@@ -5,11 +5,10 @@
 \title{Install python module py_pcha and numpy}
 \usage{
 install_py_pcha(method = "auto", conda = "auto",
-  python_version = c("python 2.7.10", "python 3.6.4")[1],
+  python_version = c("python 2.7.13", "python 3.6.4")[1],
   envname = c("reticulate_PCHA", "reticulate_PCHA_36")[1],
   overwrite_env = F, extra_packages = character(0),
-  packages = c("pip", "py_pcha", "numpy", "scipy", "datetime",
-  "geosketch"))
+  packages = c("pip", "py_pcha", "numpy", "scipy", "datetime"))
 }
 \arguments{
 \item{method}{paratemer for \code{\link[reticulate]{py_install}}. Default option should work in most cases. Use virtualenv if you don't want to install anaconda but virtualenv doesn't work on Windows. For conda method to work anaconda should be installed as described here: https://conda.io/docs/user-guide/install/index.html.}
@@ -40,8 +39,8 @@ path to python enviroment with py_pcha module installed
 \examples{
 \dontrun{
 install_py_pcha()
-install_py_pcha(extra_packages = c("tensorflow", "pandas", "keras",
-                                   "h5py", "pydot", "sklearn"))
+install_py_pcha(extra_packages = c("tensorflow", "pandas", "keras", "h5py",
+                                   "geosketch", "pydot", "sklearn", "umap-learn"))
 
 ## If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution:
 

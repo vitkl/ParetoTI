@@ -3,6 +3,7 @@
 \name{plot_arc}
 \alias{plot_arc}
 \alias{arch_to_tsne}
+\alias{arch_to_umap}
 \title{Plot data with archetypes in 2D, 3D and a panel of 2D}
 \usage{
 plot_arc(arch_data = NULL, data, which_dimensions = as.integer(1:2),
@@ -15,6 +16,9 @@ plot_arc(arch_data = NULL, data, which_dimensions = as.integer(1:2),
 
 arch_to_tsne(arch_data, data, which_dimensions = 1:2, pca = FALSE,
   partial_pca = FALSE, ...)
+
+arch_to_umap(arch_data, data, which_dimensions = 1:2,
+  method = c("naive", "umap-learn")[1], ...)
 }
 \arguments{
 \item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}
@@ -49,7 +53,9 @@ arch_to_tsne(arch_data, data, which_dimensions = 1:2, pca = FALSE,
 
 \item{partial_pca}{perform partial PCA? Argument to \code{\link[Rtsne]{Rtsne}}.}
 
-\item{...}{additional arguments to \code{\link[Rtsne]{Rtsne}}.}
+\item{...}{additional arguments to \code{\link[Rtsne]{Rtsne}} and \code{\link[umap]{umap}}.}
+
+\item{method}{Method for finding UMAP representation. Available methods are 'naive' (an implementation written in pure R) and 'umap-learn' (requires python package 'umap-learn'). See \code{\link[umap]{umap}} for details.}
 
 \item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm. Set to NULL if you want to show data alone.}
 }
@@ -57,11 +63,15 @@ arch_to_tsne(arch_data, data, which_dimensions = 1:2, pca = FALSE,
 \code{plot_arc()} ggplot2 (2D) or plotly (3D) plot
 
 arch_to_tsne() list with: arch_data containing archetype positions in tSNE coordinates, and data positions in tSNE coordinates
+
+arch_to_umap() list with: arch_data containing archetype positions in UMAP coordinates, data positions in UMAP coordinates, and umap_config parameters used to find this representation.
 }
 \description{
 \code{plot_arc()} plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "b_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").
 
-arch_to_tsne() Find archetype positions in tSNE coordinates (2D or 3D).
+arch_to_tsne() Project archetype positions to tSNE coordinates (2D or 3D) using \code{\link[Rtsne]{Rtsne}}.
+
+arch_to_umap() Project archetype positions to UMAP coordinates using \code{\link[umap]{umap}}.
 }
 \examples{
 library(ParetoTI)
@@ -83,16 +93,21 @@ set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
                           mean = 0, sd = 1, N_dim = 3)
 data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+
 plot_arc(arch_data = archetypes, data = data,
     which_dimensions = 1:3)
 
-# TSNE representation (from 3D to 2D)
-set.seed(4355)
-archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
-                          mean = 0, sd = 1, N_dim = 3)
-data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+# Project to tSNE coordinates (from 3D to 2D)
 arc_tsne = arch_to_tsne(archetypes, data, which_dimensions = 1:2)
-plot_arc(arch_data = arc_tsne$arch_data, data = arch_data$data,
+plot_arc(arch_data = arc_tsne$arch_data, data = arc_tsne$data,
+    which_dimensions = 1:2) +
+    theme_bw()
+
+# Project to UMAP representation
+arc_umap = arch_to_umap(archetypes, data, which_dimensions = 1:2,
+                        method = c("naive", # implemented in R and slow
+                                   "umap-learn")) # requires python module
+plot_arc(arch_data = arc_umap$arch_data, data = arc_umap$data,
     which_dimensions = 1:2) +
     theme_bw()
 }

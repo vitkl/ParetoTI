@@ -20,8 +20,8 @@
 ##' @examples
 ##' \dontrun{
 ##' install_py_pcha()
-##' install_py_pcha(extra_packages = c("tensorflow", "pandas", "keras",
-##'                                    "h5py", "pydot", "sklearn"))
+##' install_py_pcha(extra_packages = c("tensorflow", "pandas", "keras", "h5py",
+##'                                    "geosketch", "pydot", "sklearn", "umap-learn"))
 ##'
 ##' ## If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution:
 ##'
@@ -30,10 +30,10 @@
 ##' # use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir
 ##' }
 install_py_pcha = function(method = "auto", conda = "auto",
-                           python_version = c("python 2.7.10", "python 3.6.4")[1],
+                           python_version = c("python 2.7.13", "python 3.6.4")[1],
                            envname = c("reticulate_PCHA", "reticulate_PCHA_36")[1],
                            overwrite_env = F, extra_packages = character(0),
-                           packages = c("pip", "py_pcha", "numpy", "scipy", "datetime", "geosketch")) {
+                           packages = c("pip", "py_pcha", "numpy", "scipy", "datetime")) {
   packages = c(packages, extra_packages)
   if(method == "virtualenv") {
     reticulate::py_install(packages = packages, envname = envname,

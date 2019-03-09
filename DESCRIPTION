@@ -1,23 +1,24 @@
 Package: ParetoTI
 Type: Package
 Title: Pareto Task Inference In R (based on ParTI)
-Version: 0.1.5
+Version: 0.1.6
 Author: Vitalii Kleshchevnikov
 Maintainer: Vitalii Kleshchevnikov <vk7@sanger.ac.uk>
 Authors@R: c(person("Vitalii", "Kleshchevnikov",, "vk7@sanger.ac.uk", role = c("aut", "cre")))
 Description: This package allows you to perform Pareto Task Inference in R as described in
     Yuval Hart & Uri Alon paper in Nature Methods (2015):
     Inferring biological tasks using Pareto analysis of high-dimensional data.
-    This package realises polytope dimentionality and
-    polytope position fitting using a python 2.7 implementation of PCHA algorithm. 
-    PCHA algorithm was originally implemented in Matlab by Morten Mørup (http://www.mortenmorup.dk/MMhomepageUpdated_files/Page327.htm)
+    This package performs archetypal analysis using a python 2.7 implementation of PCHA algorithm. 
+    It was originally implemented in Matlab by Morten Mørup (http://www.mortenmorup.dk/MMhomepageUpdated_files/Page327.htm)
     and re-implemented in python by Ulf Aslak Jensen.    
-    Statistical significance of this fit is determined using permutations of the dataset 
-    that disrupt relationships between variables but keep the distribution of each variable constant (not implemented yet).
-    CAUTION! Package is currently under development! It enables only polytope fitting, bootstrap and visualisations.
-    Other analyses, in particular, statistical significance by disrupting relationships between variable, 
-    models of feature enrichment at archetype and currently being developed.
-    Alternative methods for polytope fitting will be considered such as SPAMS implemented in c++ and using R interface: https://www.stat.berkeley.edu/~yuansi.chen/demo/demo.html, https://arxiv.org/pdf/1405.6472.pdf, http://spams-devel.gforge.inria.fr/downloads.html
+    Statistical significance of how well polytope defined by archetypes describes the data is determined using permutations of the dataset 
+    that disrupt relationships between variables but keep the distribution of each variable constant. \
+    We also implement a bootstraping-based procedure to identify the correct number of archetypes. 
+    In addition we have 2 methods for identifying genes and GO functions of each archetype. 
+    For convenience, we provide logistic regression model for classifying cells (or other objects) with logistic regression,
+    and GeoSketch method for reducing the size of the data while preseving rare populations.
+    CAUTION! Package is currently under development!
+    Alternative methods for polytope fitting will be considered such as AANet (https://github.com/KrishnaswamyLab/AAnet/) and SPAMS implemented in c++ via R interface (https://arxiv.org/pdf/1405.6472.pdf, http://spams-devel.gforge.inria.fr/downloads.html)
 License: Apache License 2.0
 Encoding: UTF-8
 LazyData: true
@@ -27,4 +28,4 @@ BugReports: https://github.com/vitkl/ParetoTI/issues
 Depends: reticulate, data.table, lpSolve
 Imports: parallel, plotly, BioQC, geometry, ggplot2, AnnotationHub, GO.db, ontologyIndex, Biobase, corpcor, AUCell
 Suggests: doMC, cowplot, keras, SummarizedExperiment, SingleCellExperiment
-Enhances: clustermq, voxel, Rtsne
+Enhances: clustermq, voxel, Rtsne, umap

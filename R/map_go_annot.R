@@ -168,9 +168,7 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC", "gwas", "promo
     # Map GWAS phenotype and disease associations GWAS Catalog -------------------
     annot = map_gwas_annot(taxonomy_id = taxonomy_id, keys = keys,
                            keytype = keytype, localHub = localHub,
-                           ann_hub_cache = ann_hub_cache,
-                           gwas_url = "https://www.ebi.ac.uk/gwas/api/search/downloads/alternative",
-                           gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2018-11-19.tsv")
+                           ann_hub_cache = ann_hub_cache)
     set_id_col = "MAPPED_TRAIT_ID"
     set_name_col = "MAPPED_TRAIT_NAME"
 

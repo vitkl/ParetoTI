@@ -6,6 +6,7 @@
 \alias{measure_activity}
 \alias{load_go_ontology}
 \alias{map_gwas_annot}
+\alias{map_promoter_tf}
 \title{Annotate genes with GO terms and measure their activities}
 \usage{
 map_go_annot(taxonomy_id = 9606, keys = c("TP53", "ALB"),
@@ -31,10 +32,13 @@ measure_activity(expr_mat, which = c("BP", "MF", "CC", "gwas",
 load_go_ontology(ont_dir = "./data/", ont_file = "goslim_generic.obo")
 
 map_gwas_annot(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
-  keytype = "GENENAME", localHub = FALSE,
+  keytype = "SYMBOL", localHub = FALSE,
   ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
   gwas_url = "https://www.ebi.ac.uk/gwas/api/search/downloads/alternative",
-  gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2018-11-19.tsv")
+  gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2019-01-31.tsv")
+
+map_promoter_tf(keys = c("TP53", "ZZZ3"), keytype = "SYMBOL",
+  lower = 1, upper = Inf)
 }
 \arguments{
 \item{taxonomy_id}{Taxonomy id of your species. 9606 is human, 10090 is mouse. Find your species id using taxonomy search by UniProt: https://www.uniprot.org/taxonomy/.}
@@ -97,7 +101,9 @@ measure_activity() annotates genes with GO terms and measures their activities
 
 load_go_ontology() load GO slim ontology file and return file path
 
-map_gwas_annot() load GO slim ontology file and return file path
+map_gwas_annot() Load known GWAS loci for all phenotypes in GWAS Catalog. For each the \code{keys} find which phenotypes it is associated with using genes mapped by GWAS Catalog.
+
+map_promoter_tf() load GO slim ontology file and return file path
 }
 \details{
 GO consortium annotates genes with the most specific terms so there is a need to propagate annotations to less specific parent terms. For example, "apoptotic process in response to mitochondrial fragmentation" (GO:0140208) is an "apoptotic process" (GO:0006915). Conceptually, if gene functions in the first it also functions in the second but it is only directly annotated by the first term. So, using GO annotations for functional enrichment requires propagating annotations to less specific terms.

@@ -178,20 +178,8 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC", "gwas", "promo
 
     # Load TF-target map  --------------------------------------------------------
     if(!keytype %in% c("SYMBOL", "ENSEMBL")) stop("When which == \"promoter_TF\", the keytype should be SYMBOL or ENSEMBL")
-
-    data("promoter_TF_motifs", package = "ParetoTI", envir = environment())
-    promoter_TF_motifs = unique(promoter_TF_motifs[, c("TF", keytype)])
-    # find number of targets per TF
-    n_targ = table(promoter_TF_motifs$TF)
-    # keep TFs between upper and lower boundary
-    tf_size_filter = names(n_targ)[n_targ >= lower & n_targ <= upper]
-    promoter_TF_motifs = promoter_TF_motifs[promoter_TF_motifs[, keytype] %in% keys &
-                                              promoter_TF_motifs$TF %in% tf_size_filter,]
-    colnames(promoter_TF_motifs) = c("TF", "TARGET")
-    # check that only letters, numbers and underscores are present - remove dots
-    promoter_TF_motifs$TF = gsub("\\.", "_", promoter_TF_motifs$TF)
-
-    annot = list(annot_dt = promoter_TF_motifs)
+    annot = map_promoter_tf(keys = keys, keytype = keytype,
+                            lower = lower, upper = upper)
     set_id_col = "TF"
     set_name_col = set_id_col
     keytype = "TARGET"
@@ -272,15 +260,15 @@ load_go_ontology = function(ont_dir = "./data/", ont_file = "goslim_generic.obo"
 
 ##' @rdname measure_activity
 ##' @name map_gwas_annot
-##' @description map_gwas_annot() load GO slim ontology file and return file path
+##' @description map_gwas_annot() Load known GWAS loci for all phenotypes in GWAS Catalog. For each the \code{keys} find which phenotypes it is associated with using genes mapped by GWAS Catalog.
 ##' @param gwas_url where to download annotations? Useful for other versions of GWAS Catalog.
 ##' @param gwas_file name of the file where to store GWAS Catalog data locally (in ann_hub_cache directory).
 ##' @export map_gwas_annot
 map_gwas_annot = function(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
-                          keytype = "GENENAME", localHub = FALSE,
+                          keytype = "SYMBOL", localHub = FALSE,
                           ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
                           gwas_url = "https://www.ebi.ac.uk/gwas/api/search/downloads/alternative",
-                          gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2018-11-19.tsv") {
+                          gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2019-01-31.tsv") {
   if(taxonomy_id %in% c(9606)){
     # find annotation data base for taxonomy_id
     setAnnotationHubOption("CACHE", ann_hub_cache)
@@ -289,11 +277,11 @@ map_gwas_annot = function(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
     org_db = hub[[names(record)]]
     suppressMessages({
       annot = as.data.table(AnnotationDbi::select(org_db, keys = keys,
-                                                  columns = unique(c(keytype, "GENENAME")),
+                                                  columns = unique(c(keytype, "SYMBOL")),
                                                   keytype = keytype))
     })
   } else stop("GWAS are annotations of human genes only (taxonomy_id = 9606)")
-  gwas_file = paste0(ann_hub_cache, gwas_file)
+  gwas_file = paste0(ann_hub_cache, "/", gwas_file)
   if(!file.exists(gwas_file)){
     if(!dir.exists(ann_hub_cache)) dir.create(ann_hub_cache, recursive = TRUE)
     download.file(gwas_url,
@@ -330,8 +318,32 @@ map_gwas_annot = function(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
                     allow.cartesian = TRUE)
   # merge gene identifiers in the dataset to gene names in GWAS catalog
   gwas_data = merge(gwas_data, annot,
-                    by.x = c("MAPPED_GENE_NAME"), by.y = c("GENENAME"),
-                    all.y = TRUE, as.x = FALSE,
+                    by.x = c("MAPPED_GENE_NAME"), by.y = c("SYMBOL"),
+                    all.y = FALSE, as.x = FALSE,
                     allow.cartesian = TRUE)
   list(annot_dt = unique(gwas_data))
+}
+
+
+##' @rdname measure_activity
+##' @name map_promoter_tf
+##' @description map_promoter_tf() load GO slim ontology file and return file path
+##' @export map_promoter_tf
+map_promoter_tf = function(keys = c("TP53", "ZZZ3"),
+                           keytype = "SYMBOL",
+                           lower = 1, upper = Inf) {
+
+  data("promoter_TF_motifs", package = "ParetoTI", envir = environment())
+  promoter_TF_motifs = unique(promoter_TF_motifs[, c("TF", keytype)])
+  # find number of targets per TF
+  n_targ = table(promoter_TF_motifs$TF)
+  # keep TFs between upper and lower boundary
+  tf_size_filter = names(n_targ)[n_targ >= lower & n_targ <= upper]
+  promoter_TF_motifs = promoter_TF_motifs[promoter_TF_motifs[, keytype] %in% keys &
+                                            promoter_TF_motifs$TF %in% tf_size_filter,]
+  colnames(promoter_TF_motifs) = c("TF", "TARGET")
+  # check that only letters, numbers and underscores are present - remove dots
+  promoter_TF_motifs$TF = gsub("\\.", "_", promoter_TF_motifs$TF)
+
+  annot = list(annot_dt = promoter_TF_motifs)
 }

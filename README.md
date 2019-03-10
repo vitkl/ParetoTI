@@ -91,7 +91,7 @@ plot_arc(arch_data = arc_umap$arch_data, data = arc_umap$data,
     theme_bw()
     
 # Project to tSNE coordinates (3D -> 2D, requires Rtsne package)
-arc_tsne = arch_to_tsne(archetypes, data, which_dimensions = 1:2)
+arc_tsne = arch_to_tsne(arc_data, data, which_dimensions = 1:2)
 plot_arc(arch_data = arc_tsne$arch_data, data = arc_tsne$data,
     which_dimensions = 1:2) +
     theme_bw()

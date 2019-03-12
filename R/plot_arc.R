@@ -68,17 +68,23 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                     data_lab = "data", arc_lab = "archetypes",
                     legend_name = "data",
                     text_size = NULL, nudge = c(0.05, 0.1)) {
+
   if(!is.null(arch_data)){
+
     for_plot = ParetoTI:::.arc_data_table(arch_data, data, data_lab = data_lab,
                                           which_dimensions = which_dimensions)
     lines_for_plot = ParetoTI:::.archLines(for_plot$arc_data, arc_lab = arc_lab,
                                            type, average_func)
+
   } else {
+
     for_plot = list()
     for_plot$data = as.data.table(t(data))
     for_plot$data$lab = data_lab
+
   }
   if(is(arch_data, "b_pch_fit") & type == "average"){
+
     for_plot$arc_data[grepl("archetypes", lab), lab := "archetypes"]
     for_plot$arc_data[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
     setorder(for_plot$arc_data, lab)
@@ -86,10 +92,13 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     ly_line_size = 5
     gg_arch_size = 2
     gg_line_size = 1.5
+
   } else {
     if(!is.null(arch_data)) {
+
       for_plot$arc_data[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
       setorder(for_plot$arc_data, lab)
+
     }
     ly_arch_size = 10
     ly_line_size = 5

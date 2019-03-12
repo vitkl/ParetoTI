@@ -64,7 +64,7 @@ select_conda is a helper function that tells R to use python conda environment c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.5</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.7</span>
       </span>
     </div>
 
@@ -87,7 +87,7 @@ select_conda is a helper function that tells R to use python conda environment c
   </a>
   <ul class="dropdown-menu" role="menu">
     <li>
-      <a href="../articles/introduction.html">Manual for Pareto front and task inference, ParetoTI R package</a>
+      <a href="../articles/Hepatocyte_example.html">Example of using archetypal analysis to find representative cells &amp; describe heterogeniety in hepatocyte population between those archetypes</a>
     </li>
   </ul>
 </li>
@@ -120,7 +120,7 @@ select_conda is a helper function that tells R to use python conda environment c
     </div>
 
     <pre class="usage"><span class='fu'>install_py_pcha</span>(<span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"auto"</span>, <span class='kw'>conda</span> <span class='kw'>=</span> <span class='st'>"auto"</span>,
-  <span class='kw'>python_version</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"python 2.7.10"</span>, <span class='st'>"python 3.6.4"</span>)[<span class='fl'>1</span>],
+  <span class='kw'>python_version</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"python 2.7.13"</span>, <span class='st'>"python 3.6.4"</span>)[<span class='fl'>1</span>],
   <span class='kw'>envname</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"reticulate_PCHA"</span>, <span class='st'>"reticulate_PCHA_36"</span>)[<span class='fl'>1</span>],
   <span class='kw'>overwrite_env</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>extra_packages</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/character'>character</a></span>(<span class='fl'>0</span>),
   <span class='kw'>packages</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"pip"</span>, <span class='st'>"py_pcha"</span>, <span class='st'>"numpy"</span>, <span class='st'>"scipy"</span>, <span class='st'>"datetime"</span>))</pre>
@@ -169,8 +169,8 @@ python -m pip install --user -i https://pypi.python.org/simple --upgrade pip set
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><span class='co'># NOT RUN {</span>
 <span class='fu'>install_py_pcha</span>()
-<span class='fu'>install_py_pcha</span>(<span class='kw'>extra_packages</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"tensorflow"</span>, <span class='st'>"pandas"</span>, <span class='st'>"keras"</span>,
-                                   <span class='st'>"h5py"</span>, <span class='st'>"pydot"</span>, <span class='st'>"sklearn"</span>))
+<span class='fu'>install_py_pcha</span>(<span class='kw'>extra_packages</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"tensorflow"</span>, <span class='st'>"pandas"</span>, <span class='st'>"keras"</span>, <span class='st'>"h5py"</span>,
+                                   <span class='st'>"geosketch"</span>, <span class='st'>"pydot"</span>, <span class='st'>"sklearn"</span>, <span class='st'>"umap-learn"</span>))
 
 <span class='co'>## If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution:</span>
 

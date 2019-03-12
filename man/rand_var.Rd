@@ -23,7 +23,7 @@ This function uses permutations or sampling with replacement to disrupt relation
 }
 \examples{
 set.seed(4354)
-N = 1000
+N = 100
 x = matrix(rnorm(N * 10 * N), N * 10, N)
 x_rand = rand_var(x, MARGIN = 2, replace = FALSE, prob = NULL)
 }

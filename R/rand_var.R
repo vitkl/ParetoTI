@@ -1,4 +1,4 @@
-##' Permute each column of a matrix or sample from it's ECDF (with replacement)
+##' Permute each column of a matrix by sampling from empirical distribution
 ##' @rdname rand_var
 ##' @name rand_var
 ##' @author Vitalii Kleshchevnikov
@@ -6,7 +6,7 @@
 ##' @param x matrix to be permuted
 ##' @param MARGIN which dimension of a matrix to permute? Passed to \code{\link[base]{apply}}.
 ##' @param replace should sampling be with replacement? Passed to \code{\link[base]{sample.int}}.
-##' @param prob a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{(sample.int}}.
+##' @param prob a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{sample.int}}.
 ##' @return Matrix of the same dimention as the original matrix but with values in each column permuted.
 ##' @export rand_var
 ##' @examples

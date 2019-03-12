@@ -35,7 +35,8 @@ map_gwas_annot(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
   keytype = "SYMBOL", localHub = FALSE,
   ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
   gwas_url = "https://www.ebi.ac.uk/gwas/api/search/downloads/alternative",
-  gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2019-01-31.tsv")
+  gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2019-01-31.tsv",
+  lower = 1, upper = Inf)
 
 map_promoter_tf(keys = c("TP53", "ZZZ3"), keytype = "SYMBOL",
   lower = 1, upper = Inf)

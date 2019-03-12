@@ -2,7 +2,7 @@
 % Please edit documentation in R/rand_var.R
 \name{rand_var}
 \alias{rand_var}
-\title{Permute each column of a matrix or sample from it's ECDF (with replacement)}
+\title{Permute each column of a matrix by sampling from empirical distribution}
 \usage{
 rand_var(x, MARGIN = 2, replace = FALSE, prob = NULL)
 }
@@ -13,7 +13,7 @@ rand_var(x, MARGIN = 2, replace = FALSE, prob = NULL)
 
 \item{replace}{should sampling be with replacement? Passed to \code{\link[base]{sample.int}}.}
 
-\item{prob}{a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{(sample.int}}.}
+\item{prob}{a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{sample.int}}.}
 }
 \value{
 Matrix of the same dimention as the original matrix but with values in each column permuted.

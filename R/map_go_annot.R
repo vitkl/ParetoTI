@@ -168,7 +168,8 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC", "gwas", "promo
     # Map GWAS phenotype and disease associations GWAS Catalog -------------------
     annot = map_gwas_annot(taxonomy_id = taxonomy_id, keys = keys,
                            keytype = keytype, localHub = localHub,
-                           ann_hub_cache = ann_hub_cache)
+                           ann_hub_cache = ann_hub_cache,
+                           lower = lower, upper = upper)
     set_id_col = "MAPPED_TRAIT_ID"
     set_name_col = "MAPPED_TRAIT_NAME"
 
@@ -266,7 +267,8 @@ map_gwas_annot = function(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
                           keytype = "SYMBOL", localHub = FALSE,
                           ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
                           gwas_url = "https://www.ebi.ac.uk/gwas/api/search/downloads/alternative",
-                          gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2019-01-31.tsv") {
+                          gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2019-01-31.tsv",
+                          lower = 1, upper = Inf) {
   if(taxonomy_id %in% c(9606)){
     # find annotation data base for taxonomy_id
     setAnnotationHubOption("CACHE", ann_hub_cache)
@@ -319,6 +321,10 @@ map_gwas_annot = function(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
                     by.x = c("MAPPED_GENE_NAME"), by.y = c("SYMBOL"),
                     all.y = FALSE, as.x = FALSE,
                     allow.cartesian = TRUE)
+  # filter by lower and upper
+  gwas_data[, N_genes := uniqueN(MAPPED_TRAIT_ID), by = .(MAPPED_TRAIT_ID)]
+  gwas_data = gwas_data[N_genes >= lower & N_genes <= upper]
+
   list(annot_dt = unique(gwas_data))
 }
 

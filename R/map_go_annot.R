@@ -172,6 +172,7 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC", "gwas", "promo
                            lower = lower, upper = upper)
     set_id_col = "MAPPED_TRAIT_ID"
     set_name_col = "MAPPED_TRAIT_NAME"
+    keytype = "MAPPED_GENE_NAME"
 
   } else if(which == "promoter_TF") {
 

@@ -85,13 +85,15 @@ hepatocytes = hepatocytes[,colMeans(counts(hepatocytes) > 0) > 0.15]
 # Normalise gene expression by cell sum factors and log-transform
 hepatocytes = scran::computeSumFactors(hepatocytes)
 hepatocytes = scater::normalize(hepatocytes)
+hepatocytes = scater::normalize(hepatocytes, return_log = FALSE) # just normalise
 ```
 
 Plot below shows first 3 PCs colored by batch.  
 
 ```{r, echo=TRUE}
 # Find principal components
-hepatocytes = scater::runPCA(hepatocytes, ncomponents = 7, scale_features = T)
+hepatocytes = scater::runPCA(hepatocytes, ncomponents = 7,
+                             scale_features = T, exprs_values = "logcounts")
 # Plot PCA colored by batch
 scater::plotReducedDim(hepatocytes, ncomponents = 3, use_dimred = "PCA",
                         colour_by = "batch")

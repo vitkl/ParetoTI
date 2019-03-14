@@ -322,7 +322,7 @@ map_gwas_annot = function(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
                     all.y = FALSE, as.x = FALSE,
                     allow.cartesian = TRUE)
   # filter by lower and upper
-  gwas_data[, N_genes := uniqueN(MAPPED_TRAIT_ID), by = .(MAPPED_TRAIT_ID)]
+  gwas_data[, N_genes := uniqueN(MAPPED_GENE_NAME), by = .(MAPPED_TRAIT_ID)]
   gwas_data = gwas_data[N_genes >= lower & N_genes <= upper]
 
   list(annot_dt = unique(gwas_data))

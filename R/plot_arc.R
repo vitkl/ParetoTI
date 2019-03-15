@@ -69,7 +69,12 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                     legend_name = "data",
                     text_size = NULL, nudge = c(0.05, 0.1)) {
 
-  if(!is.null(arch_data)){
+
+  if(uniqueN(data_lab) > uniqueN(colors) & !is.integer(data_lab) & ! is.numeric(data_lab)) {
+    stop("uniqueN(data_lab) > colors, please add more colors")
+  }
+
+  if(!is.null(arch_data)) {
 
     for_plot = ParetoTI:::.arc_data_table(arch_data, data, data_lab = data_lab,
                                           which_dimensions = which_dimensions)
@@ -151,12 +156,19 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     plot = ggplot2::ggplot(for_plot$data, ggplot2::aes(x = get(x), y = get(y),
                                                        color = lab))
     if(is.numeric(for_plot$data$lab)){
+
       plot = plot + geom(size = data_size/2)
+
     } else if(identical(geom, geom_bin2d)) {
+
       plot = plot + geom()
+
     } else {
-      plot = plot + geom(color = data_colors[for_plot$data$lab],
-                         size = data_size/2)
+
+      plot = plot + geom(size = data_size/2) +
+        scale_color_manual(aesthetics = "color", values = data_colors[for_plot$data$lab]) +
+        guides(color = guide_legend(title="data"))
+
     }
     if("lines_for_plot" %in% ls()) {
       # calculate nudge by distance for text labels
@@ -181,12 +193,13 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
         ggplot2::geom_path(data = lines_for_plot, inherit.aes = FALSE,
                            ggplot2::aes(x = get(x), y = get(y),
                                         group = lab), size = gg_line_size,
-                           color = arc_line_colors) +
-        #ggplot2::scale_color_manual(values = colors) +
-        ggplot2::geom_point(data = lines_for_plot, inherit.aes = FALSE,
-                            ggplot2::aes(x = get(x), y = get(y),
-                                         group = lab), size = gg_arch_size,
-                            color = arc_line_colors)
+                           color = arc_line_colors)
+      #ggplot2::scale_color_manual(values = colors) +
+      plot = plot + ggplot2::geom_point(data = lines_for_plot, inherit.aes = FALSE,
+                                        ggplot2::aes(x = get(x), y = get(y),
+                                                     group = lab, colour = lab), size = gg_arch_size,
+                                        color = arc_line_colors)
+
       if(uniqueN(arch_data$summary$k) == 1){
         plot = plot +
           ggplot2::geom_text(data = unique(lines_for_plot), inherit.aes = FALSE,
@@ -203,7 +216,6 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
       # if cells are colored on a gradient - add nice palette
       plot = plot + ggplot2::scale_color_viridis_c()
     }
-
 
     ## 3D plot ===================================================================##
 
@@ -357,3 +369,4 @@ arch_to_umap = function(arch_data, data, which_dimensions = 1:2,
   list(arch_data = arch_data, data = t(umap_out[seq_len(ncol(data)),]),
        umap_config = umap_config)
 }
+

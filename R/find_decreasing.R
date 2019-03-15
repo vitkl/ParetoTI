@@ -175,9 +175,10 @@ fit_arc_gam_1 = function(feature, col, N_smooths, data_attr, min.sp, ..., d,
 ##' @param p.adjust.method choose method for correcting p-value for multiple hypothesis testing. See p.adjust.methods and \link[stats]{p.adjust} for details.
 ##' @param gam_fit_pval smooth term probability in gam fit (upper bound)
 ##' @param invert_cutoff invert cutoff for genes and sets. If FALSE p < cutoff_genes, if TRUE p > cutoff_genes.
-##' @param order_by order decreasing feature list by measure in summary sets. By default is deriv20, the average value of derivative at 20 of point closest to vertex.
-##' @param min_max_diff_cutoff_g what should be the mean difference (log-ratio, when y is log-space) of gene expression at the point closest to archetype compared to point furthest from archetype? When Wilcox method was used it is difference between mean of bin closest to archetype and all other cells. By default, at least 0.3 for genes 0.1 for functions.
+##' @param order_by order decreasing feature list by measure in summary sets. By default is mean_diff, the average difference between cells in bin closest to archetype and all other cells. When using GAM instead of Wilcox test set this to one of c( "deriv100", "deriv50", "deriv20"), the average value of derivative at 20/50/100 % of points closest to vertex.
+##' @param min_max_diff_cutoff_g what should be the mean difference (log-ratio, when y is log-space) of gene expression at the point closest to archetype compared to point furthest from archetype? When Wilcox method was used it is difference between mean of bin closest to archetype and all other cells. By default, at least 0.3 for genes and 0.1 for functions.
 ##' @param min_max_diff_cutoff_f see min_max_diff_cutoff_g
+##' @param order_decreasing order significant categories using \code{order_by}
 ##' @return \code{get_top_decreasing()} print summary to output, and return list with character vector with one element for each archetype, and 2 data.table- with selection of enriched genes and functions.
 ##' @export get_top_decreasing
 ##' @import data.table
@@ -186,7 +187,7 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
                               cutoff_metric = "wilcoxon_p_val",
                               p.adjust.method = c("fdr", "none")[1],
                               gam_fit_pval = 0.01, invert_cutoff = FALSE,
-                              order_by = "mean_diff", order_decreasing = FALSE,
+                              order_by = "mean_diff", order_decreasing = TRUE,
                               min_max_diff_cutoff_g = 0.3, min_max_diff_cutoff_f = 0.1) {
 
   enriched = summary_genes[metric == cutoff_metric]

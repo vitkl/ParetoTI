@@ -175,7 +175,7 @@ fit_arc_gam_1 = function(feature, col, N_smooths, data_attr, min.sp, ..., d,
 ##' @param p.adjust.method choose method for correcting p-value for multiple hypothesis testing. See p.adjust.methods and \link[stats]{p.adjust} for details.
 ##' @param gam_fit_pval smooth term probability in gam fit (upper bound)
 ##' @param invert_cutoff invert cutoff for genes and sets. If FALSE p < cutoff_genes, if TRUE p > cutoff_genes.
-##' @param order_by order decreasing feature list by measure in summary sets. By default is mean_diff, the average difference between cells in bin closest to archetype and all other cells. When using GAM instead of Wilcox test set this to one of c( "deriv100", "deriv50", "deriv20"), the average value of derivative at 20/50/100 % of points closest to vertex.
+##' @param order_by order decreasing feature list by measure in summary sets. By default is mean_diff, the average difference between cells in bin closest to archetype and all other cells. When using GAM instead of Wilcox test set this to one of c( "deriv100", "deriv50", "deriv20"), the average value of derivative at 20/50/100 % of points closest to archetype.
 ##' @param min_max_diff_cutoff_g what should be the mean difference (log-ratio, when y is log-space) of gene expression at the point closest to archetype compared to point furthest from archetype? When Wilcox method was used it is difference between mean of bin closest to archetype and all other cells. By default, at least 0.3 for genes and 0.1 for functions.
 ##' @param min_max_diff_cutoff_f see min_max_diff_cutoff_g
 ##' @param order_decreasing order significant categories using \code{order_by}
@@ -282,7 +282,7 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
     enriched_lab = unique(enriched_lab[, .(arch_name, arch_lab)])
   }
 
-  # add vertex label
+  # add archetype label
   enriched_lab[, arch_lab := paste0(arch_name, "\n\n", arch_lab), by = arch_name]
   # remove excessive empty lines
   while(sum(grepl("\n\n\n", enriched_lab$arch_lab))){
@@ -299,7 +299,7 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
 
 ##' @rdname find_decreasing
 ##' @name find_decreasing_wilcox
-##' @description \code{find_decreasing_wilcox()} find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to vertex (1 vs all Wilcox test).
+##' @description \code{find_decreasing_wilcox()} find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to archetype (1 vs all Wilcox test).
 ##' @param bin_prop proportion of data to put in bin closest to archetype
 ##' @param method how to find_decreasing_wilcox()? Use \link[BioQC]{wmwTest} or \link[stats]{wilcox.test}. BioQC::wmwTest can be up to 1000 times faster, so it is default.
 ##' @return \code{find_decreasing_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.
@@ -331,7 +331,7 @@ find_decreasing_wilcox = function(data_attr, arc_col,
     decreasing = as.data.table(decreasing, keep.rownames = "x_name")
     decreasing = melt.data.table(decreasing, id.vars = "x_name",
                                  value.name = "p", variable.name = "y_name")
-    # find mean and median difference between bin closest to vertex vs other bins
+    # find mean and median difference between bin closest to archetype vs other bins
     decreasing[, c("median_diff", "mean_diff", "top_bin_mean") := .({
       as.numeric(median(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm) -
                    median(feature_mat[-arch_bin[x_name][[1]], y_name], na.rm = na.rm))
@@ -426,9 +426,9 @@ find_decreasing_wilcox = function(data_attr, arc_col,
 
 ##' @rdname find_decreasing
 ##' @name bin_cells_by_arch
-##' @description \code{bin_cells_by_arch()} find which cells are in bin closest to vertex.
+##' @description \code{bin_cells_by_arch()} find which cells are in bin closest to archetype.
 ##' @param return_names return list of indices of cells or names of cells?
-##' @return \code{bin_cells_by_arch()} list of indices of cells or names of cells that are in bin closest to each vertex
+##' @return \code{bin_cells_by_arch()} list of indices of cells or names of cells that are in bin closest to each archetype
 ##' @export bin_cells_by_arch
 ##' @import data.table
 bin_cells_by_arch = function(data_attr, arc_col, bin_prop = 0.1, return_names = FALSE){
@@ -450,4 +450,30 @@ bin_cells_by_arch = function(data_attr, arc_col, bin_prop = 0.1, return_names = 
     data_attr$sample_id[arch_ind]
   })
   arch_bin
+}
+
+
+##' @rdname find_decreasing
+##' @name find_tradeoff_wilcox
+##' @description \code{find_tradeoff_wilcox()}: find features that are most different between 2 archetypes (at a tradeoff, DE, differentially expressed genes) by finding features with highest value (median) in bin closest to archetype (1 vs all Wilcox test).
+##' @return \code{find_tradeoff_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.
+##' @export find_tradeoff_wilcox
+##' @import data.table
+find_tradeoff_wilcox = function(data_attr, arc_col = c("archetype_1", "archetype_2"),
+                                  features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
+                                  bin_prop = 0.1, na.rm = FALSE) {
+
+  if(length(arc_col) != 2) stop("find_tradeoff_wilcox() works for pairs of arc_col but length(arc_col) != 2")
+
+  # find which cells are in bin closest to each archetype
+  arch_bin = bin_cells_by_arch(data_attr, arc_col, bin_prop, return_names = FALSE)
+
+  # filter data to include only that archetype
+  data_attr_2 = data_attr[unlist(arch_bin[arc_col]), ]
+
+  # run two one-sided Wilcoxon tests as normal
+  # but due to the filtering above 2 specific archetypes are compared
+  find_decreasing_wilcox(data_attr = data_attr_2, arc_col = arc_col,
+                         features = features, bin_prop = bin_prop, na.rm = na.rm)
+
 }

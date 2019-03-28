@@ -24,10 +24,10 @@ measure_activity(expr_mat, which = c("BP", "MF", "CC", "gwas",
   ontology_file = NULL, taxonomy_id = 10090, evidence_code = "all",
   localHub = FALSE,
   ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
-  lower = 1, upper = Inf, return_as_matrix = FALSE,
-  annot_dt = NULL, assay_name = "logcounts",
-  aucell_options = list(aucMaxRank = nrow(expr_mat) * 0.05, binary = F,
-  nCores = 3, plotStats = TRUE))
+  lower = 1, upper = Inf, variant_context = NULL,
+  return_as_matrix = FALSE, annot_dt = NULL,
+  assay_name = "logcounts", aucell_options = list(aucMaxRank =
+  nrow(expr_mat) * 0.05, binary = F, nCores = 3, plotStats = TRUE))
 
 load_go_ontology(ont_dir = "./data/", ont_file = "goslim_generic.obo")
 
@@ -36,7 +36,7 @@ map_gwas_annot(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
   ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
   gwas_url = "https://www.ebi.ac.uk/gwas/api/search/downloads/alternative",
   gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2019-01-31.tsv",
-  lower = 1, upper = Inf)
+  lower = 1, upper = Inf, variant_context = NULL)
 
 map_promoter_tf(keys = c("TP53", "ZZZ3"), keytype = "SYMBOL",
   lower = 1, upper = Inf)
@@ -73,6 +73,8 @@ map_promoter_tf(keys = c("TP53", "ZZZ3"), keytype = "SYMBOL",
 \item{which}{which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets. Use "gwas" for constructing gene sets with gwas_catalog v1.0.2. GWAS option works only with human hgnc identifiers. Use "promoter_TF" to look at TF activities measured by mapping TF->target gene regulation via co-occurence of multiple motifs for the same TF in promoters (courtesy of Krzysztof Polanski who generated this resource). TF data is added supplied with the package and works only for human data, only SYMBOL and ENSEMBL can be used as keytype. Use "custom" to provide your own gene sets in \code{annot_dt} table.}
 
 \item{activity_method}{find activities using \link[ParetoTI]{find_set_activity_AUCell} or \link[ParetoTI]{find_set_activity_pseudoinv}?}
+
+\item{variant_context}{select traits (which = "gwas") based on variant context (coding, intronic, UTR, intergenic). Find availlable options by running \code{annot = map_gwas_annot(); t = table(annot$annot_dt$CONTEXT); t[!grepl(";| x ", names(t))]}. Suggested options: \code{c("3_prime_UTR_variant", "5_prime_UTR_variant", "frameshift_variant", "inframe_deletion", "inframe_insertion", "intergenic_variant", "intron_variant", "missense_variant", "non_coding_transcript_exon_variant" "regulatory_region_variant", "splice_acceptor_variant", "splice_donor_variant", "splice_region_variant", "start_lost", "stop_gained", "stop_lost", "synonymous_variant", "TF_binding_site_variant", "TFBS_ablation", "upstream_gene_variant")}.}
 
 \item{return_as_matrix}{return matrix (TRUE) or data.table (FALSE)}
 

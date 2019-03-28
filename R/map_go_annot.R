@@ -138,7 +138,7 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC", "gwas", "promo
                             ontology_file = NULL, taxonomy_id = 10090,
                             evidence_code = "all", localHub = FALSE,
                             ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
-                            lower = 1, upper = Inf,
+                            lower = 1, upper = Inf, variant_context = NULL,
                             return_as_matrix = FALSE,
                             annot_dt = NULL,
                             assay_name = "logcounts",
@@ -169,7 +169,8 @@ measure_activity = function(expr_mat, which = c("BP", "MF", "CC", "gwas", "promo
     annot = map_gwas_annot(taxonomy_id = taxonomy_id, keys = keys,
                            keytype = keytype, localHub = localHub,
                            ann_hub_cache = ann_hub_cache,
-                           lower = lower, upper = upper)
+                           lower = lower, upper = upper,
+                           variant_context = variant_context)
     set_id_col = "MAPPED_TRAIT_ID"
     set_name_col = "MAPPED_TRAIT_NAME"
     keytype = "MAPPED_GENE_NAME"
@@ -263,13 +264,14 @@ load_go_ontology = function(ont_dir = "./data/", ont_file = "goslim_generic.obo"
 ##' @description map_gwas_annot() Load known GWAS loci for all phenotypes in GWAS Catalog. For each the \code{keys} find which phenotypes it is associated with using genes mapped by GWAS Catalog.
 ##' @param gwas_url where to download annotations? Useful for other versions of GWAS Catalog.
 ##' @param gwas_file name of the file where to store GWAS Catalog data locally (in ann_hub_cache directory).
+##' @param variant_context select traits (which = "gwas") based on variant context (coding, intronic, UTR, intergenic). Find availlable options by running \code{annot = map_gwas_annot(); t = table(annot$annot_dt$CONTEXT); t[!grepl(";| x ", names(t))]}. Suggested options: \code{c("3_prime_UTR_variant", "5_prime_UTR_variant", "frameshift_variant", "inframe_deletion", "inframe_insertion", "intergenic_variant", "intron_variant", "missense_variant", "non_coding_transcript_exon_variant" "regulatory_region_variant", "splice_acceptor_variant", "splice_donor_variant", "splice_region_variant", "start_lost", "stop_gained", "stop_lost", "synonymous_variant", "TF_binding_site_variant", "TFBS_ablation", "upstream_gene_variant")}.
 ##' @export map_gwas_annot
 map_gwas_annot = function(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
                           keytype = "SYMBOL", localHub = FALSE,
                           ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
                           gwas_url = "https://www.ebi.ac.uk/gwas/api/search/downloads/alternative",
                           gwas_file = "gwas_catalog_v1.0.2-associations_e93_r2019-01-31.tsv",
-                          lower = 1, upper = Inf) {
+                          lower = 1, upper = Inf, variant_context = NULL) {
   if(taxonomy_id %in% c(9606)){
     # find annotation data base for taxonomy_id
     setAnnotationHubOption("CACHE", ann_hub_cache)
@@ -322,9 +324,15 @@ map_gwas_annot = function(taxonomy_id = 9606, keys = c("TP53", "ZZZ3"),
                     by.x = c("MAPPED_GENE_NAME"), by.y = c("SYMBOL"),
                     all.y = FALSE, as.x = FALSE,
                     allow.cartesian = TRUE)
+
   # filter by lower and upper
   gwas_data[, N_genes := uniqueN(MAPPED_GENE_NAME), by = .(MAPPED_TRAIT_ID)]
   gwas_data = gwas_data[N_genes >= lower & N_genes <= upper]
+
+  # filter by variant context
+  if(!is.null(variant_context)){
+    gwas_data = gwas_data[grepl(paste0(variant_context, collapse = "|"), CONTEXT)]
+  }
 
   list(annot_dt = unique(gwas_data))
 }

@@ -175,7 +175,7 @@ fit_arc_gam_1 = function(feature, col, N_smooths, data_attr, min.sp, ..., d,
 ##' @param p.adjust.method choose method for correcting p-value for multiple hypothesis testing. See p.adjust.methods and \link[stats]{p.adjust} for details.
 ##' @param gam_fit_pval smooth term probability in gam fit (upper bound)
 ##' @param invert_cutoff invert cutoff for genes and sets. If FALSE p < cutoff_genes, if TRUE p > cutoff_genes.
-##' @param order_by order decreasing feature list by measure in summary sets. By default is mean_diff, the average difference between cells in bin closest to archetype and all other cells. When using GAM instead of Wilcox test set this to one of c( "deriv100", "deriv50", "deriv20"), the average value of derivative at 20/50/100 % of points closest to archetype.
+##' @param order_by order decreasing feature list by measure in summary sets. By default is mean_diff, the average difference between cells in bin closest to archetype and all other cells. When using GAM instead of Wilcox test set this to one of c( "deriv100", "deriv50", "deriv20"), the average value of derivative at 20/50/100 percent of points closest to archetype.
 ##' @param min_max_diff_cutoff_g what should be the mean difference (log-ratio, when y is log-space) of gene expression at the point closest to archetype compared to point furthest from archetype? When Wilcox method was used it is difference between mean of bin closest to archetype and all other cells. By default, at least 0.3 for genes and 0.1 for functions.
 ##' @param min_max_diff_cutoff_f see min_max_diff_cutoff_g
 ##' @param order_decreasing order significant categories using \code{order_by}
@@ -313,6 +313,7 @@ find_decreasing_wilcox = function(data_attr, arc_col,
                                   method = c("BioQC", "r_stats")[1]) {
 
   # find which cells are in bin closest to each archetype
+  if(!between(bin_prop, 0, 1)) stop("bin_prop should be between 0 and 1")
   arch_bin = bin_cells_by_arch(data_attr, arc_col, bin_prop, return_names = FALSE)
 
   if(method == "BioQC"){

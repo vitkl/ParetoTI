@@ -83,7 +83,7 @@ find_tradeoff_wilcox(data_attr, arc_col = c("archetype_1",
 
 \item{invert_cutoff}{invert cutoff for genes and sets. If FALSE p < cutoff_genes, if TRUE p > cutoff_genes.}
 
-\item{order_by}{order decreasing feature list by measure in summary sets. By default is mean_diff, the average difference between cells in bin closest to archetype and all other cells. When using GAM instead of Wilcox test set this to one of c( "deriv100", "deriv50", "deriv20"), the average value of derivative at 20/50/100 % of points closest to archetype.}
+\item{order_by}{order decreasing feature list by measure in summary sets. By default is mean_diff, the average difference between cells in bin closest to archetype and all other cells. When using GAM instead of Wilcox test set this to one of c( "deriv100", "deriv50", "deriv20"), the average value of derivative at 20/50/100 percent of points closest to archetype.}
 
 \item{order_decreasing}{order significant categories using \code{order_by}}
 

@@ -164,6 +164,8 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 \item{dist_metric}{how to describe distance to archetypes. Currently euclidian distance is implemented.}
 
 \item{rank}{rank by distance metric (euclidian distance)?}
+
+\item{replace}{fit_pch_resample/fit_pch_bootstrap: TRUE and FALSE are passed to \code{\link[base]{sample.int}} for density-based sampling, "geo_sketch" tells to sample examples using geosketch method preserving geometry of the data. See \link[ParetoTI]{geo_sketch}.}
 }
 \value{
 \code{fit_pch()}: object of class pch_fit (list) containing the following elements:

@@ -83,7 +83,7 @@ plot_arc(arch_data = archetypes, data = data,
 set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
                           mean = 0, sd = 1)
-data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
+data = generate_data(archetypes$XC, N_examples = 1e3, jiiter = 0.04, size = 0.99)
 plot_arc(arch_data = archetypes, data = data,
          which_dimensions = 1:3)
 
@@ -120,8 +120,34 @@ speed_test_cmq = microbenchmark::microbenchmark({
                                        clust_options = list(memory = 1000, n_jobs = 10))
 }, times = 5)
 
+library(ggplot2)
+library(ParetoTI)
+set.seed(4355)
+archetypes = generate_arc(arc_coord = list(c(5, 0, 4, 1, 0, 6), c(-10, 15, 0, 0, 1, 4), c(-30, -20, -5, 1, 0, 5)),
+                          mean = 0, sd = 1)
+data = generate_data(archetypes$XC, N_examples = 1e3, jiiter = 0.04, size = 0.99)
+arc_ks = k_fit_pch(data, ks = 2:6, check_installed = T,
+                   bootstrap = T, bootstrap_N = 50, maxiter = 500,
+                   bootstrap_type = "s", clust_options = list(cores = 3),
+                   seed = 2543, replace = "geo_sketch",
+                   volume_ratio = "none", # set to "none" if too slow
+                   delta=0, conv_crit = 1e-04, order_type = "align",
+                   sample_prop = 0.1)
+# Show variance explained by k-vertex model on top of k-1 model (each k separately)
+plot_arc_var(arc_ks, type = "res_varexpl", point_size = 2, line_size = 1.5) + theme_bw()
+
+# Show variance in position of vertices obtained using bootstraping
+# - use this to find largest k that has low variance
+plot_arc_var(arc_ks, type = "total_var", point_size = 2, line_size = 1.5) +
+  theme_bw() +
+  ylab("Mean variance in position of vertices")
+
 align_arc(arc$XC, archetypes$XC)
 align_arc(average_pch_fits(arc_data_rob_m)$XC, archetypes$XC)
+
+arc_data_rob_avg = average_pch_fits(arc_data_rob_m)
+weights = solve.qr(qr(arc_data_rob_avg$XC), data)
+hist(weights)
 
 ## Does bootstrap average give a better approximation of true vertex positions?
 pcha_bench = function(conv_crit) {
@@ -317,3 +343,5 @@ I = range(M)
 U = range(M)
 
 SST = np.sum(np.diag(X[:, U] * X[:, U].T))
+
+

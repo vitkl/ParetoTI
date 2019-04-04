@@ -15,10 +15,13 @@
 ##' @return \code{geo_sketch()} integer vector of cell indices
 ##' @import reticulate
 ##' @export geo_sketch
-geo_sketch = function(data, N, assay_slot = "logcounts", use_PCs = TRUE, PCs = 100, k = "auto", seed = 5232, replace = FALSE, alpha = 0.1, max_iter = 200, verbose = 0) {
+geo_sketch = function(data, N, assay_slot = "logcounts", use_PCs = TRUE, PCs = 100,
+                      k = "auto", seed = 4563, replace = FALSE,
+                      alpha = 0.1, max_iter = 200, verbose = 0,
+                      check_installed = TRUE) {
 
   # check if python modules are installed
-  .py_fbpca_installed()
+  if(check_installed) .py_geosketch_installed()
 
   if(is(data, "SingleCellExperiment") || is(data, "SummarizedExperiment")) {
     # extract assay and convert to dgCMatrix
@@ -29,6 +32,9 @@ geo_sketch = function(data, N, assay_slot = "logcounts", use_PCs = TRUE, PCs = 1
   }
 
   if(use_PCs){
+    # check if python modules are installed
+    if(check_installed) .py_fbpca_installed()
+
     # find PCs
     s = fbpca$pca(Matrix::t(data), k = as.integer(PCs))
     names(s) = c("U", "s", "Vt")
@@ -39,9 +45,10 @@ geo_sketch = function(data, N, assay_slot = "logcounts", use_PCs = TRUE, PCs = 1
     X_dimred = Matrix::t(data)
   }
 
+  if(!is.null(seed)) seed = as.integer(seed)
   # segment space into hypercubes and find representative sample
-  unlist(geosketch$gs(X_dimred, N = as.integer(N),
-                      k=k, seed=as.integer(seed), replace=replace,
+  unlist(geosketch$gs(as.matrix(X_dimred), N = as.integer(N),
+                      k=k, seed=seed, replace=replace,
                       alpha=alpha, max_iter=as.integer(max_iter), verbose=verbose))
 
 }
@@ -52,7 +59,18 @@ geo_sketch = function(data, N, assay_slot = "logcounts", use_PCs = TRUE, PCs = 1
   if(!is.null(err$message)) {
     if(grepl("Python", err$message)){
       stop(paste0(err$message,
-                  ", fbpca and geosketch missing, please use install_py_pcha() to install"))
+                  ", fbpca missing, please use install_py_pcha() to install"))
+    }
+  }
+}
+
+.py_geosketch_installed = function() {
+  # check if python package is availlable and give a helpful error message
+  err = tryCatch(geosketch$gs(matrix(1:60, 10, 6), N = as.integer(2)), error = function(e) e)
+  if(!is.null(err$message)) {
+    if(grepl("Python", err$message)){
+      stop(paste0(err$message,
+                  ", geosketch missing, please use install_py_pcha() to install"))
     }
   }
 }

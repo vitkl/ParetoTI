@@ -43,6 +43,7 @@ map_gene_annot = function(taxonomy_id = 9606, keys = "TP53", columns = c("ENSEMB
   }
 
   annot = as.data.frame(annot)
-  rownames(annot) = annot[, keytype]
+
+  if(!(sum(duplicated(annot[, keytype])) > 0)) rownames(annot) = annot[, keytype]
   annot
 }

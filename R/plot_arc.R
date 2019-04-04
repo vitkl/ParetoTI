@@ -84,7 +84,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
   } else {
 
     for_plot = list()
-    for_plot$data = as.data.table(t(data))
+    for_plot$data = as.data.table(Matrix::t(data))
     for_plot$data$lab = data_lab
 
   }

@@ -436,22 +436,42 @@ average_pch_fits = function(res, XC_array = NULL){
 ##' @name fit_pch_resample
 ##' @description \code{fit_pch_resample()} takes one sample of the data and fits a polytope (Principal Convex Hull) to data. This function uses \code{fit_pch()}.
 ##' @param i iteration number
+##' @param replace fit_pch_resample/fit_pch_bootstrap: TRUE and FALSE are passed to \code{\link[base]{sample.int}} for density-based sampling, "geo_sketch" tells to sample examples using geosketch method preserving geometry of the data. See \link[ParetoTI]{geo_sketch}.
 ##' @return \code{fit_pch_resample()} object of class pch_fit
 ##' @export fit_pch_resample
 fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE,
                             var_in_dims = var_in_dims,
                             normalise_var = normalise_var, ...) {
-  # do resampling of the data
+
+  # do resampling of the data -------------------------------------------------
   if(!is.null(sample_prop)){
     if(data.table::between(sample_prop[1], 0, 1)){
-      col_ind = sample.int(ncol(data), round(ncol(data) * sample_prop[1], digits = 0),
-                           replace = replace)
+
+      if(replace != "geo_sketch" & replace %in% c(TRUE, FALSE)){
+
+        # sample random examples with sample.int, density-based sampling -------
+        col_ind = sample.int(ncol(data), round(ncol(data) * sample_prop[1], digits = 0),
+                             replace = replace)
+
+      } else if(replace == "geo_sketch") {
+
+        # sample random examples with sample.int, geometry-based sampling ------
+        col_ind = geo_sketch(data, N = as.integer(round(ncol(data) * sample_prop[1], digits = 0)),
+                             use_PCs = FALSE, k = "auto", seed = NULL,
+                             alpha = 0.1, max_iter = 200, verbose = 0,
+                             check_installed = FALSE)
+
+      } else stop("replace should be TRUE, FALSE or geo_sketch")
+
       data = data[, col_ind]
+
     } else stop("sample_prop should be NULL or a number between 0 and 1")
   }
-  # fit polytope
+
+  # fit polytope ---------------------------------------------------------------
   ParetoTI::fit_pch(data = data, ..., var_in_dims = var_in_dims,
                     normalise_var = normalise_var, check_installed = FALSE)
+
 }
 
 ##' @rdname fit_pch

@@ -345,10 +345,14 @@ arch_to_tsne = function(arch_data, data, which_dimensions = 1:2,
 ##' @name arch_to_umap
 ##' @description arch_to_umap() Project archetype positions to UMAP coordinates using \code{\link[umap]{umap}}.
 ##' @param method Method for finding UMAP representation. Available methods are 'naive' (an implementation written in pure R) and 'umap-learn' (requires python package 'umap-learn'). See \code{\link[umap]{umap}} for details.
+##' @param n_neighbors sensible default for \code{\link[umap]{umap}}, pass other parameters via ...
+##' @param min_dist sensible default for \code{\link[umap]{umap}}
+##' @param metric sensible default for \code{\link[umap]{umap}}
 ##' @return arch_to_umap() list with: arch_data containing archetype positions in UMAP coordinates, data positions in UMAP coordinates, and umap_config parameters used to find this representation.
 ##' @export arch_to_umap
 arch_to_umap = function(arch_data, data, which_dimensions = 1:2,
-                        method = c("naive", "umap-learn")[1], ...) {
+                        method = c("naive", "umap-learn")[1],
+                        n_neighbors = 30L, min_dist = 0.3, metric = "correlation", ...) {
 
   if(!(is(arch_data, "pch_fit") | is(arch_data, "random_arc"))) {
     arch_data = average_pch_fits(arch_data)
@@ -358,7 +362,9 @@ arch_to_umap = function(arch_data, data, which_dimensions = 1:2,
   for_umap = t(cbind(data, arch_data$XC))
 
   umap_out = umap::umap(for_umap, n_components = which_dimensions[2],
-                        method = method[1], ...)
+                        method = method[1],
+                        n_neighbors = n_neighbors, min_dist = min_dist,
+                        metric = metric , ...)
   umap_config = umap_out$config
   umap_out = umap_out$layout
   colnames(umap_out) = paste0("UMAP", seq_len(ncol(umap_out)))

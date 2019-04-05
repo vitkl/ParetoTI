@@ -90,26 +90,29 @@
 <a href="#pareto-task-inference-via-archetypal-analysis-in-r-based-on-parti" class="anchor"></a>Pareto Task Inference via Archetypal Analysis In R (based on ParTI)</h3>
 <p>This package allows to find tasks that cells need to perform and trade-offs between them.</p>
 <p>Caution: the package in currently in development and testing. If you encounter problems please contact Vitalii Kleshchevnikov (vk7 at sanger.ac.uk) or report bugs on github.</p>
-<p>Need to perform multiple tasks and natural selection put cells on a Pareto front, a narrow subspace where performance at those tasks is optimal. How important the tasks are in the environment puts cells at different locations along Pareto front. This reflects trade-off in performance at those tasks. Pareto front in the performance space translates into simple shapes gene expression of cell population. By finding minimal simplex polytope (triangle in 2D, tetrahedron in 3D, 5-vertex polytope in 4D) that encloses most of the data you can describe within cell-type heterogeniety. This is done with archetypal analysis method (matrix factorisation) that finds the most distictive representative cells at “the corners of the data”. This makes it similar to clustering methods and allows interpreting archetypes as cells (rather than dimensions). The theory suggests that cells near each archetype/vertex are specialists at one tasks, whicle cells between archetypes perform a weighted combination of tasks. You can indentify the cellular tasks by finding what is special about cells closest to each archetype/vertex. This relies on recent work by Uri Alon group that showed that Pareto front is equal to minimal polytope defined by specialist phenotypes (archetypes) and developed a matlab package ParTI for performing this analysis.</p>
-<p>Please follow this <a href="https://vitkl.github.io/ParetoTI/articles/Hepatocyte_example.html">example</a> reproducing archetypes of liver cells from: <a href="https://www.sciencedirect.com/science/article/pii/S2405471218304824">Continuum of Gene-Expression Profiles Provides Spatial Division of Labor within a Differentiated Cell Type. Miri Adler et al.</a></p>
+<div id="background" class="section level4">
+<h4 class="hasAnchor">
+<a href="#background" class="anchor"></a>Background</h4>
+<p>Need to perform multiple tasks and natural selection put cells on a Pareto front, a narrow subspace where performance at those tasks is optimal. How important the tasks are in the environment puts cells at different locations along Pareto front. This reflects trade-off in performance at those tasks. Pareto front in the performance space translates into simple shapes gene expression of cell population. By finding minimal simplex polytope (triangle in 2D, tetrahedron in 3D, 5-vertex polytope in 4D) that encloses most of the data you can describe within cell-type heterogeniety. This is done with archetypal analysis method (matrix factorisation) that finds the most distictive representative cells at “the corners of the data”. This makes it similar to clustering methods and allows interpreting archetypes as cells (rather than dimensions). The theory suggests that cells near each archetype/vertex are specialists at one tasks, whicle cells between archetypes perform a weighted combination of tasks. You can indentify the cellular tasks by finding what is special about cells closest to each archetype/vertex. This package relies on recent work by Uri Alon group that showed that Pareto front is equal to minimal polytope defined by specialist phenotypes (archetypes) and their matlab package ParTI for performing this analysis.</p>
 <p>ParTI matlab package is described in more detail in Yuval Hart &amp; Uri Alon paper in Nature Methods (2015): <a href="https://www.nature.com/articles/nmeth.3254">Inferring biological tasks using Pareto analysis of high-dimensional data.</a></p>
-<p>This ParetoTI R package realises very similar procedure with a few differences.</p>
-<p>Archetypal analysis is performed PCHA algorithm. For that our R package interfaces with a python 2.7 implementation of PCHA. This algorithm was originally implemented in <a href="http://www.mortenmorup.dk/MMhomepageUpdated_files/Page327.htm">Matlab by Morten Mørup</a> and re-implemented in python by Ulf Aslak Jensen.</p>
-<p>As in the original package, statistical significance of how well polytope defined by archetypes describes the data is determined using permutations of the dataset that disrupt relationships between variables but keep the distribution of each variable constant. We implement bootstraping method to measure variability in vertex position. This adds additional selection criteria for best fit polytopes. Excessive number of vertices will lead to higher variance in positions.</p>
-<p>Archetypes can be visualised in 2D and 3D</p>
-<p>Features, genes whose expression decreases with distance from each vertex are identified using Wilcox test as those highly expressed near archetypes. As more direct but slower approach to answering this question we also implemented Generalised Additive Model (cubic splines) that describe gene expression as a a smooth function of distance from archetypes. In that case we define p-value as the probability that the first derivative of this function is below zero (function is decreasing). This approach can be used for plotting the expression of selected genes.</p>
-<p>We also strongly recommend to remove doublet cells using scrublet because those result in spurious archetypes and make selecting the number of archetypes harder. You can vary the scrublet score threshold until ParetoTI no longer finds arhetyopes with high scrublet score. Also, for convenience, we provide an interface to logistic regression model (keras) for classifying cells with logistic regression, and Geometric Sketch method (geosketch) for reducing the size of the data while preseving rare populations. Both can be done to aid Pareto Task Inference analysis.</p>
 </div>
-<div id="using-the-package" class="section level3">
+<div id="vignette" class="section level4">
+<h4 class="hasAnchor">
+<a href="#vignette" class="anchor"></a>Vignette</h4>
+<p>Please follow this <a href="https://vitkl.github.io/ParetoTI/articles/Hepatocyte_example.html">example</a> reproducing archetypes of liver cells from: <a href="https://www.sciencedirect.com/science/article/pii/S2405471218304824">Continuum of Gene-Expression Profiles Provides Spatial Division of Labor within a Differentiated Cell Type. Miri Adler et al.</a></p>
+</div>
+</div>
+<div id="short-guide-installation-and-basic-functionality" class="section level3">
 <h3 class="hasAnchor">
-<a href="#using-the-package" class="anchor"></a>Using the package</h3>
-<p><strong>Installation</strong></p>
+<a href="#short-guide-installation-and-basic-functionality" class="anchor"></a>Short guide: installation and basic functionality</h3>
+<div id="installation" class="section level4">
+<h4 class="hasAnchor">
+<a href="#installation" class="anchor"></a>Installation</h4>
 <p>You need to install development version of this package from github.com and install a python dependencies (PCHA algorithm implementation, and (optionally) keras, geosketch, fbpca, umap-learn). If you want to take advantage of high-performance computing cluster you need to do extra set up, please follow the instructions here: <a href="https://github.com/mschubert/clustermq" class="uri">https://github.com/mschubert/clustermq</a>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Install ParetoTI package, this should also install reticulate package, if not - install manually.</span>
 <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"BiocManager"</span>) <span class="co"># for installing BioConductor dependencies</span>
-BiocManager<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/BiocManager/topics/install">install</a></span>(<span class="st">"vitkl/ParetoTI"</span>, <span class="dt">dependencies =</span> T)
-
-<span class="co"># Load package</span>
+BiocManager<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/BiocManager/topics/install">install</a></span>(<span class="st">"vitkl/ParetoTI"</span>, <span class="dt">dependencies =</span> T)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load package</span>
 <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ParetoTI)
 <span class="co"># If package does not load because "py_pcha is not found" make sure you do not have</span>
 <span class="co"># a python environment already loaded in this R session (e.g. restart R and try loading again).</span>
@@ -118,17 +121,16 @@ BiocManager<span class="op">::</span><span class="kw"><a href="https://www.rdocu
 <span class="co"># and (optionally) install *extra_packages*.</span>
 ParetoTI<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/ParetoTI/topics/install_py_pcha">install_py_pcha</a></span>(<span class="dt">method =</span> <span class="st">"conda"</span>, 
                           <span class="dt">extra_packages =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"tensorflow"</span>, <span class="st">"pandas"</span>, <span class="st">"keras"</span>, <span class="st">"h5py"</span>,
-                                        <span class="st">"geosketch"</span>, <span class="st">"pydot"</span>, <span class="st">"sklearn"</span>, <span class="st">"umap-learn"</span>))
-<span class="co"># If no conda manager installed on your machine, install python 2.7 miniconda distribution:</span>
+                                        <span class="st">"geosketch"</span>, <span class="st">"pydot"</span>, <span class="st">"sklearn"</span>, <span class="st">"umap-learn"</span>))</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># If no conda manager installed on your machine, install python 2.7 miniconda distribution:</span>
 <span class="co"># https://conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation</span>
 <span class="co"># or try virtualenv (uncomment):</span>
 ## ParetoTI::install_py_pcha(method = "virtualenv")
 <span class="co"># You can also install these python modules directly in terminal,</span>
 <span class="co"># you just ensure that the conda environment is named "reticulate_PCHA" (uncomment):</span>
 ## conda create -n reticulate_PCHA python=2.7.13 pip
-## source activate reticulate_PCHA &amp;&amp; pip install --upgrade py_pcha numpy scipy datetime tensorflow pandas keras h5py geosketch pydot sklearn umap-learn
-
-<span class="co"># Finally, check that py_pcha library is successfully installed and discoverable</span>
+## source activate reticulate_PCHA &amp;&amp; pip install --upgrade py_pcha numpy scipy datetime tensorflow pandas keras h5py geosketch pydot sklearn umap-learn</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Finally, check that py_pcha library is successfully installed and discoverable</span>
 reticulate<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/reticulate/topics/py_discover_config">py_discover_config</a></span>(<span class="st">"py_pcha"</span>)</code></pre></div>
 <p><strong>Example: Fitting polytope to random triangle-shaped data (finding Pareto front)</strong></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ParetoTI)
@@ -138,9 +140,8 @@ reticulate<span class="op">::</span><span class="kw"><a href="https://www.rdocum
 <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">4355</span>)
 archetypes =<span class="st"> </span><span class="kw"><a href="reference/generate_arc.html">generate_arc</a></span>(<span class="dt">arc_coord =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">4</span>), <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="op">-</span><span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">0</span>), <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="op">-</span><span class="dv">30</span>, <span class="op">-</span><span class="dv">20</span>, <span class="op">-</span><span class="dv">5</span>)),
                           <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>)
-data =<span class="st"> </span><span class="kw"><a href="reference/generate_arc.html">generate_data</a></span>(archetypes<span class="op">$</span>XC, <span class="dt">N_examples =</span> <span class="fl">1e4</span>, <span class="dt">jiiter =</span> <span class="fl">0.04</span>, <span class="dt">size =</span> <span class="fl">0.9</span>)
-
-<span class="co"># Fit polytope to those data</span>
+data =<span class="st"> </span><span class="kw"><a href="reference/generate_arc.html">generate_data</a></span>(archetypes<span class="op">$</span>XC, <span class="dt">N_examples =</span> <span class="fl">1e4</span>, <span class="dt">jiiter =</span> <span class="fl">0.04</span>, <span class="dt">size =</span> <span class="fl">0.9</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Fit polytope to those data</span>
 arc_data =<span class="st"> </span><span class="kw"><a href="reference/fit_pch.html">fit_pch</a></span>(data, <span class="dt">noc =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/integer">as.integer</a></span>(<span class="dv">3</span>), <span class="dt">delta =</span> <span class="dv">0</span>)
 
 <span class="co"># Show results as interactive 3D scatterplot using plotly</span>
@@ -149,32 +150,41 @@ arc_data =<span class="st"> </span><span class="kw"><a href="reference/fit_pch.h
 <span class="co"># Plot static 2D scatterplot using ggplot2</span>
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_data, <span class="dt">data =</span> data,
          <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
-<span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()
+<span class="st">  </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()
   
 <span class="co"># Plot data as 2D density rather than scatterplot</span>
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_data, <span class="dt">data =</span> data,
     <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="dt">geom =</span> ggplot2<span class="op">::</span>geom_bin2d) <span class="op">+</span>
-<span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()
-    
-<span class="co"># Project to UMAP coordinates (3D -&gt; 2D)</span>
+<span class="st">  </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Project to UMAP coordinates (3D -&gt; 2D)</span>
 arc_umap =<span class="st"> </span><span class="kw"><a href="reference/plot_arc.html">arch_to_umap</a></span>(arc_data, data, <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,
                         <span class="dt">method =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"naive"</span>, <span class="co"># implemented in R and slow</span>
                                    <span class="st">"umap-learn"</span>)) <span class="co"># requires python module</span>
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_umap<span class="op">$</span>arch_data, <span class="dt">data =</span> arc_umap<span class="op">$</span>data,
     <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
-<span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()
-    
-<span class="co"># Project to tSNE coordinates (3D -&gt; 2D, requires Rtsne package)</span>
+<span class="st">    </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Project to tSNE coordinates (3D -&gt; 2D, requires Rtsne package)</span>
 arc_tsne =<span class="st"> </span><span class="kw"><a href="reference/plot_arc.html">arch_to_tsne</a></span>(arc_data, data, <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>)
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_tsne<span class="op">$</span>arch_data, <span class="dt">data =</span> arc_tsne<span class="op">$</span>data,
     <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
-<span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</code></pre></div>
+<span class="st">    </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</code></pre></div>
+</div>
+</div>
+<div id="details-and-comparison-to-parti-in-matlab" class="section level3">
+<h3 class="hasAnchor">
+<a href="#details-and-comparison-to-parti-in-matlab" class="anchor"></a>Details and comparison to ParTI in Matlab</h3>
+<p>This ParetoTI R package realises very similar procedure with a few differences.</p>
+<p>Archetypal analysis is performed using PCHA algorithm. For that our R package interfaces with a python 2.7 implementation of PCHA. This algorithm was originally implemented in <a href="http://www.mortenmorup.dk/MMhomepageUpdated_files/Page327.htm">Matlab by Morten Mørup</a> and re-implemented in python by Ulf Aslak Jensen.</p>
+<p>As in the original package, statistical significance of how well polytope defined by archetypes describes the data is determined using permutations of the dataset that disrupt relationships between variables but keep the distribution of each variable constant. We implement bootstraping method to measure variability in vertex position. This adds additional selection criteria for best fit polytopes. Excessive number of vertices will lead to higher variance in positions.</p>
+<p>Archetypes can be visualised in 2D and 3D.</p>
+<p>Features, genes whose expression decreases with distance from each vertex are identified using Wilcox test as those highly expressed near archetypes. As more direct but slower approach to answering this question we also implemented Generalised Additive Model (cubic splines) that describe gene expression as a a smooth function of distance from archetypes. In that case we define p-value as the probability that the first derivative of this function is below zero (function is decreasing). This approach can be used for plotting the expression of selected genes.</p>
+<p>We also strongly recommend to remove doublet cells using scrublet because those result in spurious archetypes and make selecting the number of archetypes harder. You can vary the scrublet score threshold until ParetoTI no longer finds arhetyopes with high scrublet score. Also, for convenience, we provide an interface to logistic regression model (keras) for classifying cells with logistic regression, and Geometric Sketch method (geosketch) for reducing the size of the data while preseving rare populations. Both can be done to aid Pareto Task Inference analysis.</p>
 </div>
 <div id="development-and-further-improvements" class="section level3">
 <h3 class="hasAnchor">
 <a href="#development-and-further-improvements" class="anchor"></a>Development and further improvements</h3>
 <p>It is currently under development and enables polytope fitting, statistical significance test by permutation, evaluating variance in vertex position by bootstraping, feature enrichment at archetype using the Wilcox test and the first derivative of Generalised Additive Model, measuring gene set activities in each cell with subsequent enrichment at archetypes.</p>
-<p>Alternative methods for polytope fitting will be considered such as AANet (<a href="https://github.com/KrishnaswamyLab/AAnet/" class="uri">https://github.com/KrishnaswamyLab/AAnet/</a>) and SPAMS implemented in c++ via R interface (<a href="https://arxiv.org/pdf/1405.6472.pdf" class="uri">https://arxiv.org/pdf/1405.6472.pdf</a>, <a href="http://spams-devel.gforge.inria.fr/downloads.html" class="uri">http://spams-devel.gforge.inria.fr/downloads.html</a>)</p>
+<p>Alternative methods for archetypal analysis are being considered: AANet (<a href="https://github.com/KrishnaswamyLab/AAnet/" class="uri">https://github.com/KrishnaswamyLab/AAnet/</a>) and SPAMS implemented in c++ via R interface (<a href="https://arxiv.org/pdf/1405.6472.pdf" class="uri">https://arxiv.org/pdf/1405.6472.pdf</a>, <a href="http://spams-devel.gforge.inria.fr/downloads.html" class="uri">http://spams-devel.gforge.inria.fr/downloads.html</a>)</p>
 </div>
 </div>
   </div>

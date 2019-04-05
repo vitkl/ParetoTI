@@ -18,7 +18,8 @@ arch_to_tsne(arch_data, data, which_dimensions = 1:2, pca = FALSE,
   partial_pca = FALSE, ...)
 
 arch_to_umap(arch_data, data, which_dimensions = 1:2,
-  method = c("naive", "umap-learn")[1], ...)
+  method = c("naive", "umap-learn")[1], n_neighbors = 30L,
+  min_dist = 0.3, metric = "correlation", ...)
 }
 \arguments{
 \item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}
@@ -56,6 +57,12 @@ arch_to_umap(arch_data, data, which_dimensions = 1:2,
 \item{...}{additional arguments to \code{\link[Rtsne]{Rtsne}} and \code{\link[umap]{umap}}.}
 
 \item{method}{Method for finding UMAP representation. Available methods are 'naive' (an implementation written in pure R) and 'umap-learn' (requires python package 'umap-learn'). See \code{\link[umap]{umap}} for details.}
+
+\item{n_neighbors}{sensible default for \code{\link[umap]{umap}}, pass other parameters via ...}
+
+\item{min_dist}{sensible default for \code{\link[umap]{umap}}}
+
+\item{metric}{sensible default for \code{\link[umap]{umap}}}
 
 \item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm. Set to NULL if you want to show data alone.}
 }

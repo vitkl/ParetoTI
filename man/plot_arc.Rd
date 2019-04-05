@@ -19,7 +19,8 @@ arch_to_tsne(arch_data, data, which_dimensions = 1:2, pca = FALSE,
 
 arch_to_umap(arch_data, data, which_dimensions = 1:2,
   method = c("naive", "umap-learn")[1], n_neighbors = 30L,
-  min_dist = 0.3, metric = "correlation", ...)
+  min_dist = 0.3, metric = ifelse(method[1] == "umap-learn",
+  "correlation", "euclidean"), ...)
 }
 \arguments{
 \item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}

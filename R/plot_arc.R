@@ -352,7 +352,9 @@ arch_to_tsne = function(arch_data, data, which_dimensions = 1:2,
 ##' @export arch_to_umap
 arch_to_umap = function(arch_data, data, which_dimensions = 1:2,
                         method = c("naive", "umap-learn")[1],
-                        n_neighbors = 30L, min_dist = 0.3, metric = "correlation", ...) {
+                        n_neighbors = 30L, min_dist = 0.3,
+                        metric = ifelse(method[1] == "umap-learn",
+                                        "correlation", "euclidean"), ...) {
 
   if(!(is(arch_data, "pch_fit") | is(arch_data, "random_arc"))) {
     arch_data = average_pch_fits(arch_data)

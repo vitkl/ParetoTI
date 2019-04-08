@@ -149,6 +149,55 @@ arc_data_rob_avg = average_pch_fits(arc_data_rob_m)
 weights = solve.qr(qr(arc_data_rob_avg$XC), data)
 hist(weights)
 
+#------------------------------------------------------------------------------=
+# compare to k-means
+library(ParetoTI)
+devtools::load_all("../ParetoTI/")
+library(ggplot2)
+library(cowplot)
+set.seed(4355)
+# generate data
+archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
+                          mean = 0, sd = 1)
+data = generate_data(archetypes$XC, N_examples = 1e3, jiiter = 0.04, size = 0.99)
+
+# find archetypes
+arc = fit_pch(data, noc = 4)
+# find clusters
+clusters = fit_pch(data, noc = 4, method = "kmeans")
+
+plot_grid(plot_arc(arch_data = arc, data = data,
+                   which_dimensions = 1:2) + ylim(-18, 17),
+          plot_arc(arch_data = clusters, data = data,
+                   which_dimensions = 1:2,
+                   data_lab = as.character(apply(clusters$S, 2, which.max))) + ylim(-18, 17),
+          align = "vh")
+
+# bootstrap with kmeans
+clusters_rob = fit_pch_bootstrap(data, n = 200, sample_prop = 0.65, seed = 2543,
+                                 noc=4, method = "kmeans")
+plot_arc(arch_data = clusters_rob, data = data,
+         which_dimensions = 1:2,
+         data_lab = as.character(apply(clusters$S, 2, which.max))) + ylim(-18, 17)
+
+# trying different number of clusters
+arc_ks = k_fit_pch(data, ks = 2:5,
+                   bootstrap = T, bootstrap_N = 200, maxiter = 500,
+                   bootstrap_type = "s", clust_options = list(cores = 3),
+                   seed = 2543, replace = FALSE,
+                   volume_ratio = "none", # set to "none" if too slow
+                   order_type = "align", sample_prop = 0.65, reference = T, method = "kmeans")
+
+# Show variance explained by k-vertex model on top of k-1 model (each k separately)
+plot_arc_var(arc_ks, type = "res_varexpl", point_size = 2, line_size = 1.5) + theme_bw()
+
+# Show variance in position of vertices obtained using bootstraping
+# - use this to find largest k that has low variance
+plot_arc_var(arc_ks, type = "total_var", point_size = 2, line_size = 1.5) +
+  theme_bw() +
+  ylab("Mean variance in position of vertices")
+#------------------------------------------------------------------------------=
+
 ## Does bootstrap average give a better approximation of true vertex positions?
 pcha_bench = function(conv_crit) {
   library(ParetoTI)

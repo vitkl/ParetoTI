@@ -166,7 +166,7 @@ fit_arc_gam_1 = function(feature, col, N_smooths, data_attr, min.sp, ..., d,
 
 ##' @rdname find_decreasing
 ##' @name get_top_decreasing
-##' @description \code{get_top_decreasing()} Get top-12 genes and top-3 gene sets for each archetype.
+##' @description \code{get_top_decreasing()} Find genes highest at each archetype above p-values threshold, and print top-12 genes and top-3 gene sets for each archetype.
 ##' @param summary_genes gam_deriv summary data.table for decreasing genes
 ##' @param summary_sets gam_deriv summary data.table for decreasing gene sets
 ##' @param cutoff_genes value of cutoff_metric (lower bound) for genes

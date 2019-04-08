@@ -19,12 +19,13 @@
 \title{Find the smallest polytope (Principal Convex Hull) that contains most of the data}
 \usage{
 fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
-  verbose = FALSE, conv_crit = 1e-06, maxiter = 500,
+  verbose = FALSE, conv_crit = 1e-04, maxiter = 500,
   check_installed = T, order_by = seq(1, nrow(data)),
   order_type = c("cosine", "side", "align")[3],
   volume_ratio = c("t_ratio", "variance_ratio", "none")[1],
   converge_else_fail = TRUE, var_in_dims = FALSE,
-  normalise_var = TRUE)
+  normalise_var = TRUE, method = c("pcha", "kmeans"),
+  method_options = list())
 
 k_fit_pch(data, ks = 2:4, check_installed = TRUE, bootstrap = FALSE,
   bootstrap_N = 10, sample_prop = 0.65, bootstrap_type = c("s", "m",
@@ -93,7 +94,7 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 
 \item{verbose}{if TRUE display messages}
 
-\item{conv_crit}{The convergence criteria (default: 10^-6 relative change in SSE). Reduce to 1e-4 or 1e-3 for reduced computation time by more approximate results. 1e-4 gives very similar results to 1e-5 or 1e-6 on simulated example and STARmap 1020 gene data.}
+\item{conv_crit}{The convergence criteria (default: 10^-4 relative change in SSE). Reduce to 1e-3 for reduced computation time but more approximate results. Increase to 1e-6 for improved accuracy (python and Matlab default). 1e-4 gives very similar results to 1e-5 or 1e-6 on datasets I looked at.}
 
 \item{maxiter}{maximum number of iterations (default: 500 iterations)}
 
@@ -110,6 +111,10 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 \item{var_in_dims}{calculate variance in dimensions across vertices in addition to variance in vertices.}
 
 \item{normalise_var}{normalise variance in position of vertices by variance in data in each dimention}
+
+\item{method}{method for archetypal analysis: PCHA (default), \link[stats]{kmeans}. Non-default methods use \code{data} and \code{noc}for data matrix and the number of archetypes, pass additional arguments via method_options.}
+
+\item{method_options}{additional arguments for non-default method, named list: \code{list(arg = "value")}.}
 
 \item{ks}{integer vector, dimensions of polytopes to be fit to data}
 
@@ -169,8 +174,8 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 }
 \value{
 \code{fit_pch()}: object of class pch_fit (list) containing the following elements:
-XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes);
-S - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
+XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes), or matrix with cluster centers (method = "kmeans");
+S - numeric matrix of archetype values per example (e.g. cell) or cluster membership (method = "kmeans"), dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 C - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 SSE - numeric vector (1L), Sum of Squared Errors;
 varexpl - numeric vector (1L), Percent variation explained by the model.

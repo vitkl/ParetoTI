@@ -115,7 +115,7 @@ find_tradeoff_wilcox(data_attr, arc_col = c("archetype_1",
 
 \code{fit_arc_gam_1()} Finds single GAM model fit and it's first derivative for a single feature and one or several archetypes.
 
-\code{get_top_decreasing()} Get top-12 genes and top-3 gene sets for each archetype.
+\code{get_top_decreasing()} Find genes highest at each archetype above p-values threshold, and print top-12 genes and top-3 gene sets for each archetype.
 
 \code{find_decreasing_wilcox()} find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to archetype (1 vs all Wilcox test).
 

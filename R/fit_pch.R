@@ -10,16 +10,18 @@
 ##' @param U vector, entries of data to model in S (optional)
 ##' @param delta parameter that inflates original polytope(simplex) fit such that it may contain more points of the dataset
 ##' @param verbose if TRUE display messages
-##' @param conv_crit The convergence criteria (default: 10^-6 relative change in SSE). Reduce to 1e-4 or 1e-3 for reduced computation time by more approximate results. 1e-4 gives very similar results to 1e-5 or 1e-6 on simulated example and STARmap 1020 gene data.
+##' @param conv_crit The convergence criteria (default: 10^-4 relative change in SSE). Reduce to 1e-3 for reduced computation time but more approximate results. Increase to 1e-6 for improved accuracy (python and Matlab default). 1e-4 gives very similar results to 1e-5 or 1e-6 on datasets I looked at.
 ##' @param maxiter maximum number of iterations (default: 500 iterations)
 ##' @param check_installed if TRUE, check if python module py_pcha is found. Useful to set to FALSE for running analysis or within other functions
 ##' @param order_by integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector. When bootstraping vertices can be aligned to reference and ordered (order_type == "align") by these dimensions.
 ##' @param order_type order archetypes by: cosine distance from c(1,1, ..., 1) vector ("cosine"), dot product that measures position to each side of the c(1,1) vector ("side"), align positions to reference when bootstraping(fit using all data, "align"). See \link[ParetoTI]{align_arc} When order_type is "align" vertices are ordered by "cosine" first.
 ##' @param volume_ratio find volume of the convex hull of the data and the t-ratio ("t_ratio") or ratio of variance of vertex positions to variance of data ("variance_ratio") or do nothing ("none")? Caution! Geometric figure should be at least simplex: qhull algorhirm will fail to find convex hull of flat 2D shapes in 3D, 3D shapes in 4D and so on. So, for calculating this dimentions are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions.
 ##' @param converge_else_fail throw an error and stop execution if PCHA did not converge in \code{maxiter} steps.
+##' @param method method for archetypal analysis: PCHA (default), \link[stats]{kmeans}. Non-default methods use \code{data} and \code{noc}for data matrix and the number of archetypes, pass additional arguments via method_options.
+##' @param method_options additional arguments for non-default method, named list: \code{list(arg = "value")}.
 ##' @return \code{fit_pch()}: object of class pch_fit (list) containing the following elements:
-##' XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes);
-##' S - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
+##' XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes), or matrix with cluster centers (method = "kmeans");
+##' S - numeric matrix of archetype values per example (e.g. cell) or cluster membership (method = "kmeans"), dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 ##' C - numeric matrix, dim(noc, length(U)) matrix, S>=0 |S_j|_1=1;
 ##' SSE - numeric vector (1L), Sum of Squared Errors;
 ##' varexpl - numeric vector (1L), Percent variation explained by the model.
@@ -75,30 +77,61 @@
 ##' # add legend to plot
 ##' plot_grid(p_all, legend, rel_widths = c(3.2, .6))
 fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
-                   delta = 0, verbose = FALSE, conv_crit = 1e-6,
+                   delta = 0, verbose = FALSE, conv_crit = 1e-4,
                    maxiter = 500, check_installed = T,
                    order_by = seq(1, nrow(data)),
                    order_type = c("cosine", "side", "align")[3],
                    volume_ratio = c("t_ratio", "variance_ratio", "none")[1],
                    converge_else_fail = TRUE,
-                   var_in_dims = FALSE, normalise_var = TRUE) {
-  if(check_installed) .py_pcha_installed()
-  # coerce to matrix
-  if(!is.matrix(data)) data = as.matrix(data)
+                   var_in_dims = FALSE, normalise_var = TRUE,
+                   method = c("pcha", "kmeans"), method_options = list()) {
 
-  # run PCHA
-  res = tryCatch({
-    res = py_PCHA$PCHA(X = data, noc = as.integer(noc), I = I, U = U,
-                       delta = delta, verbose = verbose,
-                       conv_crit = conv_crit, maxiter = maxiter)
-    names(res) = c("XC", "S", "C", "SSE", "varexpl")
+  if(check_installed) .py_pcha_installed()
+
+  if(isTRUE(method[1] == "pcha")){
+    # run PCHA -------------------------------------------------------------------
+
+    # coerce to matrix
+    if(!is.matrix(data)) data = as.matrix(data)
+
+    res = tryCatch({
+      res = py_PCHA$PCHA(X = data, noc = as.integer(noc), I = I, U = U,
+                         delta = delta, verbose = verbose,
+                         conv_crit = conv_crit, maxiter = maxiter)
+      names(res) = c("XC", "S", "C", "SSE", "varexpl")
+      if(!is.null(rownames(data))) rownames(res$XC) = rownames(data)
+      class(res) = "pch_fit"
+      res
+    }, error = function(err) {
+      if(isTRUE(converge_else_fail)) stop(paste0("fit_pch(noc = ",noc,") error: ", err))
+      return(NULL)
+    })
+    #---------------------------------------------------------------------------
+
+  } else if(isTRUE(method[1] == "kmeans")) {
+    # run k-means --------------------------------------------------------------
+    # set defaults or replace them with provided options
+    default = list(iter.max = 10, nstart = 1,
+                   algorithm = c("Hartigan-Wong", "Lloyd", "Forgy",
+                                 "MacQueen"), trace=FALSE)
+    default_retain = !names(default) %in% names(method_options)
+    options = c(default[default_retain], method_options)
+
+    res = kmeans(Matrix::t(data), centers = as.integer(noc),
+                 iter.max = default$iter.max, nstart = default$nstart,
+                 algorithm = default$algorithm, trace = default$trace)
+    res = list(XC = t(res$centers),
+               S = Matrix::sparseMatrix(i = res$cluster,
+                                        j = seq_len(length(res$cluster)), x = 1),
+               C = Matrix::sparseMatrix(i = res$cluster,
+                                        j = seq_len(length(res$cluster)), x = 0),
+               SSE = res$tot.withinss, varexpl = res$betweenss / res$totss)
     if(!is.null(rownames(data))) rownames(res$XC) = rownames(data)
+    colnames(res$XC) = NULL
     class(res) = "pch_fit"
-    res
-  }, error = function(err) {
-    if(isTRUE(converge_else_fail)) stop(paste0("fit_pch(noc = ",noc,") error: ", err))
-    return(NULL)
-  })
+    #---------------------------------------------------------------------------
+  } else stop("method should be pcha or kmeans")
+
   if(is.null(res)) return(NULL)
 
   # step sorting archetypes to improve reproducibility
@@ -286,12 +319,14 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
                  var_in_dims = var_in_dims,
                  normalise_var = normalise_var, ...)
   }
+
   # multi-process --------------------------------------------------------------
   if(type == "m"){
     # set defaults or replace them with provided options
     default = list(cores = parallel::detectCores()-1, cluster_type = "PSOCK")
     default_retain = !names(default) %in% names(clust_options)
     options = c(default[default_retain], clust_options)
+
     # create cluster
     cl = parallel::makeCluster(options$cores, type = options$cluster_type)
     # get library support needed to run the code
@@ -307,6 +342,7 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
     # stop cluster
     parallel::stopCluster(cl)
   }
+
   # clustermq ------------------------------------------------------------------
   if(type == "cmq"){
     # set defaults or replace them with provided options
@@ -333,8 +369,8 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
       })
     })
   }
-  # combine results ------------------------------------------------------------
 
+  # combine results ------------------------------------------------------------
   res = list(call = match.call(),
              pch_fits = .c_pch_fit_list(res))
   class(res) = "b_pch_fit"

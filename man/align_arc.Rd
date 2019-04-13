@@ -3,15 +3,11 @@
 \name{align_arc}
 \alias{align_arc}
 \alias{gen_permut}
-\alias{align_arc_opt}
 \title{Match/align arhetypes}
 \usage{
 align_arc(arc1, arc2, type = c("lpsolve", "exhaustive")[1])
 
 gen_permut(n)
-
-align_arc_opt(arc1, arc2, control = list(maxit = 10000, temp = 2000,
-  REPORT = 500))
 }
 \arguments{
 \item{arc1}{reference matrix of archetype positions dim(dimensions, archetypes)}
@@ -21,26 +17,18 @@ align_arc_opt(arc1, arc2, control = list(maxit = 10000, temp = 2000,
 \item{type}{method for finding matching vertices. Linear programming (lpsolve) or exhaustive search (do not use for more than 10 vertices)}
 
 \item{n}{number of element to permute}
-
-\item{control}{options for SANN methods. See \link[stats]{optim}}
 }
 \value{
-\code{align_arc()} list containing: total distance between archetypes in arc1 and arc2 (dist), integer vector specifying indices (columns) of arc2 that match archetypes in arc1 (ind)
+\code{align_arc()} list containing: total distance between archetypes in arc1 and arc2 (dist), integer vector specifying indices of archetypes in arc2 that match archetypes in arc1 (ind)
 
 \code{gen_permut()} a matrix of all possible gen_permut (in rows)
-
-same as \code{align_arc()}
 }
 \description{
-\code{align_arc()} matches archetypes in arc2 to arc1 by exhaustively testing all possible pairings.
+\code{align_arc()} matches archetypes in arc2 to arc1 by solving a bipartite matching problem on euclidian distances between archetypes.
 
 \code{gen_permut()} used for exhaustive search generates a matrix of all possible permutations of n elements. Each row is a different permutation.
-
-\code{align_arc_opt()} does the same as \code{align_arc()} but using optimisation (method = "SANN") instead of exhaustively trying all combinations.
 }
 \details{
-Exhaustive search works better than optimisation using SANN method for k=2:9 (163.0747ms vs 354.6311ms for 3 dimensions, k=2:5 are faster than 2ms). This optimisation method essentially samples the space rather than doing gradient descent. This is because total distance as a function of pairings of archetypes is not a differentiable function. For this reason, optimisation will often fail to find correct pairing.
-
 \code{gen_permut()} function is taken from https://stackoverflow.com/questions/11095992/generating-all-distinct-permutations-of-a-list-in-r
 }
 \examples{
@@ -54,26 +42,6 @@ dim(data)
 arc_data = fit_pch_bootstrap(data, n = 2, sample_prop = 0.65, seed = 2543,
                         order_type = "align", noc = as.integer(6),
                         delta = 0, type = "s")
-# align archetypes by exhausive search
+# align archetypes
 align_arc(arc_data$pch_fits$XC[[1]], arc_data$pch_fits$XC[[2]])
-# align archetypes by optimisation
-set.seed(123)
-align_arc_opt(arc_data$pch_fits$XC[[1]], arc_data$pch_fits$XC[[2]])
-# restart multiple times to see if it finds real match
-res = lapply(seq(1, 100), function(i) align_arc_opt(arc_data$pch_fits$XC[[1]], arc_data$pch_fits$XC[[2]]))
-# show best pairing
-res[[which.min(sapply(res, function(r) r$dist))]]
-
-# Measure which approach is faster depending on k (uncomment)
-#for (i in 2:12) {
-#    # fit polytopes to 2 subsamples
-#    arc_data = fit_pch_bootstrap(data, n = 2, sample_prop = 0.65, seed = 2543,
-#                             order_type = "align", noc = as.integer(i),
-#                             delta = 0, type = "s")
-#    print(i)
-#    # measure how much time each method takes
-#    print(microbenchmark::microbenchmark(align_arc(arc_data$pch_fits$XC[[1]], arc_data$pch_fits$XC[[2]]),
-#                                         align_arc_opt(arc_data$pch_fits$XC[[1]], arc_data$pch_fits$XC[[2]]),
-#                                         times = 10))
-#}
 }

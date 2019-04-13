@@ -379,7 +379,10 @@ arch_to_umap = function(arch_data, data, which_dimensions = 1:2,
     arch_data = average_pch_fits(arch_data)
   }
 
-  colnames(arch_data$XC) = paste0("archetype", seq_len(ncol(arch_data$XC)))
+  # set names if archetypes are not named
+  if(is.null(colnames(arch_data$XC))) {
+    colnames(arch_data$XC) = paste0("archetype_", seq_len(ncol(arch_data$XC)))
+  }
   for_umap = t(cbind(data, arch_data$XC))
 
   umap_out = umap::umap(for_umap, n_components = which_dimensions[2],

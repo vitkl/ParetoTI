@@ -15,7 +15,7 @@
 ##' @param data_size size of data points in plotly. Values for ggplot are 1/2 of data_size.
 ##' @param arch_alpha opacity of archetype points
 ##' @param data_lab vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label
-##' @param arc_lab vector, 1L or nrow(arc_data$XC)/noc, label vertices/archetypes (points) with a qualitative or quantitative label
+##' @param arc_lab vector, 1L or nrow(arc_data$XC)/noc, label vertices/archetypes (points) with a categorical. Only used when looking at a single fit (pch_fit).
 ##' @param legend_name name to display on legend, e.g. gene name in data_lab
 ##' @param text_size archetype label text size
 ##' @return \code{plot_arc()} ggplot2 (2D) or plotly (3D) plot
@@ -28,7 +28,7 @@
 ##' # Random data that fits into the triangle (2D)
 ##' set.seed(4355)
 ##' archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
-##'                           mean = 0, sd = 1, N_dim = 2)
+##'                           mean = 0, sd = 1)
 ##' data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 ##' plot_arc(arch_data = archetypes, data = data,
 ##'     which_dimensions = 1:2) +
@@ -40,7 +40,7 @@
 ##' # Random data that fits into the triangle (3D)
 ##' set.seed(4355)
 ##' archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
-##'                           mean = 0, sd = 1, N_dim = 3)
+##'                           mean = 0, sd = 1)
 ##' data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 ##'
 ##' plot_arc(arch_data = archetypes, data = data,
@@ -70,15 +70,21 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                     text_size = NULL, nudge = c(0.05, 0.1)) {
 
 
-  if(uniqueN(data_lab) > uniqueN(colors) & !is.integer(data_lab) & ! is.numeric(data_lab)) {
+  if((uniqueN(data_lab) + uniqueN(arc_lab)) > uniqueN(colors) & !is.integer(data_lab) & ! is.numeric(data_lab)) {
     stop("uniqueN(data_lab) > colors, please add more colors")
+  }
+  if(length(arc_lab) > 1 & !(is(arch_data, "pch_fit") | is(arch_data, "random_arc") | is.null(arch_data))) {
+    stop("Archetype labels can be used only with single fit of the model
+          - class(arch_data) == 'pch_fit'")
   }
 
   if(!is.null(arch_data)) {
 
-    for_plot = ParetoTI:::.arc_data_table(arch_data, data, data_lab = data_lab,
+    for_plot = ParetoTI:::.arc_data_table(arch_data, data,
+                                          data_lab = data_lab, arc_lab = arc_lab,
                                           which_dimensions = which_dimensions)
     lines_for_plot = ParetoTI:::.archLines(for_plot$arc_data, arc_lab = arc_lab,
+                                           pch_fit = is(arch_data, "pch_fit") | is(arch_data, "random_arc"),
                                            type, average_func)
 
   } else {

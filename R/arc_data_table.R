@@ -1,9 +1,12 @@
-.arc_data_table = function(arc_data, data, data_lab = "data",
+.arc_data_table = function(arc_data, data,
+                           data_lab = "data", arc_lab = "archetypes",
                            which_dimensions = 1:2){
   # if single fit just add label column
   if(is(arc_data, "pch_fit") | is(arc_data, "random_arc")){
+
     arc_data = as.data.table(t(arc_data$XC[which_dimensions,]))
-    arc_data$lab = "archetypes"
+    arc_data$lab = arc_lab # user label for archetypes is only used when looking at single fit
+
   }
   # if multiple fits from bootstrap or different k - combine all matrices
   # in one data.table with each matrix getting unique label
@@ -35,19 +38,33 @@
 }
 ##' add a line between all archetypes
 ##'@param arc_data data.table that contains positions of archetypes
-##'@param label character specifying which data point to connect (when multiple replicates of fitted polytopes)
-.archLines = function(arc_data, arc_lab = "archetypes", type = c("average", "all")[1], average_func = mean){
-  arch_lines = arc_data[grepl("archetypes", arc_data$lab)]
-  arch_lines[, arch_id := seq(1, .N), by = lab]
+##'@param pch_fit logical, is this a single archetype fit (TRUE) or multiple ("b_pch_fit", "k_pch_fit")?
+##'@param arc_lab labels for archetypes
+##'@param type average across arc_lab (average)?
+.archLines = function(arc_data, arc_lab = "archetypes", pch_fit = TRUE,
+                      type = c("average", "all")[1], average_func = mean){
+
+  arch_lines = copy(arc_data)
+
+  if(pch_fit) {
+    arch_lines[, arch_id := seq(1, .N)]
+  } else {
+    arch_lines[, arch_id := seq(1, .N), by = lab]
+  }
+
   if(type == "average"){
+
     col_names = colnames(arch_lines)
     col_names = col_names[!col_names %in% c("lab", "arch_id")]
     for (col_name in col_names) {
       arch_lines[, c(col_name) := average_func(get(col_name)), by = "arch_id"]
     }
+
     arch_lines$lab = arc_lab
     arch_lines = unique(arch_lines)
+
   }
+
   aa = data.table(1:nrow(arch_lines))
   aa = aa[, .(V2 = 1:nrow(arch_lines)), by = V1]
   aa = aa[V1 != V2]

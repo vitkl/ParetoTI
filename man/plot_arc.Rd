@@ -45,7 +45,7 @@ arch_to_umap(arch_data, data, which_dimensions = 1:2,
 
 \item{data_lab}{vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label}
 
-\item{arc_lab}{vector, 1L or nrow(arc_data$XC)/noc, label vertices/archetypes (points) with a qualitative or quantitative label}
+\item{arc_lab}{vector, 1L or nrow(arc_data$XC)/noc, label vertices/archetypes (points) with a categorical. Only used when looking at a single fit (pch_fit).}
 
 \item{legend_name}{name to display on legend, e.g. gene name in data_lab}
 
@@ -87,7 +87,7 @@ library(ggplot2)
 # Random data that fits into the triangle (2D)
 set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
-                          mean = 0, sd = 1, N_dim = 2)
+                          mean = 0, sd = 1)
 data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 plot_arc(arch_data = archetypes, data = data,
     which_dimensions = 1:2) +
@@ -99,7 +99,7 @@ plot_arc(arch_data = archetypes, data = data,
 # Random data that fits into the triangle (3D)
 set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
-                          mean = 0, sd = 1, N_dim = 3)
+                          mean = 0, sd = 1)
 data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 
 plot_arc(arch_data = archetypes, data = data,

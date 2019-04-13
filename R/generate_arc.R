@@ -6,7 +6,6 @@
 ##' @param arc_coord list of archetype coordinates, one numeric vector (length of N dimensions) per each archetype.
 ##' @param mean mean of random distribution added to arc_coord
 ##' @param sd standard deviationn of random distribution added to arc_coord
-##' @param N_dim number of dimentions. Can be set to large number of dimentions, in that case arc_coord will be recycled keeping true dimensionality of the data as specified in arc_coord.
 ##' @return \code{generate_arc()} object of class "random_arc" (similar to "pch_fit"), element XC is a matrix of archetypes of dim(dimensions, archetypes)
 ##' @export generate_arc
 ##' @seealso \code{\link[ParetoTI]{fit_pch}}, \code{\link[ParetoTI]{arch_dist}}
@@ -14,7 +13,7 @@
 ##' # Random data that fits into the triangle
 ##' set.seed(4355)
 ##' archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
-##'                           mean = 0, sd = 1, N_dim = 2)
+##'                           mean = 0, sd = 1)
 ##' data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 ##' # Find Euclidian distance between data points and archetypes
 ##' distance = sqrt(arch_dist(data, archetypes))

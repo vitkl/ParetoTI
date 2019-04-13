@@ -12,7 +12,7 @@
 
 \item{arc_lab}{labels for archetypes}
 
-\item{pch_fit}{logical, is this a single archetype fit (TRUE) or multiple ("b_pch_fit", "k_pch_fit")?}
+\item{pch_fit}{not used}
 
 \item{type}{average across arc_lab (average)?}
 }

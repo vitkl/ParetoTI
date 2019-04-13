@@ -12,7 +12,8 @@ plot_arc(arch_data = NULL, data, which_dimensions = as.integer(1:2),
   colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400",
   "#FF7E0F"), arch_size = NULL, line_size = NULL, data_size = 4,
   arch_alpha = 0.4, data_lab = "data", arc_lab = "archetypes",
-  legend_name = "data", text_size = NULL, nudge = c(0.05, 0.1))
+  arc_names_num = TRUE, legend_name = "data", text_size = NULL,
+  nudge = c(0.05, 0.1))
 
 arch_to_tsne(arch_data, data, which_dimensions = 1:2, pca = FALSE,
   partial_pca = FALSE, ...)
@@ -46,6 +47,8 @@ arch_to_umap(arch_data, data, which_dimensions = 1:2,
 \item{data_lab}{vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label}
 
 \item{arc_lab}{vector, 1L or nrow(arc_data$XC)/noc, label vertices/archetypes (points) with a categorical. Only used when looking at a single fit (pch_fit).}
+
+\item{arc_names_num}{logical, when archetypes are named, use numbers (default, TRUE), or names (FALSE, produces cluttered plot)?}
 
 \item{legend_name}{name to display on legend, e.g. gene name in data_lab}
 

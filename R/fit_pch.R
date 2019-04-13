@@ -13,9 +13,9 @@
 ##' @param conv_crit The convergence criteria (default: 10^-4 relative change in SSE). Reduce to 1e-3 for reduced computation time but more approximate results. Increase to 1e-6 for improved accuracy (python and Matlab default). 1e-4 gives very similar results to 1e-5 or 1e-6 on datasets I looked at.
 ##' @param maxiter maximum number of iterations (default: 500 iterations)
 ##' @param check_installed if TRUE, check if python module py_pcha is found. Useful to set to FALSE for running analysis or within other functions
-##' @param order_by integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector. When bootstraping vertices can be aligned to reference and ordered (order_type == "align") by these dimensions.
-##' @param order_type order archetypes by: cosine distance from c(1,1, ..., 1) vector ("cosine"), dot product that measures position to each side of the c(1,1) vector ("side"), align positions to reference when bootstraping(fit using all data, "align"). See \link[ParetoTI]{align_arc} When order_type is "align" vertices are ordered by "cosine" first.
-##' @param volume_ratio find volume of the convex hull of the data and the t-ratio ("t_ratio") or ratio of variance of vertex positions to variance of data ("variance_ratio") or do nothing ("none")? Caution! Geometric figure should be at least simplex: qhull algorhirm will fail to find convex hull of flat 2D shapes in 3D, 3D shapes in 4D and so on. So, for calculating this dimentions are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions.
+##' @param order_by integer, dimensions to be used for ordering archetypes. Archetypes are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that archetype. Additional step finds when archetype vector is to the left (counter-clockwise) of the c(1, 1) vector. When bootstraping archetypes can be aligned to reference and ordered (order_type == "align") by these dimensions.
+##' @param order_type order archetypes by: cosine distance from c(1,1, ..., 1) vector ("cosine"), dot product that measures position to each side of the c(1,1) vector ("side"), align positions to reference when bootstraping(fit using all data, "align"). See \link[ParetoTI]{align_arc} When order_type is "align" archetypes are ordered by "cosine" first.
+##' @param volume_ratio find volume of the convex hull of the data and the t-ratio ("t_ratio") or ratio of variance of archetype positions to variance of data ("variance_ratio") or do nothing ("none")? Caution! Geometric figure should be at least simplex: qhull algorhirm will fail to find convex hull of flat 2D shapes in 3D, 3D shapes in 4D and so on. So, for calculating this dimentions are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions.
 ##' @param converge_else_fail throw an error and stop execution if PCHA did not converge in \code{maxiter} steps.
 ##' @param method method for archetypal analysis: PCHA (default), \link[stats]{kmeans}. Non-default methods use \code{data} and \code{noc}for data matrix and the number of archetypes, pass additional arguments via method_options.
 ##' @param method_options additional arguments for non-default method, named list: \code{list(arg = "value")}.
@@ -26,11 +26,11 @@
 ##' SSE - numeric vector (1L), Sum of Squared Errors;
 ##' varexpl - numeric vector (1L), Percent variation explained by the model.
 ##' hull_vol - numeric vector (1L), Volume of convex hull of the data.
-##' arc_vol - numeric vector (1L), Volume of polytope enclosed by vertices.
+##' arc_vol - numeric vector (1L), Volume of polytope enclosed by archetypes.
 ##' t_ratio - numeric vector (1L), Ratio of \code{arc_vol} to \code{hull_vol}
-##' var_vert - numeric vector (noc L), Variance in position of each vertex.
-##' var_dim - numeric vector (noc L), Variance in positions of vertices in each dimension.
-##' total_var - numeric vector (1L), Mean variance in position of all vertices.
+##' var_vert - numeric vector (noc L), Variance in position of each archetype.
+##' var_dim - numeric vector (noc L), Variance in positions of archetypes in each dimension.
+##' total_var - numeric vector (1L), Mean variance in position of all archetypes.
 ##' summary - data.table with varexpl, t_ratio, total_var and noc for ease of combining multiple shape fits.
 ##' call - function call.
 ##' @export fit_pch
@@ -42,7 +42,7 @@
 ##'                           mean = 0, sd = 1, N_dim = 2)
 ##' data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 ##' dim(data)
-##' # Fit a polytope with 3 vertices to data matrix
+##' # Fit a polytope with 3 archetypes to data matrix
 ##' arc = fit_pch(data, noc=as.integer(3), delta=0)
 ##' # Fit the same polytope 3 times without resampling to test convergence of the algorithm.
 ##' arc_rob = fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
@@ -55,10 +55,10 @@
 ##' arc_data = fit_pch_bootstrap(data, n = 10, sample_prop = 0.7,
 ##'                          noc=as.integer(3), delta=0, type = "m")
 ##'
-##' # Fit polytopes with 2-4 vertices
+##' # Fit polytopes with 2-4 archetypes
 ##' arc_ks = k_fit_pch(data, ks = 2:4, check_installed = T, delta=0)
 ##'
-##' # Evaluate how much vertices vary in randomised data, (variable shuffled
+##' # Evaluate how much archetypes vary in randomised data, (variable shuffled
 ##' # without replacement)
 ##' rand3 = randomise_fit_pch1(i = 1, data, true_fit = NULL,
 ##'     replace = FALSE, bootstrap_N = 200, seed = 2543,
@@ -138,12 +138,12 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
   # (archetypes are inherently exchangeable)
   if(noc > 1) {
     XC2 = res$XC[order_by,]
-    arch_order = .find_vertex_order(XC2, noc, order_type = order_type)
+    arch_order = .find_archetype_order(XC2, noc, order_type = order_type)
     res$XC = res$XC[, arch_order]
     res$S = res$S[arch_order, ]
     res$C = res$C[arch_order, ]
   } else {
-    # when only one vertex make sure data is still in the matrix form
+    # when only one archetype make sure data is still in the matrix form
     res$XC = matrix(res$XC, length(res$XC), 1)
     res$S = matrix(res$S, 1, length(res$S))
     res$C = matrix(res$C, 1, 1)
@@ -155,11 +155,11 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
   # adjust number of dimensions to noc
   data_dim = seq(1, noc-1)
   if(volume_ratio == "t_ratio" & nrow(data) >= length(data_dim) & noc > 2){
-    # calculate volume or area of the polytope only when number of vertices (noc) > number of dimenstions which means
+    # calculate volume or area of the polytope only when number of archetypes (noc) > number of dimenstions which means
     # find volume of the convex hull of the data
     hull_vol = fit_convhulln(data[data_dim, ], positions = FALSE)
 
-    # Calcute the volume of non-simplex polytope (4 vertices in 2D, 5 in 3D or more)
+    # Calcute the volume of non-simplex polytope (4 archetypes in 2D, 5 in 3D or more)
     if(F){
       # find volume of the polytope fit, qhull requires at least 4 points in 2D
       # and more in higher dimensions so we have to add 20 points within
@@ -184,7 +184,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
   } else if(volume_ratio == "variance_ratio") {
 
     # 2 variance ratio ---------------------------------------------------------
-    # (variance of vertex positions within each dimension /
+    # (variance of archetype positions within each dimension /
     #      variance of data in that dimension summed across dimensions)
     res = ParetoTI:::.cacl_var_in_dims(res, data,
                                        var_in_dims = T, normalise_var = T)
@@ -199,7 +199,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 
     # 3 none
 
-    if(volume_ratio == "t_ratio" & isTRUE(converge_else_fail)) message(paste0("Convex hull and t-ratio not computed for noc: ", noc," and nrow(data) = ", nrow(data),". fit_pch() can calculate volume or area of the polytope only when\nthe number of vertices (noc) > the number of dimensions (when polytope is convex):\ncheck that noc > nrow(data),\nselect only revelant dimensions or increase noc"))
+    if(volume_ratio == "t_ratio" & isTRUE(converge_else_fail)) message(paste0("Convex hull and t-ratio not computed for noc: ", noc," and nrow(data) = ", nrow(data),". fit_pch() can calculate volume or area of the polytope only when\nthe number of archetypes (noc) > the number of dimensions (when polytope is convex):\ncheck that noc > nrow(data),\nselect only revelant dimensions or increase noc"))
     res$hull_vol = NA
     res$arc_vol = NA
     res$t_ratio = NA
@@ -226,7 +226,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 ##' @name k_fit_pch
 ##' @description \code{k_fit_pch()} finds polytopes of k dimensions in the data. This function applies \code{fit_pch()} to different k-s.
 ##' @param ks integer vector, dimensions of polytopes to be fit to data
-##' @param bootstrap \code{k_fit_pch()}: use bootstrap to find average positions for each k? Also returns variability in vertex position to aid the selection of k. At excessive k position vary more.
+##' @param bootstrap \code{k_fit_pch()}: use bootstrap to find average positions for each k? Also returns variability in archetype position to aid the selection of k. At excessive k position vary more.
 ##' @param simplex when testing multiple k using \code{k_fit_pch()} match dimensions to the number of archetypes? Use only on ordered principal components. If FALSE try all k for all dimensions in data. If simplex == TRUE test only simplex shapes (k=3 in 2D, k=4 in 3D, k=5 in 4D...). This assumes order of columns which is valid for principal components but may not be valid for untransformed data.
 ##' @return \code{k_fit_pch()}: object of class k_pch_fit (list) containing the same elements as pch_fit, but each is either a list of pch_fit elements (e.g. list of ks number of XC matrices) or a vector (which pch_fit element is one number). When length(ks) = 1 returns pch_fit.
 ##' @export k_fit_pch
@@ -241,7 +241,7 @@ k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
   if(!is.matrix(data)) data = as.matrix(data)
 
   # check that ks do not exceed dimensions when simplex is true
-  if(nrow(data) < (max(ks) - 1) & isTRUE(simplex)) stop("simplex = TRUE but number of vertices (",
+  if(nrow(data) < (max(ks) - 1) & isTRUE(simplex)) stop("simplex = TRUE but number of archetypes (",
                                                         max(ks),") exceeds number of dimensions - 1 (", nrow(data),")")
   # run analysis for all k -----------------------------------------------------
   if(isTRUE(bootstrap)){
@@ -287,7 +287,7 @@ k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
 
 ##' @rdname fit_pch
 ##' @name fit_pch_bootstrap
-##' @description \code{fit_pch_bootstrap()} uses resampling data with or without replacement (bootstrapping) to find robust positions of vertices of a polytope (Principal Convex Hull) describing the data. This function uses \code{fit_pch_resample()}.
+##' @description \code{fit_pch_bootstrap()} uses resampling data with or without replacement (bootstrapping) to find robust positions of archetypes of a polytope (Principal Convex Hull) describing the data. This function uses \code{fit_pch_resample()}.
 ##' @param n number of samples to be taken when bootstraping
 ##' @param sample_prop either NULL or the proportion of dataset that should be included in each sample. If NULL the polytope fitting algorithm is run n times on the same data which is useful for evaluating how often the algorithm gets stuck in local optima.
 ##' @param type one of s, m, cmq. s means single core processing using lapply. m means multi-core parallel procession using parLapply. cmq means multi-node parallel processing on a computing cluster using clustermq package. "See also" for details.
@@ -295,9 +295,9 @@ k_fit_pch = function(data, ks = 2:4, check_installed = TRUE,
 ##' @param seed seed for reproducible random number generation. Works for all types of processing.
 ##' @param replace should resampling be with replacement? passed to \link[base]{sample.int}
 ##' @param average average archetype positions and varexpl? By default FALSE, return all fits to resampled data.
-##' @param var_in_dims calculate variance in dimensions across vertices in addition to variance in vertices.
-##' @param normalise_var normalise variance in position of vertices by variance in data in each dimention
-##' @param reference align vertices (order_type="align") against reference polytope based on all data (TRUE), or align to the polytope from the first bootstrap iteration (FALSE). Second option can save time for large datasets
+##' @param var_in_dims calculate variance in dimensions across archetypes in addition to variance in archetypes.
+##' @param normalise_var normalise variance in position of archetypes by variance in data in each dimention
+##' @param reference align archetypes (order_type="align") against reference polytope based on all data (TRUE), or align to the polytope from the first bootstrap iteration (FALSE). Second option can save time for large datasets
 ##' @return \code{fit_pch_bootstrap()} object of class b_pch_fit (list) containing the same elements as pch_fit, but each is either a list of pch_fit elements (e.g. list of n number of XC matrices) or a vector (which pch_fit element is one number).
 ##' @export fit_pch_bootstrap
 fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = T,
@@ -421,17 +421,17 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
   # calculate variance of data in each dimension
   if(isTRUE(normalise_var)) row_var_data = matrixStats::rowVars(data)
 
-  # sum variance in position of each vertex across dimensions
+  # sum variance in position of each archetype across dimensions
   res$var_vert = colSums(res$var)
-  # normalise variance in vertex positions by variance of data
+  # normalise variance in archetype positions by variance of data
   if(isTRUE(normalise_var)) res$var_vert = res$var_vert / sum(row_var_data)
-  # find mean of variances of all vertices to get a single number
+  # find mean of variances of all archetypes to get a single number
   res$total_var = mean(res$var_vert)
 
-  # normalise variance in vertex positions by variance of data in each dimension
+  # normalise variance in archetype positions by variance of data in each dimension
   if(isTRUE(normalise_var)) res$var = res$var / matrixStats::rowVars(data)
 
-  # find mean variance in position for each dimension across vertices
+  # find mean variance in position for each dimension across archetypes
   res = ParetoTI:::.cacl_var_in_dims(res, data, var_in_dims, normalise_var, XC_array)
 
   # update summary data.table  -------------------------------------------------
@@ -512,10 +512,10 @@ fit_pch_resample = function(i = 1, data, sample_prop = NULL, replace = FALSE,
 
 ##' @rdname fit_pch
 ##' @name randomise_fit_pch
-##' @description \code{randomise_fit_pch()} helps answer the question "how likely you are to observe data shaped as polytope given no relationship between variables?" This function disrupts the relationships between variables, find a polytope that best describes the data. It calculates variance explained, t-ratio of polytope volume to convex hull volume. Optionally, it uses bootstrapping of data points to measure variance in vertex positions. This function uses \code{randomise_fit_pch1()}. Number of vertices is determined automatically from \code{arc_data}.
+##' @description \code{randomise_fit_pch()} helps answer the question "how likely you are to observe data shaped as polytope given no relationship between variables?" This function disrupts the relationships between variables, find a polytope that best describes the data. It calculates variance explained, t-ratio of polytope volume to convex hull volume. Optionally, it uses bootstrapping of data points to measure variance in archetype positions. This function uses \code{randomise_fit_pch1()}. Number of archetypes is determined automatically from \code{arc_data}.
 ##' @param arc_data observed polytope that describes the data. Class pch_fit, b_pch_fit and k_pch_fit objects generated by \code{fit_pch()} or \code{fit_pch_bootstrap()}
 ##' @param n_rand number of randomisation samples
-##' @return \code{randomise_fit_pch()} S3 "r_pch_fit" object (list) containing: 1. data table with columns variance explained (rand_varexpl), t-ratio (rand_t_ratio), variance in positions of vertices (total_var) and number of vertices (k) for \code{n_rand} samples; 2. empirical p-value for those parameters for each number of vertices.
+##' @return \code{randomise_fit_pch()} S3 "r_pch_fit" object (list) containing: 1. data table with columns variance explained (rand_varexpl), t-ratio (rand_t_ratio), variance in positions of archetypes (total_var) and number of archetypes (k) for \code{n_rand} samples; 2. empirical p-value for those parameters for each number of archetypes.
 ##' @import data.table
 ##' @export randomise_fit_pch
 randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
@@ -696,12 +696,12 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
 ##' @name randomise_fit_pch1
 ##' @description \code{randomise_fit_pch1()} disrupts the relationships between variables (one sampling iteration), keeping the distribution of each variable constant, and fits a polytope (Principal Convex Hull) to data. This function uses \code{\link[ParetoTI]{rand_var}} and \code{fit_pch()}.
 ##' @param prob a vector of probability weights for obtaining the elements of the vector being sampled. Passed to \code{\link[base]{(sample.int}}.
-##' @param bootstrap_N randomise_fit_pch1() and k_fit_pch(): integer, number of bootstrap samples on random data to measure variability in vertex positions. Set to NA fit once to all data instead of bootstraping. When this option is positive seed bootstrap_seed and sample_prop must be provided.
+##' @param bootstrap_N randomise_fit_pch1() and k_fit_pch(): integer, number of bootstrap samples on random data to measure variability in archetype positions. Set to NA fit once to all data instead of bootstraping. When this option is positive seed bootstrap_seed and sample_prop must be provided.
 ##' @param bootstrap_type \code{randomise_fit_pch1()} and \code{k_fit_pch()}: parallel processing type when bootstraping. Caution: avoid nested parallel processing, do not use "m" and "cmq" inside other parallel functions.
 ##' @param return_data return randomised data?
 ##' @param return_arc return archetype positions in randomised data?
 ##' @param bootstrap_average \code{randomise_fit_pch1()}: average positions and summary statistics when bootstraping? Passed to \code{average} argument of \code{fit_pch_bootstrap()}. When multiple ks this defaults to TRUE.
-##' @return \code{randomise_fit_pch1()}: list containing function call, summary of the sample, optional data and optional position of vertices/archetypes.
+##' @return \code{randomise_fit_pch1()}: list containing function call, summary of the sample, optional data and optional position of archetypes.
 ##' @import data.table
 ##' @export randomise_fit_pch1
 randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
@@ -719,7 +719,7 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
   # fit polytope ---------------------------------------------------------------
 
   if(is.na(bootstrap_N)) { # single fit ----------------------------------------
-    # fitting many shapes (ks vertices) or fitting one shape
+    # fitting many shapes (ks archetypes) or fitting one shape
     arc_data = ParetoTI::k_fit_pch(data = data, ks = ks, check_installed = FALSE,
                                    bootstrap = FALSE, seed = seed,
                                    volume_ratio = volume_ratio,
@@ -730,7 +730,7 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
                                    converge_else_fail = FALSE, ...)
 
   } else if(isTRUE(as.integer(bootstrap_N) >= 1)) { # bootstraping --------------
-    if(length(ks) > 1){ # fitting many shapes (ks vertices)
+    if(length(ks) > 1){ # fitting many shapes (ks archetypes)
       arc_data = ParetoTI::k_fit_pch(data = data, ks = ks, check_installed = TRUE,
                                      bootstrap = TRUE, bootstrap_N = bootstrap_N,
                                      sample_prop = sample_prop,
@@ -739,7 +739,7 @@ randomise_fit_pch1 = function(i = 1, data, ks = 2:4,
                                      var_in_dims = var_in_dims,
                                      normalise_var = normalise_var,
                                      ..., volume_ratio = volume_ratio)
-    } else { # fitting many shapes (ks vertices)
+    } else { # fitting many shapes (ks archetypes)
       arc_data = ParetoTI::fit_pch_bootstrap(data, n = bootstrap_N, noc = ks,
                                              check_installed = FALSE,
                                              type = bootstrap_type, seed = seed,
@@ -860,11 +860,11 @@ merge_arch_dist = function(arch_data, data, feature_data,
        summary = data.table::rbindlist(lapply(pch_fit_list, function(pch) pch$summary)))
 }
 
-## .find_vertex_order orders vertices by cosine relative to the unit vector c(1, 1)
-## Cosine is negative when vertex vector is to the left (counter-clockwise) of the unit vector
+## .find_archetype_order orders archetypes by cosine relative to the unit vector c(1, 1)
+## Cosine is negative when archetype vector is to the left (counter-clockwise) of the unit vector
 ## Solution taken from here: https://stackoverflow.com/questions/13221873/determining-if-one-2d-vector-is-to-the-right-or-left-of-another
 ## XC2 is a matrix of dim(dimensions, archetype) that has only 2 dimentions
-.find_vertex_order = function(XC2, noc, order_type = c("cosine", "side", "align")[3]){
+.find_archetype_order = function(XC2, noc, order_type = c("cosine", "side", "align")[3]){
   if(isTRUE(order_type == "side")){
     order_by = vapply(seq(1, noc), function(i) -XC2[1,i] + XC2[2,i],
                       FUN.VALUE = numeric(1L))
@@ -880,43 +880,43 @@ merge_arch_dist = function(arch_data, data, feature_data,
 ##' @name print.pch_fit
 ##' @export print.pch_fit
 print.pch_fit = function(res){
-  cat("Minimal polytope with k vertices describing the data (S3 class pch_fit)\n\n")
-  cat("Summary:  varexpl = variance within polytope\n          t_ratio = volume of polytope / volume of convex hull\n          total_var = total variance in positions of vertices\n            (by bootstraping, mean acrooss vertices)\n\n")
+  cat("k representative archetypes (S3 class pch_fit)\n\n")
+  cat("Summary:  varexpl = variance explained by data as weighted sum of archetypes\n          t_ratio = volume of polytope formed by archetypes / volume of convex hull\n          total_var = total variance in positions of archetypes\n            (by bootstraping, mean acrooss archetypes)\n\n")
   print(res$summary)
-  cat("\n vertex positions stored in 'object$XC' \n dim(variables/dimentions, vertices/archetypes)")
+  cat("\n archetype positions stored in 'object$XC' \n dim(variables/dimentions, archetypes)")
 }
 
 ##' @rdname fit_pch
 ##' @name print.k_pch_fit
 ##' @export print.k_pch_fit
 print.k_pch_fit = function(res){
-  cat("Minimal polytopes with k vertices describing the data (S3 class k_pch_fit)\n\n")
-  cat("Summary:  varexpl = variance within polytope\n          t_ratio = volume of polytope / volume of convex hull\n          total_var = total variance in positions of vertices\n            (by bootstraping, mean acrooss vertices)\n\n")
+  cat("k representative archetypes (S3 class k_pch_fit)\n\n")
+  cat("Summary:  varexpl = variance explained by data as weighted sum of archetypes\n          t_ratio = volume of polytope formed by archetypes / volume of convex hull\n          total_var = total variance in positions of archetypes\n            (by bootstraping, mean acrooss archetypes)\n\n")
   print(res$summary)
-  cat("\n vertex positions stored in 'object$pch_fits$XC' \n dim(variables/dimentions, vertices/archetypes)")
+  cat("\n archetype positions stored in 'object$pch_fits$XC' \n dim(variables/dimentions, archetypes)")
 }
 
 ##' @rdname fit_pch
 ##' @name print.b_pch_fit
 ##' @export print.b_pch_fit
 print.b_pch_fit = function(res){
-  cat("Minimal polytopes describing the data \n calculated by bootstraping data points (cells) (S3 class b_pch_fit)\n\n")
-  cat("Average summary:  varexpl = variance within polytope\n          t_ratio = volume of polytope / volume of convex hull\n          total_var = total variance in positions of vertices\n            (by bootstraping, mean acrooss vertices)\n\n")
+  cat("k representative archetypes \n calculated by bootstraping data points (cells) (S3 class b_pch_fit)\n\n")
+  cat("Average summary:  varexpl = variance explained by data as weighted sum of archetypes\n          t_ratio = volume of polytope formed by archetypes / volume of convex hull\n          total_var = total variance in positions of archetypes\n            (by bootstraping, mean acrooss archetypes)\n\n")
   print(res$summary)
   cat("\nAll polytopes (fit to bootstrapped data), summary:\n")
   print(res$pch_fits$summary)
-  cat("\n vertex positions stored in 'object$pch_fits$XC' \n dim(variables/dimentions, vertices/archetypes)")
+  cat("\n archetype positions stored in 'object$pch_fits$XC' \n dim(variables/dimentions, archetypes)")
 }
 
 ##' @rdname fit_pch
 ##' @name print.r_pch_fit
 ##' @export print.r_pch_fit
 print.r_pch_fit = function(res){
-  cat("Background distribution of minimal polytopes fits \nto data with no relationships between variables (S3 class r_pch_fit)\n\n")
+  cat("Background distribution of k representative archetypes \nin data with no relationships between variables (S3 class r_pch_fit)\n\n")
   cat("N randomisation trials: ",res$rand_dist[, max(repl)],"\n\n")
   cat("Summary of best-fit polytope to observed data (including p-value):\n\n")
   print(res$obs_dist)
-  cat("\n          varexpl = variance within polytope\n          t_ratio = volume of polytope / volume of convex hull\n          total_var = total variance in positions of vertices\n            (by bootstraping, mean acrooss vertices)\n\n")
+  cat("\n          varexpl = variance explained by data as weighted sum of archetypes\n          t_ratio = volume of polytope formed by archetypes / volume of convex hull\n          total_var = total variance in positions of archetypes\n            (by bootstraping, mean acrooss archetypes)\n\n")
   cat("Function call:\n")
   print(res$call)
 }
@@ -924,7 +924,7 @@ print.r_pch_fit = function(res){
 ##' @rdname fit_pch
 ##' @name plot.r_pch_fit
 ##' @export plot.r_pch_fit
-##' @description plot.r_pch_fit() plot distribution of t-ratio, total variance in vertex positions and variance explained used to calculate empirical p-value
+##' @description plot.r_pch_fit() plot distribution of t-ratio, total variance in archetype positions and variance explained used to calculate empirical p-value
 ##' @import ggplot2
 plot.r_pch_fit = function(rand_arch,
                           ks = unique(rand_arch$rand_dist$k),
@@ -973,7 +973,7 @@ plot.r_pch_fit = function(rand_arch,
 ##' @rdname fit_pch
 ##' @name plot_dim_var
 ##' @export plot_dim_var
-##' @description plot_dim_var() plot distribution of variance in vertex positions in each dimension and corresponding empirical p-values
+##' @description plot_dim_var() plot distribution of variance in archetype positions in each dimension and corresponding empirical p-values
 ##' @import ggplot2
 plot_dim_var = function(rand_arch,
                         ks = unique(rand_arch$rand_dist$k),
@@ -1016,14 +1016,14 @@ plot_dim_var = function(rand_arch,
                   label = p_value_text,
                   color = var_name, group = var_name), size = text_lab_size,
               nudge_y = nudge_y, nudge_x = nudge_x) +
-    xlab("Variance in vertex positions") +
+    xlab("Variance in archetype positions") +
     ylab("Dimension where variance is measured")
 }
 
 .cacl_var_in_dims = function(res, data, var_in_dims, normalise_var,
                              XC_array = NULL, most_extreme = NULL) {
   if(var_in_dims){
-    # calculate variance in vertex positions in each dimension
+    # calculate variance in archetype positions in each dimension
     if(is(res, "pch_fit")){
       res$var_dim = matrix(matrixStats::rowVars(res$XC), nrow = 1, ncol = nrow(data))
       noc = ncol(res$XC)

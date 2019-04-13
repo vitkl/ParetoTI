@@ -16,6 +16,7 @@
 ##' @param arch_alpha opacity of archetype points
 ##' @param data_lab vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label
 ##' @param arc_lab vector, 1L or nrow(arc_data$XC)/noc, label vertices/archetypes (points) with a categorical. Only used when looking at a single fit (pch_fit).
+##' @param arc_names_num logical, when archetypes are named, use numbers (default, TRUE), or names (FALSE, produces cluttered plot)?
 ##' @param legend_name name to display on legend, e.g. gene name in data_lab
 ##' @param text_size archetype label text size
 ##' @return \code{plot_arc()} ggplot2 (2D) or plotly (3D) plot
@@ -65,7 +66,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                     colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"),
                     arch_size = NULL, line_size = NULL,
                     data_size = 4, arch_alpha = 0.4,
-                    data_lab = "data", arc_lab = "archetypes",
+                    data_lab = "data", arc_lab = "archetypes", arc_names_num = TRUE,
                     legend_name = "data",
                     text_size = NULL, nudge = c(0.05, 0.1)) {
 
@@ -73,7 +74,8 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
   if((uniqueN(data_lab) + uniqueN(arc_lab)) > uniqueN(colors) & !is.integer(data_lab) & ! is.numeric(data_lab)) {
     stop("uniqueN(data_lab) > colors, please add more colors")
   }
-  if(length(arc_lab) > 1 & !(is(arch_data, "pch_fit") | is(arch_data, "random_arc") | is.null(arch_data))) {
+  if(length(arc_lab) > 1 & !(is(arch_data, "pch_fit") |
+                             is(arch_data, "random_arc") | is.null(arch_data))) {
     stop("Archetype labels can be used only with single fit of the model
           - class(arch_data) == 'pch_fit'")
   }
@@ -83,6 +85,10 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     for_plot = ParetoTI:::.arc_data_table(arch_data, data,
                                           data_lab = data_lab, arc_lab = arc_lab,
                                           which_dimensions = which_dimensions)
+
+    # convert names to numbers
+    if(arc_names_num) for_plot$arc_data[, arch_id := gsub("^.+_|$", "", arch_id)]
+
     lines_for_plot = ParetoTI:::.archLines(for_plot$arc_data, arc_lab = arc_lab,
                                            pch_fit = is(arch_data, "pch_fit") | is(arch_data, "random_arc"),
                                            type, average_func)
@@ -159,6 +165,9 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
 
   ## 2D plot ===================================================================##
   if(length(which_dimensions) == 2){
+
+    setorder(for_plot$data, lab)
+
     plot = ggplot2::ggplot(for_plot$data, ggplot2::aes(x = get(x), y = get(y),
                                                        color = lab))
     if(is.numeric(for_plot$data$lab)){
@@ -237,6 +246,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     z = as.formula(paste0("~", z))
 
     setorder(for_plot$data, lab)
+
     plot = plot_ly(for_plot$data)
 
     if(is.numeric(for_plot$data$lab)){
@@ -245,10 +255,13 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                          marker = list(size = data_size,
                                        colorbar = list(title = legend_name)))
     } else {
+
+      data_colors_2 = data_colors[as.character(for_plot$data$lab)]
+      #data_colors_2 = factor(data_colors_2, levels = data_colors)
       plot = add_markers(p = plot, x = x, y = y, z = z, mode = "markers",
                          colors = ~ lab, name = ~ lab,
                          marker = list(size = data_size,
-                                       color = data_colors[for_plot$data$lab]))
+                                       colors = data_colors_2))
     }
 
     if("lines_for_plot" %in% ls()) {

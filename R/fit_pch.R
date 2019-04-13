@@ -42,20 +42,20 @@
 ##'                           mean = 0, sd = 1, N_dim = 2)
 ##' data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 ##' dim(data)
-##' # Fit a polytope with 3 archetypes to data matrix
+##' # Find 3 archetypes in this data
 ##' arc = fit_pch(data, noc=as.integer(3), delta=0)
-##' # Fit the same polytope 3 times without resampling to test convergence of the algorithm.
+##' # Fit the model 3 times without resampling to test convergence of the algorithm.
 ##' arc_rob = fit_pch_bootstrap(data, n = 3, sample_prop = NULL,
 ##'                          noc=as.integer(3), delta=0)
-##' # Fit the 10 polytopes to resampled datasets each time looking at 70% of examples.
+##' # Fit 10 models to resampled datasets each time looking at 70% of examples.
 ##' arc_data = fit_pch_bootstrap(data, n = 10, sample_prop = 0.7,
 ##'                          noc=as.integer(3), delta=0)
 ##'
-##' # Use local parallel processing to fit the 10 polytopes to resampled datasets each time looking at 70% of examples.
+##' # Use local parallel processing to fit 10 models to resampled datasets each time looking at 70% of examples.
 ##' arc_data = fit_pch_bootstrap(data, n = 10, sample_prop = 0.7,
 ##'                          noc=as.integer(3), delta=0, type = "m")
 ##'
-##' # Fit polytopes with 2-4 archetypes
+##' # Fit models with 2-4 archetypes
 ##' arc_ks = k_fit_pch(data, ks = 2:4, check_installed = T, delta=0)
 ##'
 ##' # Evaluate how much archetypes vary in randomised data, (variable shuffled

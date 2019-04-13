@@ -16,9 +16,9 @@
 ##'                           mean = 0, sd = 1)
 ##' data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 ##' # Find Euclidian distance between data points and archetypes
-##' distance = sqrt(arch_dist(data, archetypes))
+##' distance = arch_dist(data, archetypes)
 ##' # Find Euclidian distance between archetypes
-##' arc_distance = sqrt(arch_dist(archetypes, archetypes))
+##' arc_distance = arch_dist(archetypes, archetypes)
 generate_arc = function(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
                         mean = 0, sd = 1){
   n_arc = length(arc_coord)

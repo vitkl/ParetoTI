@@ -68,7 +68,7 @@ arch_to_umap(arch_data, data, which_dimensions = 1:2,
 
 \item{metric}{sensible default for \code{\link[umap]{umap}}}
 
-\item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm. Set to NULL if you want to show data alone.}
+\item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the archetypal analysis. Set to NULL if you want to show data alone.}
 }
 \value{
 \code{plot_arc()} ggplot2 (2D) or plotly (3D) plot

@@ -23,12 +23,16 @@
 ##' arc_distance = arch_dist(archetypes, archetypes)
 arch_dist = function(data, archetypes, dist_metric = "euclidian"){
   if(dist_metric == "euclidian"){
-    archetypes = lapply(seq_len(ncol(archetypes)), function(i) archetypes[, i])
-    distances = vapply(archetypes, function(arc, data){
+    archetype_list = lapply(seq_len(ncol(archetypes)), function(i) archetypes[, i])
+    distances = vapply(archetype_list, function(arc, data){
       diff = arc - data
       sqrt(colSums(diff^2))
     }, FUN.VALUE = numeric(ncol(data)), data)
-    colnames(distances) = paste0("archetype_", seq_len(ncol(distances)))
+    # if archetypes are not named => rename
+    if(is.null(colnames(archetypes))){
+      colnames(distances) = paste0("archetype_", seq_len(ncol(distances)))
+    } else colnames(distances) = colnames(archetypes)
+
   }
   distances
 }

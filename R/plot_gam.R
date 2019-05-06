@@ -81,10 +81,12 @@ plot_gam = function(gam_deriv = NULL, gam_fit, data,
       geom_rug(data = data, aes_string(y = as.character(gam_fit$formula[[2]]),
                                        x = cols), alpha = 0.2)
   }
+
+  if(title == "") return(end_plot) # if title empty return ggplot output
+  # otherwise add the main plot title
   title = cowplot::ggdraw() +
     cowplot::draw_label(title,
                         fontface = "bold")
-  if(title == "") return(end_plot) # if title empty return ggplot output
   cowplot::plot_grid(title, end_plot,
                      ncol = 1, rel_heights = c(0.08, 1))
 }

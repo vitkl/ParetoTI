@@ -6,6 +6,7 @@
 \usage{
 plot_gam(gam_deriv = NULL, gam_fit, data, feature = NULL,
   archetype = NULL, groupCovs = NULL, title_size = 10,
+  point_size = 1, point_alpha = 0.1, rug_size = 1, rug_alpha = 0.1,
   title = "GAM model: gene expression = function(distance from archetype)")
 }
 \arguments{
@@ -20,6 +21,12 @@ plot_gam(gam_deriv = NULL, gam_fit, data, feature = NULL,
 \item{archetype}{character vector, which archetypes to plot?}
 
 \item{groupCovs}{argument for \link[voxel]{plotGAM}}
+
+\item{title_size}{size of individial plot titles and axis titles}
+
+\item{title}{main title for all features and archetypes}
+
+\item{point_size/rug_size/point_alpha/rug_alpha}{size and alpha controls for points and geom_rug.}
 }
 \value{
 \code{plot_gam()} list (S3 object, plot_gam) containing data.table-s for each predictor in gam model

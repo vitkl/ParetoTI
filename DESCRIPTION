@@ -1,11 +1,11 @@
 Package: ParetoTI
 Type: Package
-Title: Pareto Task Inference In R (based on ParTI)
+Title: R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data (based on ParTI) 
 Version: 0.1.8
 Author: Vitalii Kleshchevnikov
 Maintainer: Vitalii Kleshchevnikov <vk7@sanger.ac.uk>
 Authors@R: c(person("Vitalii", "Kleshchevnikov",, "vk7@sanger.ac.uk", role = c("aut", "cre")))
-Description: This package allows you to perform Pareto Task Inference in R as described in
+Description: R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data, partially based on ParTI described in
     Yuval Hart & Uri Alon paper in Nature Methods (2015):
     Inferring biological tasks using Pareto analysis of high-dimensional data.
     This package performs archetypal analysis using a python 2.7 implementation of PCHA algorithm. 

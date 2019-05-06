@@ -1,13 +1,15 @@
 ## ParetoTI R package 
-### Pareto Task Inference via Archetypal Analysis In R (based on ParTI)
+### R toolbox for Archetypal Analysis and Pareto Task Inference for unsupervised characterisation of single cell data
 
-  This package allows to find tasks that cells need to perform and trade-offs between them. 
+  This package allows describing a continuum of cell states by identifying representative cells with most distinctive expression (archetypes). Detecting which genes and functional annotations (e.g. GO) make those cells distinctive gives marker genes and predicted functions for each state.     
+  This avoids drawing arbitrary cluster boundaries when a continuum of cell states is apparent (e.g. within-cell-type heterogeniety, multi-step differentiation trajectories, [this artificial example](https://vitkl.github.io/ParetoTI/articles/Comparison_to_kmeans.html#find-archetypes-with-pcha-and-cluster-centers-with-k-means)). Yet Archetypal Analysis provides a similar and easy to understand conceptual framework for unsupervised discovery of cell subpopulations.    
+  In theory (see [citation](https://www.nature.com/articles/nmeth.3254)), archetypes are cells specialised at a combination of tasks, and the continuum of transcriptional states between archetypes mirrors the trade-offs between tasks. In practice, many factors lead could to a distinct expression profile (archetype), including technical bias, cell doublets, stress response induced by cell dissociation and other factors.    
   
-  Caution: the package in currently in development and testing. If you encounter problems please contact Vitalii Kleshchevnikov (vk7 at sanger.ac.uk) or report bugs on github.
+  Caution: the package in currently in development and testing. If you encounter problems please contact Vitalii Kleshchevnikov (vk7 at sanger.ac.uk) or report bugs on [github](https://github.com/vitkl/ParetoTI/issues).
   
 #### Background
   
-  Need to perform multiple tasks and natural selection put cells on a Pareto front, a narrow subspace where performance at those tasks is optimal. How important the tasks are in the environment puts cells at different locations along Pareto front. This reflects trade-off in performance at those tasks. Pareto front in the performance space translates into simple shapes gene expression of cell population. By finding minimal simplex polytope (triangle in 2D, tetrahedron in 3D, 5-vertex polytope in 4D) that encloses most of the data you can describe within cell-type heterogeniety. This is done with archetypal analysis method (matrix factorisation) that finds the most distictive representative cells at "the corners of the data". This makes it similar to clustering methods and allows interpreting archetypes as cells (rather than dimensions). The theory suggests that cells near each archetype/vertex are specialists at one tasks, whicle cells between archetypes perform a weighted combination of tasks. You can indentify the cellular tasks by finding what is special about cells closest to each archetype/vertex. This package relies on recent work by Uri Alon group that showed that Pareto front is equal to minimal polytope defined by specialist phenotypes (archetypes) and their matlab package ParTI for performing this analysis.
+  Need to perform multiple tasks and natural selection put cells on a Pareto front, a narrow subspace where performance at those tasks is optimal. How important the tasks are in the environment puts cells at different locations along Pareto front. This reflects trade-off in performance at those tasks. Pareto front in the performance space translates into simple shapes gene expression of cell population. By finding minimal simplex polytope (triangle in 2D, tetrahedron in 3D, 5-vertex polytope in 4D) that encloses most of the data you can describe within cell-type heterogeniety. This is done with archetypal analysis method (matrix factorisation) that finds the most distictive representative cells at "the corners of the data". This makes it similar to clustering methods and allows interpreting archetypes as cells (rather than dimensions). The theory suggests that cells near each archetype/vertex are specialists at one tasks, whicle cells between archetypes perform a weighted combination of tasks. You can indentify the cellular tasks by finding what is special about cells closest to each archetype/vertex. This package is inspired and partially relies on recent work by Uri Alon's group that showed that Pareto front is equal to minimal polytope defined by specialist phenotypes (archetypes) and their matlab package ParTI for performing this analysis.
   
   ParTI matlab package is described in more detail in Yuval Hart & Uri Alon paper in Nature Methods (2015):
   [Inferring biological tasks using Pareto analysis of high-dimensional data.](https://www.nature.com/articles/nmeth.3254)
@@ -55,7 +57,7 @@ ParetoTI::install_py_pcha(method = "conda",
 reticulate::py_discover_config("py_pcha")
 ```
 
-**Example: Fitting polytope to random triangle-shaped data (finding Pareto front)**  
+**Example: Finding archetypes in data created by simulating a triangle  **  
 
 ```r
 library(ParetoTI)
@@ -113,7 +115,7 @@ plot_arc(arch_data = arc_tsne$arch_data, data = arc_tsne$data,
 
   Features, genes whose expression decreases with distance from each vertex are identified using Wilcox test as those highly expressed near archetypes. As more direct but slower approach to answering this question we also implemented Generalised Additive Model (cubic splines) that describe gene expression as a a smooth function of distance from archetypes. In that case we define p-value as the probability that the first derivative of this function is below zero (function is decreasing). This approach can be used for plotting the expression of selected genes.
   
-  We also strongly recommend to remove doublet cells using scrublet (https://github.com/AllonKleinLab/scrublet) because those result in spurious archetypes and make selecting the number of archetypes harder. You can vary the scrublet score threshold until ParetoTI no longer finds arhetyopes with high scrublet score. Also, for convenience, we provide an interface to logistic regression model (keras) for classifying cells with logistic regression, and Geometric Sketch method (geosketch) for reducing the size of the data while preseving rare populations. Both can be done to aid Pareto Task Inference analysis. 
+  We also strongly recommend to remove doublet cells using scrublet (https://github.com/AllonKleinLab/scrublet, or other doublet prediction methods) because doublets result in spurious archetypes and make selecting the number of archetypes harder. You can vary the scrublet score threshold until ParetoTI no longer finds arhetyopes with high scrublet score. Also, for convenience, we provide an interface to logistic regression model (keras) for classifying cells with logistic regression, and Geometric Sketch method (geosketch) for reducing the size of the data while preseving rare populations. Both can be done to aid Pareto Task Inference analysis. 
 
 ### Development and further improvements
 

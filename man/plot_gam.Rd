@@ -5,7 +5,7 @@
 \title{Plot gam model fit for multiple genes and archetypes (Generalised Additive Model, mgcv)}
 \usage{
 plot_gam(gam_deriv = NULL, gam_fit, data, feature = NULL,
-  groupCovs = NULL, title_size = 10,
+  archetype = NULL, groupCovs = NULL, title_size = 10,
   title = "GAM model: gene expression = function(distance from archetype)")
 }
 \arguments{
@@ -15,7 +15,9 @@ plot_gam(gam_deriv = NULL, gam_fit, data, feature = NULL,
 
 \item{data}{data.table dim(examples, dimensions) that includes distance of each example to archetype in columns given by \code{arc_col} and feature values given by \code{feature}. Must be provided.}
 
-\item{feature}{character vector (1L), column than containg feature values}
+\item{feature}{character vector, which features (e.g. genes) to plot?}
+
+\item{archetype}{character vector, which archetypes to plot?}
 
 \item{groupCovs}{argument for \link[voxel]{plotGAM}}
 }

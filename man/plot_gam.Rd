@@ -6,7 +6,8 @@
 \usage{
 plot_gam(gam_deriv = NULL, gam_fit, data, feature = NULL,
   archetype = NULL, groupCovs = NULL, title_size = 10,
-  point_size = 1, point_alpha = 0.1, rug_size = 1, rug_alpha = 0.1,
+  point_size = 1, point_alpha = 0.1, point_position = c("identity",
+  "jitter"), rug_size = 1, rug_alpha = 0.1,
   title = "GAM model: gene expression = function(distance from archetype)")
 }
 \arguments{
@@ -23,6 +24,8 @@ plot_gam(gam_deriv = NULL, gam_fit, data, feature = NULL,
 \item{groupCovs}{argument for \link[voxel]{plotGAM}}
 
 \item{title_size}{size of individial plot titles and axis titles}
+
+\item{point_position}{point position option, a way to add jitter but "identity" by default}
 
 \item{title}{main title for all features and archetypes}
 

@@ -11,6 +11,7 @@
 ##' @param groupCovs argument for \link[voxel]{plotGAM}
 ##' @param title_size size of individial plot titles and axis titles
 ##' @param point_size/rug_size/point_alpha/rug_alpha size and alpha controls for points and geom_rug.
+##' @param point_position point position option, a way to add jitter but "identity" by default
 ##' @param title main title for all features and archetypes
 ##' @return \code{plot_gam()} list (S3 object, plot_gam) containing data.table-s for each predictor in gam model
 ##' @export plot_gam
@@ -19,6 +20,7 @@ plot_gam = function(gam_deriv = NULL, gam_fit, data,
                     feature = NULL, archetype = NULL,
                     groupCovs = NULL, title_size = 10,
                     point_size = 1, point_alpha = 0.1,
+                    point_position = c("identity", "jitter"),
                     rug_size = 1, rug_alpha = 0.1,
                     title = "GAM model: gene expression = function(distance from archetype)"){
   if(!is.null(gam_deriv)){
@@ -32,7 +34,8 @@ plot_gam = function(gam_deriv = NULL, gam_fit, data,
         voxel::plotGAM(gam_fit, smooth.cov = col, groupCovs = groupCovs) +
           geom_point(data = data, aes_string(y = as.character(gam_fit$formula[[2]]),
                                              x = col),
-                     alpha = point_alpha, size = point_size) +
+                     alpha = point_alpha, size = point_size,
+                     position = point_position[1]) +
           geom_rug(data = data, aes_string(y = as.character(gam_fit$formula[[2]]),
                                            x = col),
                    alpha = rug_alpha, size = rug_size) +
@@ -77,9 +80,12 @@ plot_gam = function(gam_deriv = NULL, gam_fit, data,
     cols = cols[!cols %in% as.character(gam_fit$formula[[2]])]
     end_plot = voxel::plotGAM(gam_fit, smooth.cov = cols, groupCovs = groupCovs) +
       geom_point(data = data, aes_string(y = as.character(gam_fit$formula[[2]]),
-                                         x = cols), alpha = 0.2) +
+                                         x = cols),
+                 alpha = point_alpha, size = point_size,
+                 position = point_position[1]) +
       geom_rug(data = data, aes_string(y = as.character(gam_fit$formula[[2]]),
-                                       x = cols), alpha = 0.2)
+                                       x = cols),
+               alpha = rug_alpha, size = rug_size)
   }
 
   if(title == "") return(end_plot) # if title empty return ggplot output

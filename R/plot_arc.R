@@ -11,9 +11,10 @@
 ##' @param geom plotting function to plot data in 2D, useful options are ggplot2::geom_point (scatterplot) and ggplot2::geom_bin2d (density)
 ##' @param colors character vector giving color palette for different archetype fits and the data (both 3D and 2D plot)
 ##' @param arch_size size of archetype points
-##' @param line_size width of lines connecting archetypes
-##' @param data_size size of data points in plotly. Values for ggplot are 1/2 of data_size.
 ##' @param arch_alpha opacity of archetype points
+##' @param data_size size of data points in plotly. Values for ggplot are 1/2 of data_size.
+##' @param data_alpha opacity of data points
+##' @param line_size width of lines connecting archetypes
 ##' @param data_lab vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label
 ##' @param arc_lab vector, 1L or nrow(arc_data$XC)/noc, label vertices/archetypes (points) with a categorical. Only used when looking at a single fit (pch_fit).
 ##' @param arc_names_num logical, when archetypes are named, use numbers (default, TRUE), or names (FALSE, produces cluttered plot)?
@@ -64,10 +65,11 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                     type = c("average", "all")[1], average_func = mean,
                     geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
                     colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"),
-                    arch_size = NULL, line_size = NULL,
-                    data_size = 4, arch_alpha = 0.4,
-                    data_lab = "data", arc_lab = "archetypes", arc_names_num = TRUE,
-                    legend_name = "data",
+                    arch_size = NULL, arch_alpha = 0.4,
+                    data_size = 4, data_alpha = 1,
+                    line_size = NULL,
+                    data_lab = "data", arc_lab = "archetypes",
+                    arc_names_num = TRUE, legend_name = "data",
                     text_size = NULL, nudge = c(0.05, 0.1)) {
 
 
@@ -172,7 +174,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                                                        color = lab))
     if(is.numeric(for_plot$data$lab)){
 
-      plot = plot + geom(size = data_size/2)
+      plot = plot + geom(size = data_size/2, alpha = data_alpha)
 
     } else if(identical(geom, geom_bin2d)) {
 
@@ -180,7 +182,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
 
     } else {
 
-      plot = plot + geom(size = data_size/2) +
+      plot = plot + geom(size = data_size/2, alpha = data_alpha) +
         scale_color_manual(aesthetics = "color", values = data_colors[for_plot$data$lab]) +
         guides(color = guide_legend(title="data"))
 
@@ -261,7 +263,8 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
       plot = add_markers(p = plot, x = x, y = y, z = z, mode = "markers",
                          colors = ~ lab, name = ~ lab,
                          marker = list(size = data_size,
-                                       colors = data_colors_2))
+                                       colors = data_colors_2,
+                                       opacity = data_alpha))
     }
 
     if("lines_for_plot" %in% ls()) {

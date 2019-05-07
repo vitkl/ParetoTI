@@ -85,15 +85,15 @@ archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20
                           mean = 0, sd = 1)
 data = generate_data(archetypes$XC, N_examples = 1e3, jiiter = 0.04, size = 0.99)
 plot_arc(arch_data = archetypes, data = data,
-         which_dimensions = 1:3)
+         which_dimensions = 1:3, data_alpha = 0.5)
 
 # test fitPCH
 arc_data = fit_pch(data, noc = as.integer(3), delta = 0)
 plot_arc(arch_data = arc_data, data = data,
          which_dimensions = 1:3)
 plot_arc(arch_data = arc_data, data = data,
-         which_dimensions = 1:2) +
-  theme_bw()
+         which_dimensions = 1:2, data_alpha = 0.5) +
+  ggplot2::theme_bw()
 
 
 speed_test = microbenchmark::microbenchmark({

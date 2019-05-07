@@ -10,10 +10,10 @@ plot_arc(arch_data = NULL, data, which_dimensions = as.integer(1:2),
   type = c("average", "all")[1], average_func = mean,
   geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
   colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400",
-  "#FF7E0F"), arch_size = NULL, line_size = NULL, data_size = 4,
-  arch_alpha = 0.4, data_lab = "data", arc_lab = "archetypes",
-  arc_names_num = TRUE, legend_name = "data", text_size = NULL,
-  nudge = c(0.05, 0.1))
+  "#FF7E0F"), arch_size = NULL, arch_alpha = 0.4, data_size = 4,
+  data_alpha = 1, line_size = NULL, data_lab = "data",
+  arc_lab = "archetypes", arc_names_num = TRUE, legend_name = "data",
+  text_size = NULL, nudge = c(0.05, 0.1))
 
 arch_to_tsne(arch_data, data, which_dimensions = 1:2, pca = FALSE,
   partial_pca = FALSE, ...)
@@ -38,11 +38,13 @@ arch_to_umap(arch_data, data, which_dimensions = 1:2,
 
 \item{arch_size}{size of archetype points}
 
-\item{line_size}{width of lines connecting archetypes}
+\item{arch_alpha}{opacity of archetype points}
 
 \item{data_size}{size of data points in plotly. Values for ggplot are 1/2 of data_size.}
 
-\item{arch_alpha}{opacity of archetype points}
+\item{data_alpha}{opacity of data points}
+
+\item{line_size}{width of lines connecting archetypes}
 
 \item{data_lab}{vector, 1L or length of data, label data points (examples) with a qualitative or quantitative label}
 

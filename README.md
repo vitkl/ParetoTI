@@ -32,7 +32,7 @@ You need to install development version of this package from github.com and inst
 ```r
 # Install ParetoTI package, this should also install reticulate package, if not - install manually.
 install.packages("BiocManager") # for installing BioConductor dependencies
-BiocManager::install("vitkl/ParetoTI", dependencies = c("Depends", "Imports", "LinkingTo", "Suggests"))
+BiocManager::install("vitkl/ParetoTI", dependencies = c("Depends", "Imports", "LinkingTo"))
 ```
 ```r
 # Load package

@@ -23,7 +23,6 @@
 ##' @param model Provide your own keras/tensorflow model. Output units must be equal to the number of classes (columns of y), input_shape must be equal to nrow(sce). This can be used to extend logistic regression model by adding hidden layers
 ##' @export fit_logistic_model
 ##' @import data.table
-##' @import SingleCellExperiment
 ##' @examples
 ##' # download PBMC data as SingleCellExperiment object
 ##'

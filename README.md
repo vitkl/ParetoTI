@@ -9,6 +9,8 @@
   
   Caution: the package in currently in development and testing. If you encounter problems please contact Vitalii Kleshchevnikov (vk7 at sanger.ac.uk) or report bugs on [github](https://github.com/vitkl/ParetoTI/issues).
   
+  [![DOI](https://zenodo.org/badge/146516634.svg)](https://zenodo.org/badge/latestdoi/146516634)
+  
 #### Background
   
   Need to perform multiple tasks and natural selection put cells on a Pareto front, a narrow subspace where performance at those tasks is optimal. How important the tasks are in the environment puts cells at different locations along Pareto front. This reflects trade-off in performance at those tasks. Pareto front in the performance space translates into simple shapes gene expression of cell population. By finding minimal simplex polytope (triangle in 2D, tetrahedron in 3D, 5-vertex polytope in 4D) that encloses most of the data you can describe within cell-type heterogeniety. This is done with archetypal analysis method (matrix factorisation) that finds the most distictive representative cells at "the corners of the data". This makes it similar to clustering methods and allows interpreting archetypes as cells (rather than dimensions). The theory suggests that cells near each archetype/vertex are specialists at one tasks, whicle cells between archetypes perform a weighted combination of tasks. You can indentify the cellular tasks by finding what is special about cells closest to each archetype/vertex. This package is inspired and partially relies on recent work by Uri Alon's group that showed that Pareto front is equal to minimal polytope defined by specialist phenotypes (archetypes) and their matlab package ParTI for performing this analysis.

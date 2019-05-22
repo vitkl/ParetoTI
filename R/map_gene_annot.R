@@ -25,6 +25,9 @@ map_gene_annot = function(taxonomy_id = 9606, keys = "TP53", columns = c("ENSEMB
   record = subset(hub, taxonomyid == taxonomy_id & rdataclass ==
                     "OrgDb")
   org_db = hub[[names(record)]]
+
+  if(isTRUE(return_org_db)) return(org_db)
+
   annot = as.data.table(AnnotationDbi::select(org_db, keys = keys,
                                               columns = c(columns, keytype),
                                               keytype = keytype))

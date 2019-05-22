@@ -19,10 +19,9 @@ filter_go_annot(annot, ontology_file = NULL, lower = 1, upper = Inf,
   ontology_type = c("BP", "MF", "CC"))
 
 measure_activity(expr_mat, which = c("BP", "MF", "CC", "gwas",
-  "promoter_TF", "custom")[1], activity_method = c("AUCell",
-  "pseudoinverse")[1], keys = rownames(expr_mat), keytype = "ALIAS",
-  ontology_file = NULL, taxonomy_id = 10090, evidence_code = "all",
-  localHub = FALSE,
+  "custom")[1], activity_method = c("AUCell", "pseudoinverse")[1],
+  keys = rownames(expr_mat), keytype = "ALIAS", ontology_file = NULL,
+  taxonomy_id = 10090, evidence_code = "all", localHub = FALSE,
   ann_hub_cache = AnnotationHub::getAnnotationHubOption("CACHE"),
   lower = 1, upper = Inf, variant_context = NULL,
   return_as_matrix = FALSE, annot_dt = NULL,
@@ -70,7 +69,7 @@ map_promoter_tf(keys = c("TP53", "ZZZ3"), keytype = "SYMBOL",
 
 \item{expr_mat}{expression matrix (genes in rows, cells in columns) or one of: dgCMatrix, ExpressionSet, and SummarizedExperiment or SingleCellExperiment both of which require assay_name.}
 
-\item{which}{which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets. Use "gwas" for constructing gene sets with gwas_catalog v1.0.2. GWAS option works only with human hgnc identifiers. Use "promoter_TF" to look at TF activities measured by mapping TF->target gene regulation via co-occurence of multiple motifs for the same TF in promoters (courtesy of Krzysztof Polanski who generated this resource). TF data is added supplied with the package and works only for human data, only SYMBOL and ENSEMBL can be used as keytype. Use "custom" to provide your own gene sets in \code{annot_dt} table.}
+\item{which}{which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets. Use "gwas" for constructing gene sets with gwas_catalog v1.0.2. GWAS option works only with human hgnc identifiers. TF data is added supplied with the package and works only for human data, only SYMBOL and ENSEMBL can be used as keytype. Use "custom" to provide your own gene sets in \code{annot_dt} table.}
 
 \item{activity_method}{find activities using \link[ParetoTI]{find_set_activity_AUCell} or \link[ParetoTI]{find_set_activity_pseudoinv}?}
 
@@ -106,7 +105,7 @@ load_go_ontology() load GO slim ontology file and return file path
 
 map_gwas_annot() Load known GWAS loci for all phenotypes in GWAS Catalog. For each the \code{keys} find which phenotypes it is associated with using genes mapped by GWAS Catalog.
 
-map_promoter_tf() load GO slim ontology file and return file path
+map_promoter_tf() load data mapping TF->target gene regulation via co-occurence of multiple motifs for the same TF in promoters (courtesy of Krzysztof Polanski who generated this resource). This TF datasets does not produce useful results with > 5 scRNA-seq datasets, so more bespoke approach is needed, and TF-target mapping can be provided with "custom" option of measure_activity().
 }
 \details{
 GO consortium annotates genes with the most specific terms so there is a need to propagate annotations to less specific parent terms. For example, "apoptotic process in response to mitochondrial fragmentation" (GO:0140208) is an "apoptotic process" (GO:0006915). Conceptually, if gene functions in the first it also functions in the second but it is only directly annotated by the first term. So, using GO annotations for functional enrichment requires propagating annotations to less specific terms.

@@ -8,7 +8,7 @@ devtools::load_all("../ParetoTI/")
 
 #install.packages("BiocManager") # for installing BioConductor dependencies
 BiocManager::install("vitkl/ParetoTI", dependencies = T)
-BiocManager::install("vitkl/ParetoTI", dependencies = c("Depends", "Imports", "LinkingTo", "Suggests"))
+BiocManager::install("vitkl/ParetoTI", dependencies = c("Depends", "Imports", "LinkingTo"))
 
 library(ParetoTI)
 
@@ -73,11 +73,11 @@ archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
 data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
 plot_arc(arch_data = archetypes, data = data,
          which_dimensions = 1:2) +
-  theme_bw()
+  ggplot2::theme_bw()
 # Plot data as 2D density rather than points
 plot_arc(arch_data = archetypes, data = data,
          which_dimensions = 1:2, geom = ggplot2::geom_bin2d) +
-  theme_bw()
+  ggplot2::theme_bw()
 
 # Random data that fits into the triangle (3D)
 set.seed(4355)
@@ -393,4 +393,31 @@ U = range(M)
 
 SST = np.sum(np.diag(X[:, U] * X[:, U].T))
 
+library(ParetoTI)
+# Random data that fits into the triangle (2D)
+set.seed(4355)
+archetypes3 = generate_arc(arc_coord = list(c(5, 0, 17, 4), c(-10, 15, -10, 8), c(-20, -20, 5, 1)),
+                          mean = 0, sd = 1)
+data3 = generate_data(archetypes3$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
+p1 = plot_arc(arch_data = archetypes3, data = data3,
+         which_dimensions = 1:2) +
+  ggplot2::theme_bw()
 
+# Random data that fits into the triangle (2D)
+archetypes2 = generate_arc(arc_coord = list(c(5, -2, 3, -1)*3, c(-2, 1.5, 2, 3)*3),
+                          mean = 0, sd = 1)
+data2 = generate_data(archetypes2$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
+p2 = plot_arc(arch_data = archetypes2, data = data2,
+         which_dimensions = 1:2) +
+  ggplot2::theme_bw()
+
+data_mix = rbind(data3, data2)
+arc_data = k_fit_pch(data_mix, k = 1:8, delta = 0, volume_ratio = "none")
+
+u_data = arch_to_umap(arc_data, data_mix, method = "umap-learn", metric = "euclidean")
+p3 = plot_arc(arch_data = u_data$arch_data, data = u_data$data,
+         which_dimensions = 1:2, line_size = 0) +
+  ggplot2::theme_bw()
+p3
+
+cowplot::plot_grid(p2, p1)

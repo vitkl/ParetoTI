@@ -35,10 +35,15 @@ annotate_archetypes = function(arc, ...) {
 
   annots = list(...)
 
+  # create labels for archetypes
   for (i in seq_len(length(annots))) {
     ind = vert %in% paste0("", annots[[i]])
     vert[ind] = paste0(names(annots)[i], "_", vert[ind])
   }
+
+  # add word archetype when no label provided
+  ind = !grepl("[^0-9]", vert)
+  vert[ind] = paste0("archetype_", vert[ind])
 
   # name archetypes and return pch_fit back
   if(is(arc, "b_pch_fit")) {

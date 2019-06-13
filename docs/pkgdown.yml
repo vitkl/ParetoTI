@@ -2,5 +2,6 @@ pandoc: 1.19.2.1
 pkgdown: 1.3.0
 pkgdown_sha: ~
 articles:
+  Comparison_to_kmeans: Comparison_to_kmeans.html
   Hepatocyte_example: Hepatocyte_example.html
 

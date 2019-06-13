@@ -34,15 +34,15 @@
 
 <meta property="og:description" content="fit_pch() fits a polytope (Principal Convex Hull) to data using PCHA algorithm. All of the listed functions take input matrix dim(variables/dimentions, examples) and return archetype positions (XC) of dim(variables/dimentions, archetypes).
 k_fit_pch() finds polytopes of k dimensions in the data. This function applies fit_pch() to different k-s.
-fit_pch_bootstrap() uses resampling data with or without replacement (bootstrapping) to find robust positions of vertices of a polytope (Principal Convex Hull) describing the data. This function uses fit_pch_resample().
+fit_pch_bootstrap() uses resampling data with or without replacement (bootstrapping) to find robust positions of archetypes of a polytope (Principal Convex Hull) describing the data. This function uses fit_pch_resample().
 average_pch_fits() averages archetypes positions and relevant metrics across polytope fit obtained using bootstraping. Uses output of fit_pch_bootstrap() directly.
 fit_pch_resample() takes one sample of the data and fits a polytope (Principal Convex Hull) to data. This function uses fit_pch().
-randomise_fit_pch() helps answer the question &quot;how likely you are to observe data shaped as polytope given no relationship between variables?&quot; This function disrupts the relationships between variables, find a polytope that best describes the data. It calculates variance explained, t-ratio of polytope volume to convex hull volume. Optionally, it uses bootstrapping of data points to measure variance in vertex positions. This function uses randomise_fit_pch1(). Number of vertices is determined automatically from arc_data.
+randomise_fit_pch() helps answer the question &quot;how likely you are to observe data shaped as polytope given no relationship between variables?&quot; This function disrupts the relationships between variables, find a polytope that best describes the data. It calculates variance explained, t-ratio of polytope volume to convex hull volume. Optionally, it uses bootstrapping of data points to measure variance in archetype positions. This function uses randomise_fit_pch1(). Number of archetypes is determined automatically from arc_data.
 randomise_fit_pch1() disrupts the relationships between variables (one sampling iteration), keeping the distribution of each variable constant, and fits a polytope (Principal Convex Hull) to data. This function uses rand_var and fit_pch().
 fit_convhulln() computes smallest convex hull that encloses a set of points using convhulln and returns positions of convex hull points (positions = TRUE).
 merge_arch_dist() calculates distance to archtypes, and merges distance matrix to data that was used to identify archetypes, optionally adds other features of data points (through colData).
-plot.r_pch_fit() plot distribution of t-ratio, total variance in vertex positions and variance explained used to calculate empirical p-value
-plot_dim_var() plot distribution of variance in vertex positions in each dimension and corresponding empirical p-values" />
+plot.r_pch_fit() plot distribution of t-ratio, total variance in archetype positions and variance explained used to calculate empirical p-value
+plot_dim_var() plot distribution of variance in archetype positions in each dimension and corresponding empirical p-values" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -73,7 +73,7 @@ plot_dim_var() plot distribution of variance in vertex positions in each dimensi
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -95,6 +95,9 @@ plot_dim_var() plot distribution of variance in vertex positions in each dimensi
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/Comparison_to_kmeans.html">Comparison of achetypal analysis and k-means clustering</a>
+    </li>
     <li>
       <a href="../articles/Hepatocyte_example.html">Example of using archetypal analysis to find representative cells &amp; describe heterogeniety in hepatocyte population between those archetypes</a>
     </li>
@@ -125,25 +128,26 @@ plot_dim_var() plot distribution of variance in vertex positions in each dimensi
     
     <p><code>fit_pch()</code> fits a polytope (Principal Convex Hull) to data using PCHA algorithm. All of the listed functions take input matrix dim(variables/dimentions, examples) and return archetype positions (XC) of dim(variables/dimentions, archetypes).</p>
 <p><code>k_fit_pch()</code> finds polytopes of k dimensions in the data. This function applies <code>fit_pch()</code> to different k-s.</p>
-<p><code>fit_pch_bootstrap()</code> uses resampling data with or without replacement (bootstrapping) to find robust positions of vertices of a polytope (Principal Convex Hull) describing the data. This function uses <code>fit_pch_resample()</code>.</p>
+<p><code>fit_pch_bootstrap()</code> uses resampling data with or without replacement (bootstrapping) to find robust positions of archetypes of a polytope (Principal Convex Hull) describing the data. This function uses <code>fit_pch_resample()</code>.</p>
 <p><code>average_pch_fits()</code> averages archetypes positions and relevant metrics across polytope fit obtained using bootstraping. Uses output of fit_pch_bootstrap() directly.</p>
 <p><code>fit_pch_resample()</code> takes one sample of the data and fits a polytope (Principal Convex Hull) to data. This function uses <code>fit_pch()</code>.</p>
-<p><code>randomise_fit_pch()</code> helps answer the question "how likely you are to observe data shaped as polytope given no relationship between variables?" This function disrupts the relationships between variables, find a polytope that best describes the data. It calculates variance explained, t-ratio of polytope volume to convex hull volume. Optionally, it uses bootstrapping of data points to measure variance in vertex positions. This function uses <code>randomise_fit_pch1()</code>. Number of vertices is determined automatically from <code>arc_data</code>.</p>
+<p><code>randomise_fit_pch()</code> helps answer the question "how likely you are to observe data shaped as polytope given no relationship between variables?" This function disrupts the relationships between variables, find a polytope that best describes the data. It calculates variance explained, t-ratio of polytope volume to convex hull volume. Optionally, it uses bootstrapping of data points to measure variance in archetype positions. This function uses <code>randomise_fit_pch1()</code>. Number of archetypes is determined automatically from <code>arc_data</code>.</p>
 <p><code>randomise_fit_pch1()</code> disrupts the relationships between variables (one sampling iteration), keeping the distribution of each variable constant, and fits a polytope (Principal Convex Hull) to data. This function uses <code><a href='rand_var.html'>rand_var</a></code> and <code>fit_pch()</code>.</p>
 <p><code>fit_convhulln()</code> computes smallest convex hull that encloses a set of points using <code><a href='https://www.rdocumentation.org/packages/geometry/topics/convhulln'>convhulln</a></code> and returns positions of convex hull points (positions = TRUE).</p>
 <p><code>merge_arch_dist()</code> calculates distance to archtypes, and merges distance matrix to data that was used to identify archetypes, optionally adds other features of data points (through colData).</p>
-<p>plot.r_pch_fit() plot distribution of t-ratio, total variance in vertex positions and variance explained used to calculate empirical p-value</p>
-<p>plot_dim_var() plot distribution of variance in vertex positions in each dimension and corresponding empirical p-values</p>
+<p>plot.r_pch_fit() plot distribution of t-ratio, total variance in archetype positions and variance explained used to calculate empirical p-value</p>
+<p>plot_dim_var() plot distribution of variance in archetype positions in each dimension and corresponding empirical p-values</p>
     
     </div>
 
     <pre class="usage"><span class='fu'>fit_pch</span>(<span class='no'>data</span>, <span class='kw'>noc</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>3</span>), <span class='kw'>I</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>U</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>delta</span> <span class='kw'>=</span> <span class='fl'>0</span>,
-  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>conv_crit</span> <span class='kw'>=</span> <span class='fl'>1e-06</span>, <span class='kw'>maxiter</span> <span class='kw'>=</span> <span class='fl'>500</span>,
+  <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>conv_crit</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>maxiter</span> <span class='kw'>=</span> <span class='fl'>500</span>,
   <span class='kw'>check_installed</span> <span class='kw'>=</span> <span class='no'>T</span>, <span class='kw'>order_by</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/seq'>seq</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>nrow</a></span>(<span class='no'>data</span>)),
   <span class='kw'>order_type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"cosine"</span>, <span class='st'>"side"</span>, <span class='st'>"align"</span>)[<span class='fl'>3</span>],
   <span class='kw'>volume_ratio</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"t_ratio"</span>, <span class='st'>"variance_ratio"</span>, <span class='st'>"none"</span>)[<span class='fl'>1</span>],
   <span class='kw'>converge_else_fail</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>var_in_dims</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>normalise_var</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+  <span class='kw'>normalise_var</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"pcha"</span>, <span class='st'>"kmeans"</span>),
+  <span class='kw'>method_options</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>())
 
 <span class='fu'>k_fit_pch</span>(<span class='no'>data</span>, <span class='kw'>ks</span> <span class='kw'>=</span> <span class='fl'>2</span>:<span class='fl'>4</span>, <span class='kw'>check_installed</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>bootstrap</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>bootstrap_N</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>sample_prop</span> <span class='kw'>=</span> <span class='fl'>0.65</span>, <span class='kw'>bootstrap_type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"s"</span>, <span class='st'>"m"</span>,
@@ -178,7 +182,8 @@ plot_dim_var() plot distribution of variance in vertex positions in each dimensi
 <span class='fu'>fit_convhulln</span>(<span class='no'>data</span>, <span class='kw'>positions</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 
 <span class='fu'>merge_arch_dist</span>(<span class='no'>arch_data</span>, <span class='no'>data</span>, <span class='no'>feature_data</span>, <span class='kw'>colData</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='no'>colData_id</span>, <span class='kw'>dist_metric</span> <span class='kw'>=</span> <span class='st'>"euclidian"</span>, <span class='kw'>rank</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
+  <span class='no'>colData_id</span>, <span class='kw'>dist_metric</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"euclidean"</span>, <span class='st'>"arch_weights"</span>)[<span class='fl'>1</span>],
+  <span class='kw'>rank</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>)
 
 <span class='co'># S3 method for pch_fit</span>
 <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/print'>print</a></span>(<span class='no'>res</span>)
@@ -233,7 +238,7 @@ plot_dim_var() plot distribution of variance in vertex positions in each dimensi
     </tr>
     <tr>
       <th>conv_crit</th>
-      <td><p>The convergence criteria (default: 10^-6 relative change in SSE). Reduce to 1e-4 or 1e-3 for reduced computation time by more approximate results. 1e-4 gives very similar results to 1e-5 or 1e-6 on simulated example and STARmap 1020 gene data.</p></td>
+      <td><p>The convergence criteria (default: 10^-4 relative change in SSE). Reduce to 1e-3 for reduced computation time but more approximate results. Increase to 1e-6 for improved accuracy (python and Matlab default). 1e-4 gives very similar results to 1e-5 or 1e-6 on datasets I looked at.</p></td>
     </tr>
     <tr>
       <th>maxiter</th>
@@ -245,15 +250,15 @@ plot_dim_var() plot distribution of variance in vertex positions in each dimensi
     </tr>
     <tr>
       <th>order_by</th>
-      <td><p>integer, dimensions to be used for ordering vertices/archetypes. Vertices are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that vertex. Additional step finds when vertex vector is to the left (counter-clockwise) of the c(1, 1) vector. When bootstraping vertices can be aligned to reference and ordered (order_type == "align") by these dimensions.</p></td>
+      <td><p>integer, dimensions to be used for ordering archetypes. Archetypes are ordered by angle (cosine) between c(1, 1) vector and a vector pointing to that archetype. Additional step finds when archetype vector is to the left (counter-clockwise) of the c(1, 1) vector. When bootstraping archetypes can be aligned to reference and ordered (order_type == "align") by these dimensions.</p></td>
     </tr>
     <tr>
       <th>order_type</th>
-      <td><p>order archetypes by: cosine distance from c(1,1, ..., 1) vector ("cosine"), dot product that measures position to each side of the c(1,1) vector ("side"), align positions to reference when bootstraping(fit using all data, "align"). See <a href='align_arc.html'>align_arc</a> When order_type is "align" vertices are ordered by "cosine" first.</p></td>
+      <td><p>order archetypes by: cosine distance from c(1,1, ..., 1) vector ("cosine"), dot product that measures position to each side of the c(1,1) vector ("side"), align positions to reference when bootstraping(fit using all data, "align"). See <a href='align_arc.html'>align_arc</a> When order_type is "align" archetypes are ordered by "cosine" first.</p></td>
     </tr>
     <tr>
       <th>volume_ratio</th>
-      <td><p>find volume of the convex hull of the data and the t-ratio ("t_ratio") or ratio of variance of vertex positions to variance of data ("variance_ratio") or do nothing ("none")? Caution! Geometric figure should be at least simplex: qhull algorhirm will fail to find convex hull of flat 2D shapes in 3D, 3D shapes in 4D and so on. So, for calculating this dimentions are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions.</p></td>
+      <td><p>find volume of the convex hull of the data and the t-ratio ("t_ratio") or ratio of variance of archetype positions to variance of data ("variance_ratio") or do nothing ("none")? Caution! Geometric figure should be at least simplex: qhull algorhirm will fail to find convex hull of flat 2D shapes in 3D, 3D shapes in 4D and so on. So, for calculating this dimentions are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions.</p></td>
     </tr>
     <tr>
       <th>converge_else_fail</th>
@@ -261,11 +266,19 @@ plot_dim_var() plot distribution of variance in vertex positions in each dimensi
     </tr>
     <tr>
       <th>var_in_dims</th>
-      <td><p>calculate variance in dimensions across vertices in addition to variance in vertices.</p></td>
+      <td><p>calculate variance in dimensions across archetypes in addition to variance in archetypes.</p></td>
     </tr>
     <tr>
       <th>normalise_var</th>
-      <td><p>normalise variance in position of vertices by variance in data in each dimention</p></td>
+      <td><p>normalise variance in position of archetypes by variance in data in each dimention</p></td>
+    </tr>
+    <tr>
+      <th>method</th>
+      <td><p>method for archetypal analysis: PCHA (default), <a href='https://www.rdocumentation.org/packages/stats/topics/kmeans'>kmeans</a>. Non-default methods use <code>data</code> and <code>noc</code>for data matrix and the number of archetypes, pass additional arguments via method_options.</p></td>
+    </tr>
+    <tr>
+      <th>method_options</th>
+      <td><p>additional arguments for non-default method, named list: <code><a href='https://www.rdocumentation.org/packages/base/topics/list'>list(arg = "value")</a></code>.</p></td>
     </tr>
     <tr>
       <th>ks</th>
@@ -273,11 +286,11 @@ plot_dim_var() plot distribution of variance in vertex positions in each dimensi
     </tr>
     <tr>
       <th>bootstrap</th>
-      <td><p><code>k_fit_pch()</code>: use bootstrap to find average positions for each k? Also returns variability in vertex position to aid the selection of k. At excessive k position vary more.</p></td>
+      <td><p><code>k_fit_pch()</code>: use bootstrap to find average positions for each k? Also returns variability in archetype position to aid the selection of k. At excessive k position vary more.</p></td>
     </tr>
     <tr>
       <th>bootstrap_N</th>
-      <td><p>randomise_fit_pch1() and k_fit_pch(): integer, number of bootstrap samples on random data to measure variability in vertex positions. Set to NA fit once to all data instead of bootstraping. When this option is positive seed bootstrap_seed and sample_prop must be provided.</p></td>
+      <td><p>randomise_fit_pch1() and k_fit_pch(): integer, number of bootstrap samples on random data to measure variability in archetype positions. Set to NA fit once to all data instead of bootstraping. When this option is positive seed bootstrap_seed and sample_prop must be provided.</p></td>
     </tr>
     <tr>
       <th>sample_prop</th>
@@ -317,7 +330,7 @@ plot_dim_var() plot distribution of variance in vertex positions in each dimensi
     </tr>
     <tr>
       <th>reference</th>
-      <td><p>align vertices (order_type="align") against reference polytope based on all data (TRUE), or align to the polytope from the first bootstrap iteration (FALSE). Second option can save time for large datasets</p></td>
+      <td><p>align archetypes (order_type="align") against reference polytope based on all data (TRUE), or align to the polytope from the first bootstrap iteration (FALSE). Second option can save time for large datasets</p></td>
     </tr>
     <tr>
       <th>XC_array</th>
@@ -369,36 +382,40 @@ plot_dim_var() plot distribution of variance in vertex positions in each dimensi
     </tr>
     <tr>
       <th>dist_metric</th>
-      <td><p>how to describe distance to archetypes. Currently euclidian distance is implemented.</p></td>
+      <td><p>how to describe distance to archetypes. Currently euclidean distance and archetype weights are implemented. Archetypes weights come from <code>arch_data$S</code> matrix so bootstrapped archetype positions cannot be used - only single fit to all data.</p></td>
     </tr>
     <tr>
       <th>rank</th>
-      <td><p>rank by distance metric (euclidian distance)?</p></td>
+      <td><p>rank by distance metric (euclidean distance)?</p></td>
+    </tr>
+    <tr>
+      <th>replace</th>
+      <td><p>fit_pch_resample/fit_pch_bootstrap: TRUE and FALSE are passed to <code><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample.int</a></code> for density-based sampling, "geo_sketch" tells to sample examples using geosketch method preserving geometry of the data. See <a href='geo_sketch.html'>geo_sketch</a>.</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p><code>fit_pch()</code>: object of class pch_fit (list) containing the following elements:
-XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes);
-S - numeric matrix, dim(noc, length(U)) matrix, S&gt;=0 |S_j|_1=1;
+XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes), or matrix with cluster centers (method = "kmeans");
+S - numeric matrix of archetype values per example (e.g. cell) or cluster membership (method = "kmeans"), dim(noc, length(U)) matrix, S&gt;=0 |S_j|_1=1;
 C - numeric matrix, dim(noc, length(U)) matrix, S&gt;=0 |S_j|_1=1;
 SSE - numeric vector (1L), Sum of Squared Errors;
 varexpl - numeric vector (1L), Percent variation explained by the model.
 hull_vol - numeric vector (1L), Volume of convex hull of the data.
-arc_vol - numeric vector (1L), Volume of polytope enclosed by vertices.
+arc_vol - numeric vector (1L), Volume of polytope enclosed by archetypes.
 t_ratio - numeric vector (1L), Ratio of <code>arc_vol</code> to <code>hull_vol</code>
-var_vert - numeric vector (noc L), Variance in position of each vertex.
-var_dim - numeric vector (noc L), Variance in positions of vertices in each dimension.
-total_var - numeric vector (1L), Mean variance in position of all vertices.
+var_vert - numeric vector (noc L), Variance in position of each archetype.
+var_dim - numeric vector (noc L), Variance in positions of archetypes in each dimension.
+total_var - numeric vector (1L), Mean variance in position of all archetypes.
 summary - data.table with varexpl, t_ratio, total_var and noc for ease of combining multiple shape fits.
 call - function call.</p>
 <p><code>k_fit_pch()</code>: object of class k_pch_fit (list) containing the same elements as pch_fit, but each is either a list of pch_fit elements (e.g. list of ks number of XC matrices) or a vector (which pch_fit element is one number). When length(ks) = 1 returns pch_fit.</p>
 <p><code>fit_pch_bootstrap()</code> object of class b_pch_fit (list) containing the same elements as pch_fit, but each is either a list of pch_fit elements (e.g. list of n number of XC matrices) or a vector (which pch_fit element is one number).</p>
 <p><code>average_pch_fits()</code> object of class pch_fit</p>
 <p><code>fit_pch_resample()</code> object of class pch_fit</p>
-<p><code>randomise_fit_pch()</code> S3 "r_pch_fit" object (list) containing: 1. data table with columns variance explained (rand_varexpl), t-ratio (rand_t_ratio), variance in positions of vertices (total_var) and number of vertices (k) for <code>n_rand</code> samples; 2. empirical p-value for those parameters for each number of vertices.</p>
-<p><code>randomise_fit_pch1()</code>: list containing function call, summary of the sample, optional data and optional position of vertices/archetypes.</p>
+<p><code>randomise_fit_pch()</code> S3 "r_pch_fit" object (list) containing: 1. data table with columns variance explained (rand_varexpl), t-ratio (rand_t_ratio), variance in positions of archetypes (total_var) and number of archetypes (k) for <code>n_rand</code> samples; 2. empirical p-value for those parameters for each number of archetypes.</p>
+<p><code>randomise_fit_pch1()</code>: list containing function call, summary of the sample, optional data and optional position of archetypes.</p>
 <p><code>fit_convhulln()</code> list with 3 elements: hull - matrix storing positions of points dim(points, dimensions)); area - surface area for 3D or higher and perimeter for 2D; vol - volume for 3D and surface area for 2D.</p>
 <p><code>merge_arch_dist()</code> list: data.table with samples in rows (speficied by sample_id column) and features in columns (including distance to archetypes); and character vectors listing names of archetypes, feature columns and colData columns.</p>
     
@@ -414,24 +431,24 @@ call - function call.</p>
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4355</span>)
 <span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
-                          <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>N_dim</span> <span class='kw'>=</span> <span class='fl'>2</span>)</div><div class='output co'>#&gt; <span class='error'>Error in generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),     mean = 0, sd = 1, N_dim = 2): unused argument (N_dim = 2)</span></div><div class='input'><span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>archetypes</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/dim'>dim</a></span>(<span class='no'>data</span>)</div><div class='output co'>#&gt; NULL</div><div class='input'><span class='co'># Fit a polytope with 3 vertices to data matrix</span>
-<span class='no'>arc</span> <span class='kw'>=</span> <span class='fu'>fit_pch</span>(<span class='no'>data</span>, <span class='kw'>noc</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>3</span>), <span class='kw'>delta</span><span class='kw'>=</span><span class='fl'>0</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.vector(x, mode): cannot coerce type 'closure' to vector of type 'any'</span></div><div class='input'><span class='co'># Fit the same polytope 3 times without resampling to test convergence of the algorithm.</span>
+                          <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>N_dim</span> <span class='kw'>=</span> <span class='fl'>2</span>)</div><div class='output co'>#&gt; <span class='error'>Error in generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),     mean = 0, sd = 1, N_dim = 2): unused argument (N_dim = 2)</span></div><div class='input'><span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>archetypes</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/dim'>dim</a></span>(<span class='no'>data</span>)</div><div class='output co'>#&gt; NULL</div><div class='input'><span class='co'># Find 3 archetypes in this data</span>
+<span class='no'>arc</span> <span class='kw'>=</span> <span class='fu'>fit_pch</span>(<span class='no'>data</span>, <span class='kw'>noc</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>3</span>), <span class='kw'>delta</span><span class='kw'>=</span><span class='fl'>0</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.vector(x, mode): cannot coerce type 'closure' to vector of type 'any'</span></div><div class='input'><span class='co'># Fit the model 3 times without resampling to test convergence of the algorithm.</span>
 <span class='no'>arc_rob</span> <span class='kw'>=</span> <span class='fu'>fit_pch_bootstrap</span>(<span class='no'>data</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>sample_prop</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-                         <span class='kw'>noc</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>3</span>), <span class='kw'>delta</span><span class='kw'>=</span><span class='fl'>0</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.vector(x, mode): cannot coerce type 'closure' to vector of type 'any'</span></div><div class='input'><span class='co'># Fit the 10 polytopes to resampled datasets each time looking at 70% of examples.</span>
+                         <span class='kw'>noc</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>3</span>), <span class='kw'>delta</span><span class='kw'>=</span><span class='fl'>0</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.vector(x, mode): cannot coerce type 'closure' to vector of type 'any'</span></div><div class='input'><span class='co'># Fit 10 models to resampled datasets each time looking at 70% of examples.</span>
 <span class='no'>arc_data</span> <span class='kw'>=</span> <span class='fu'>fit_pch_bootstrap</span>(<span class='no'>data</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>sample_prop</span> <span class='kw'>=</span> <span class='fl'>0.7</span>,
                          <span class='kw'>noc</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>3</span>), <span class='kw'>delta</span><span class='kw'>=</span><span class='fl'>0</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.vector(x, mode): cannot coerce type 'closure' to vector of type 'any'</span></div><div class='input'>
-<span class='co'># Use local parallel processing to fit the 10 polytopes to resampled datasets each time looking at 70% of examples.</span>
+<span class='co'># Use local parallel processing to fit 10 models to resampled datasets each time looking at 70% of examples.</span>
 <span class='no'>arc_data</span> <span class='kw'>=</span> <span class='fu'>fit_pch_bootstrap</span>(<span class='no'>data</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>10</span>, <span class='kw'>sample_prop</span> <span class='kw'>=</span> <span class='fl'>0.7</span>,
                          <span class='kw'>noc</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>3</span>), <span class='kw'>delta</span><span class='kw'>=</span><span class='fl'>0</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"m"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.vector(x, mode): cannot coerce type 'closure' to vector of type 'any'</span></div><div class='input'>
-<span class='co'># Fit polytopes with 2-4 vertices</span>
+<span class='co'># Fit models with 2-4 archetypes</span>
 <span class='no'>arc_ks</span> <span class='kw'>=</span> <span class='fu'>k_fit_pch</span>(<span class='no'>data</span>, <span class='kw'>ks</span> <span class='kw'>=</span> <span class='fl'>2</span>:<span class='fl'>4</span>, <span class='kw'>check_installed</span> <span class='kw'>=</span> <span class='no'>T</span>, <span class='kw'>delta</span><span class='kw'>=</span><span class='fl'>0</span>)</div><div class='output co'>#&gt; <span class='error'>Error in as.vector(x, mode): cannot coerce type 'closure' to vector of type 'any'</span></div><div class='input'>
-<span class='co'># Evaluate how much vertices vary in randomised data, (variable shuffled</span>
+<span class='co'># Evaluate how much archetypes vary in randomised data, (variable shuffled</span>
 <span class='co'># without replacement)</span>
 <span class='no'>rand3</span> <span class='kw'>=</span> <span class='fu'>randomise_fit_pch1</span>(<span class='kw'>i</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='no'>data</span>, <span class='kw'>true_fit</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
     <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>bootstrap_N</span> <span class='kw'>=</span> <span class='fl'>200</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>2543</span>,
     <span class='kw'>return_data</span> <span class='kw'>=</span> <span class='no'>T</span>, <span class='kw'>return_arc</span> <span class='kw'>=</span> <span class='no'>T</span>, <span class='kw'>sample_prop</span> <span class='kw'>=</span> <span class='fl'>0.65</span>,
     <span class='kw'>order_type</span> <span class='kw'>=</span> <span class='st'>"align"</span>, <span class='kw'>noc</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>3</span>),
-    <span class='kw'>delta</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>bootstrap_type</span> <span class='kw'>=</span> <span class='st'>"cmq"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in apply(x, MARGIN = MARGIN, FUN = function(x_i, n) {    x_i[sample.int(n, n, replace = replace, prob = prob)]}, n): dim(X) must have a positive length</span></div><div class='input'><span class='no'>p</span> <span class='kw'>=</span> <span class='fu'><a href='plot_arc.html'>plot_arc</a></span>(<span class='no'>arc_data</span>, <span class='no'>data</span>, <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>line_size</span> <span class='kw'>=</span> <span class='fl'>1</span>)</div><div class='output co'>#&gt; <span class='error'>Error in plot_arc(arc_data, data, which_dimensions = 1:2, line_size = 1): object 'arc_data' not found</span></div><div class='input'><span class='co'># plot shapes of observed data and randomised data side-by-side using cowplot</span>
+    <span class='kw'>delta</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>bootstrap_type</span> <span class='kw'>=</span> <span class='st'>"cmq"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in apply(x, MARGIN = MARGIN, FUN = function(x_i, n) {    x_i[sample.int(n, n, replace = replace, prob = prob)]}, n): dim(X) must have a positive length</span></div><div class='input'><span class='no'>p</span> <span class='kw'>=</span> <span class='fu'><a href='plot_arc.html'>plot_arc</a></span>(<span class='no'>arc_data</span>, <span class='no'>data</span>, <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>line_size</span> <span class='kw'>=</span> <span class='fl'>1</span>)</div><div class='output co'>#&gt; <span class='error'>Error in is(arch_data, "pch_fit"): object 'arc_data' not found</span></div><div class='input'><span class='co'># plot shapes of observed data and randomised data side-by-side using cowplot</span>
 <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>cowplot</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: package ‘cowplot’ was built under R version 3.5.2</span></div><div class='output co'>#&gt; <span class='message'>Loading required package: ggplot2</span></div><div class='output co'>#&gt; <span class='message'></span>
 #&gt; <span class='message'>Attaching package: ‘cowplot’</span></div><div class='output co'>#&gt; <span class='message'>The following object is masked from ‘package:ggplot2’:</span>
 #&gt; <span class='message'></span>

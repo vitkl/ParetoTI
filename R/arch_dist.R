@@ -2,10 +2,10 @@
 ##' @rdname arch_dist
 ##' @name arch_dist
 ##' @author Vitalii Kleshchevnikov
-##' @description \code{arch_dist()} calculates Euclidian distance from every point to every archetype give matrices that contain this data.
+##' @description \code{arch_dist()} calculates Euclidean distance from every point to every archetype give matrices that contain this data.
 ##' @param data matrix of dim(variables/dimentions, examples)
 ##' @param archetypes matrix of dim(variables/dimentions, archetypes)
-##' @param dist_metric distance metric, currently only "euclidian" implemented
+##' @param dist_metric distance metric, currently only "euclidean" implemented
 ##' @return matrix of distances to archetypes of dim(examples, archetypes)
 ##' @export arch_dist
 ##' @seealso \code{\link[ParetoTI]{fit_pch}}, \code{\link[ParetoTI]{generate_arc}}, \code{\link[ParetoTI]{generate_data}}
@@ -17,12 +17,12 @@
 ##' archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
 ##'                           mean = 0, sd = 1, N_dim = 2)
 ##' data = generate_data(archetypes, N_examples = 1e4, jiiter = 0.04, size = 0.9)
-##' # Find Euclidian distance between data points and archetypes
+##' # Find Euclidean distance between data points and archetypes
 ##' distance = arch_dist(data, archetypes)
-##' # Find Euclidian distance between archetypes
+##' # Find Euclidean distance between archetypes
 ##' arc_distance = arch_dist(archetypes, archetypes)
-arch_dist = function(data, archetypes, dist_metric = "euclidian"){
-  if(dist_metric == "euclidian"){
+arch_dist = function(data, archetypes, dist_metric = "euclidean"){
+  if(dist_metric == "euclidean"){
     archetype_list = lapply(seq_len(ncol(archetypes)), function(i) archetypes[, i])
     distances = vapply(archetype_list, function(arc, data){
       diff = arc - data

@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Permute each column of a matrix by sampling from empirical distribution — rand_var • ParetoTI</title>
+<title>Find and plot similarity structure between archetypes — plot_arch_struct • ParetoTI</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="Permute each column of a matrix by sampling from empirical distribution — rand_var" />
+<meta property="og:title" content="Find and plot similarity structure between archetypes — plot_arch_struct" />
 
-<meta property="og:description" content="This function uses permutations or sampling with replacement to disrupt relationships between variables but keep the distribution of each variable constant. Variables should be in columns of a matrix." />
+<meta property="og:description" content="Find similarity structure between archetypes by comparing archetype weights for cells, measuring similarity of archetypes in expression space and in marker gene. genesXarch option shows" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -109,37 +109,48 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Permute each column of a matrix by sampling from empirical distribution</h1>
+    <h1>Find and plot similarity structure between archetypes</h1>
     
-    <div class="hidden name"><code>rand_var.Rd</code></div>
+    <div class="hidden name"><code>plot_arch_struct.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>This function uses permutations or sampling with replacement to disrupt relationships between variables but keep the distribution of each variable constant. Variables should be in columns of a matrix.</p>
+    <p>Find similarity structure between archetypes by comparing archetype weights for cells, measuring similarity of archetypes in expression space and in marker gene. genesXarch option shows</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>rand_var</span>(<span class='no'>x</span>, <span class='kw'>MARGIN</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>plot_arch_struct</span>(<span class='no'>arc</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"cells"</span>, <span class='st'>"space"</span>, <span class='st'>"marker_genes"</span>,
+  <span class='st'>"genesXarch"</span>)[<span class='fl'>1</span>], <span class='kw'>dist_fun</span> <span class='kw'>=</span> <span class='kw'>function</span>(<span class='no'>x</span>) <span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/dist'>dist</a></span>(<span class='no'>x</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"euclidean"</span>),
+  <span class='kw'>marker_genes</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>marker_genes_mean</span> <span class='kw'>=</span> <span class='no'>F</span>,
+  <span class='kw'>marker_genes_mean_col</span> <span class='kw'>=</span> <span class='st'>"mean_diff"</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>matrix to be permuted</p></td>
+      <th>arc</th>
+      <td><p>object containing archetypal analysis results (class "pch_fit")</p></td>
     </tr>
     <tr>
-      <th>MARGIN</th>
-      <td><p>which dimension of a matrix to permute? Passed to <code><a href='https://www.rdocumentation.org/packages/base/topics/apply'>apply</a></code>.</p></td>
+      <th>type</th>
+      <td><p>one of c("cells", "space", "marker_genes", "genesXarch"). "cells": distances are computed over archetype weights of cells (S matrix). "space": measures distances between archetypes in space, PCs or gene expression, depending on which space was used to find archetypes (XC matrix). "marker_genes": distance is computed base on lists marker genes. "genesXarch": show both archetypes and dimensions, both clustered with hierarchical clustering. When <code>marker_genes</code> is provided "genesXarch" shows marker gene membership across archetypes rather than expression values of those genes (PCs) at archetypes.</p></td>
     </tr>
     <tr>
-      <th>replace</th>
-      <td><p>should sampling be with replacement? Passed to <code><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample.int</a></code>.</p></td>
+      <th>dist_fun</th>
+      <td><p>function use to compute distance, should take one argument and compute distances between rows.</p></td>
     </tr>
     <tr>
-      <th>prob</th>
-      <td><p>a vector of probability weights for obtaining the elements of the vector being sampled. Passed to <code><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample.int</a></code>.</p></td>
+      <th>marker_genes</th>
+      <td><p>filtered data.table containing markers for each archetype, normally the output of <code><a href='find_decreasing.html'>get_top_decreasing</a></code> stored in $enriched_genes. When <code>type = "genesXarch"</code> dimensions are filtered using gene names supplied in <code>marker_genes</code>.</p></td>
+    </tr>
+    <tr>
+      <th>marker_genes_mean</th>
+      <td><p>show the strength of marker gene association with archetypes? (mean_diff in the output of <code><a href='find_decreasing.html'>get_top_decreasing</a></code> stored in $enriched_genes). By default is FALSE - show only marker gene membership (0/1).</p></td>
+    </tr>
+    <tr>
+      <th>marker_genes_mean_col</th>
+      <td><p>which column in <code>marker_genes</code> stores the strength of marker gene association with archetypes?</p></td>
     </tr>
     </table>
     
@@ -148,11 +159,6 @@
     <p>Matrix of the same dimention as the original matrix but with values in each column permuted.</p>
     
 
-    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4354</span>)
-<span class='no'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>
-<span class='no'>x</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='no'>N</span> * <span class='fl'>10</span> * <span class='no'>N</span>), <span class='no'>N</span> * <span class='fl'>10</span>, <span class='no'>N</span>)
-<span class='no'>x_rand</span> <span class='kw'>=</span> <span class='fu'>rand_var</span>(<span class='no'>x</span>, <span class='kw'>MARGIN</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -160,9 +166,7 @@
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
-      
-      <li><a href="#examples">Examples</a></li>
-    </ul>
+          </ul>
 
     <h2>Author</h2>
     <p>Vitalii Kleshchevnikov</p>

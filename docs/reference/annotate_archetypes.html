@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Permute each column of a matrix by sampling from empirical distribution — rand_var • ParetoTI</title>
+<title>Annotate archetypes with custom labels — annotate_archetypes • ParetoTI</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,9 +30,9 @@
 
 
 
-<meta property="og:title" content="Permute each column of a matrix by sampling from empirical distribution — rand_var" />
+<meta property="og:title" content="Annotate archetypes with custom labels — annotate_archetypes" />
 
-<meta property="og:description" content="This function uses permutations or sampling with replacement to disrupt relationships between variables but keep the distribution of each variable constant. Variables should be in columns of a matrix." />
+<meta property="og:description" content="annotate_archetypes() adds custom labels to archetype indices: paste0(label, &quot;_&quot;, index)" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -109,50 +109,55 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Permute each column of a matrix by sampling from empirical distribution</h1>
+    <h1>Annotate archetypes with custom labels</h1>
     
-    <div class="hidden name"><code>rand_var.Rd</code></div>
+    <div class="hidden name"><code>annotate_archetypes.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>This function uses permutations or sampling with replacement to disrupt relationships between variables but keep the distribution of each variable constant. Variables should be in columns of a matrix.</p>
+    <p><code>annotate_archetypes()</code> adds custom labels to archetype indices: <code><a href='https://www.rdocumentation.org/packages/base/topics/paste'>paste0(label, "_", index)</a></code></p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>rand_var</span>(<span class='no'>x</span>, <span class='kw'>MARGIN</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>annotate_archetypes</span>(<span class='no'>arc</span>, <span class='no'>...</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
-      <th>x</th>
-      <td><p>matrix to be permuted</p></td>
+      <th>...</th>
+      <td><p>named arguments specifying label for indicex, e.g. <code>Epithelial = c(1, 5, 9)</code></p></td>
     </tr>
     <tr>
-      <th>MARGIN</th>
-      <td><p>which dimension of a matrix to permute? Passed to <code><a href='https://www.rdocumentation.org/packages/base/topics/apply'>apply</a></code>.</p></td>
-    </tr>
-    <tr>
-      <th>replace</th>
-      <td><p>should sampling be with replacement? Passed to <code><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample.int</a></code>.</p></td>
-    </tr>
-    <tr>
-      <th>prob</th>
-      <td><p>a vector of probability weights for obtaining the elements of the vector being sampled. Passed to <code><a href='https://www.rdocumentation.org/packages/base/topics/sample'>sample.int</a></code>.</p></td>
+      <th>arc_data</th>
+      <td><p>objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from <code><a href='fit_pch.html'>fit_pch</a></code>() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the archetypal analysis.</p></td>
     </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p>Matrix of the same dimention as the original matrix but with values in each column permuted.</p>
+    <p><code>annotate_archetypes()</code> archetypal analysis result object, the same as input but with named archetypes</p>
+    
+    <h2 class="hasAnchor" id="see-also"><a class="anchor" href="#see-also"></a>See also</h2>
+
+    <div class='dont-index'><p><code><a href='fit_pch.html'>fit_pch</a></code>, <code><a href='arch_dist.html'>arch_dist</a></code></p></div>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4354</span>)
-<span class='no'>N</span> <span class='kw'>=</span> <span class='fl'>100</span>
-<span class='no'>x</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/matrix'>matrix</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/stats/topics/Normal'>rnorm</a></span>(<span class='no'>N</span> * <span class='fl'>10</span> * <span class='no'>N</span>), <span class='no'>N</span> * <span class='fl'>10</span>, <span class='no'>N</span>)
-<span class='no'>x_rand</span> <span class='kw'>=</span> <span class='fu'>rand_var</span>(<span class='no'>x</span>, <span class='kw'>MARGIN</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>replace</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>prob</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</div></pre>
+    <pre class="examples"><div class='input'><span class='co'># Random data that fits into the triangle</span>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4355</span>)
+<span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
+                          <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>archetypes</span>$<span class='no'>XC</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)
+
+<span class='co'># Find 3 archetypes in this data</span>
+<span class='no'>arc</span> <span class='kw'>=</span> <span class='fu'><a href='fit_pch.html'>fit_pch</a></span>(<span class='no'>data</span>, <span class='kw'>noc</span><span class='kw'>=</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>3</span>), <span class='kw'>delta</span><span class='kw'>=</span><span class='fl'>0</span>)
+
+<span class='co'># Annotate</span>
+<span class='no'>arc</span> <span class='kw'>=</span> <span class='fu'>annotate_archetypes</span>(<span class='no'>arc</span>, <span class='kw'>top</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>bottom</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>1</span>, <span class='fl'>3</span>))
+<span class='co'># Plot</span>
+<span class='fu'><a href='plot_arc.html'>plot_arc</a></span>(<span class='no'>arc</span>, <span class='no'>data</span>, <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>arc_names_num</span> <span class='kw'>=</span> <span class='no'>F</span>)</div><div class='img'><img src='annotate_archetypes-1.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
@@ -160,6 +165,8 @@
       <li><a href="#arguments">Arguments</a></li>
       
       <li><a href="#value">Value</a></li>
+
+      <li><a href="#see-also">See also</a></li>
       
       <li><a href="#examples">Examples</a></li>
     </ul>

@@ -6,7 +6,8 @@
 \usage{
 plot_arch_struct(arc, type = c("cells", "space", "marker_genes",
   "genesXarch")[1], dist_fun = function(x) dist(x, method = "euclidean"),
-  marker_genes = NULL, marker_genes_mean = F)
+  marker_genes = NULL, marker_genes_mean = F,
+  marker_genes_mean_col = "mean_diff")
 }
 \arguments{
 \item{arc}{object containing archetypal analysis results (class "pch_fit")}
@@ -18,6 +19,8 @@ plot_arch_struct(arc, type = c("cells", "space", "marker_genes",
 \item{marker_genes}{filtered data.table containing markers for each archetype, normally the output of \code{\link[ParetoTI]{get_top_decreasing}} stored in $enriched_genes. When \code{type = "genesXarch"} dimensions are filtered using gene names supplied in \code{marker_genes}.}
 
 \item{marker_genes_mean}{show the strength of marker gene association with archetypes? (mean_diff in the output of \code{\link[ParetoTI]{get_top_decreasing}} stored in $enriched_genes). By default is FALSE - show only marker gene membership (0/1).}
+
+\item{marker_genes_mean_col}{which column in \code{marker_genes} stores the strength of marker gene association with archetypes?}
 }
 \value{
 Matrix of the same dimention as the original matrix but with values in each column permuted.

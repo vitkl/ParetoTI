@@ -32,9 +32,8 @@
 
 <meta property="og:title" content="Match/align arhetypes — align_arc" />
 
-<meta property="og:description" content="align_arc() matches archetypes in arc2 to arc1 by exhaustively testing all possible pairings.
-gen_permut() used for exhaustive search generates a matrix of all possible permutations of n elements. Each row is a different permutation.
-align_arc_opt() does the same as align_arc() but using optimisation (method = &quot;SANN&quot;) instead of exhaustively trying all combinations." />
+<meta property="og:description" content="align_arc() matches archetypes in arc2 to arc1 by solving a bipartite matching problem on euclidian distances between archetypes.
+gen_permut() used for exhaustive search generates a matrix of all possible permutations of n elements. Each row is a different permutation." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -65,7 +64,7 @@ align_arc_opt() does the same as align_arc() but using optimisation (method = &q
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -87,6 +86,9 @@ align_arc_opt() does the same as align_arc() but using optimisation (method = &q
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/Comparison_to_kmeans.html">Comparison of achetypal analysis and k-means clustering</a>
+    </li>
     <li>
       <a href="../articles/Hepatocyte_example.html">Example of using archetypal analysis to find representative cells &amp; describe heterogeniety in hepatocyte population between those archetypes</a>
     </li>
@@ -115,18 +117,14 @@ align_arc_opt() does the same as align_arc() but using optimisation (method = &q
 
     <div class="ref-description">
     
-    <p><code>align_arc()</code> matches archetypes in arc2 to arc1 by exhaustively testing all possible pairings.</p>
+    <p><code>align_arc()</code> matches archetypes in arc2 to arc1 by solving a bipartite matching problem on euclidian distances between archetypes.</p>
 <p><code>gen_permut()</code> used for exhaustive search generates a matrix of all possible permutations of n elements. Each row is a different permutation.</p>
-<p><code>align_arc_opt()</code> does the same as <code>align_arc()</code> but using optimisation (method = "SANN") instead of exhaustively trying all combinations.</p>
     
     </div>
 
     <pre class="usage"><span class='fu'>align_arc</span>(<span class='no'>arc1</span>, <span class='no'>arc2</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"lpsolve"</span>, <span class='st'>"exhaustive"</span>)[<span class='fl'>1</span>])
 
-<span class='fu'>gen_permut</span>(<span class='no'>n</span>)
-
-<span class='fu'>align_arc_opt</span>(<span class='no'>arc1</span>, <span class='no'>arc2</span>, <span class='kw'>control</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>maxit</span> <span class='kw'>=</span> <span class='fl'>10000</span>, <span class='kw'>temp</span> <span class='kw'>=</span> <span class='fl'>2000</span>,
-  <span class='kw'>REPORT</span> <span class='kw'>=</span> <span class='fl'>500</span>))</pre>
+<span class='fu'>gen_permut</span>(<span class='no'>n</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -147,22 +145,16 @@ align_arc_opt() does the same as align_arc() but using optimisation (method = &q
       <th>n</th>
       <td><p>number of element to permute</p></td>
     </tr>
-    <tr>
-      <th>control</th>
-      <td><p>options for SANN methods. See <a href='https://www.rdocumentation.org/packages/stats/topics/optim'>optim</a></p></td>
-    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
-    <p><code>align_arc()</code> list containing: total distance between archetypes in arc1 and arc2 (dist), integer vector specifying indices (columns) of arc2 that match archetypes in arc1 (ind)</p>
+    <p><code>align_arc()</code> list containing: total distance between archetypes in arc1 and arc2 (dist), integer vector specifying indices of archetypes in arc2 that match archetypes in arc1 (ind)</p>
 <p><code>gen_permut()</code> a matrix of all possible gen_permut (in rows)</p>
-<p>same as <code>align_arc()</code></p>
     
     <h2 class="hasAnchor" id="details"><a class="anchor" href="#details"></a>Details</h2>
 
-    <p>Exhaustive search works better than optimisation using SANN method for k=2:9 (163.0747ms vs 354.6311ms for 3 dimensions, k=2:5 are faster than 2ms). This optimisation method essentially samples the space rather than doing gradient descent. This is because total distance as a function of pairings of archetypes is not a differentiable function. For this reason, optimisation will often fail to find correct pairing.</p>
-<p><code>gen_permut()</code> function is taken from https://stackoverflow.com/questions/11095992/generating-all-distinct-permutations-of-a-list-in-r</p>
+    <p><code>gen_permut()</code> function is taken from https://stackoverflow.com/questions/11095992/generating-all-distinct-permutations-of-a-list-in-r</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -175,41 +167,13 @@ align_arc_opt() does the same as align_arc() but using optimisation (method = &q
 <span class='no'>arc_data</span> <span class='kw'>=</span> <span class='fu'><a href='fit_pch.html'>fit_pch_bootstrap</a></span>(<span class='no'>data</span>, <span class='kw'>n</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>sample_prop</span> <span class='kw'>=</span> <span class='fl'>0.65</span>, <span class='kw'>seed</span> <span class='kw'>=</span> <span class='fl'>2543</span>,
                         <span class='kw'>order_type</span> <span class='kw'>=</span> <span class='st'>"align"</span>, <span class='kw'>noc</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>6</span>),
                         <span class='kw'>delta</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"s"</span>)
-<span class='co'># align archetypes by exhausive search</span>
+<span class='co'># align archetypes</span>
 <span class='fu'>align_arc</span>(<span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>2</span>]])</div><div class='output co'>#&gt; $dist
-#&gt; [1] 43.16511
+#&gt; [1] 3.710594
 #&gt; 
 #&gt; $ind
 #&gt; [1] 1 2 3 4 5 6
-#&gt; </div><div class='input'><span class='co'># align archetypes by optimisation</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>123</span>)
-<span class='fu'>align_arc_opt</span>(<span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>2</span>]])</div><div class='output co'>#&gt; $dist
-#&gt; [1] 43.16511
-#&gt; 
-#&gt; $ind
-#&gt; [1] 1 2 3 4 5 6
-#&gt; </div><div class='input'><span class='co'># restart multiple times to see if it finds real match</span>
-<span class='no'>res</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/lapply'>lapply</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/seq'>seq</a></span>(<span class='fl'>1</span>, <span class='fl'>100</span>), <span class='kw'>function</span>(<span class='no'>i</span>) <span class='fu'>align_arc_opt</span>(<span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>1</span>]], <span class='no'>arc_data</span>$<span class='no'>pch_fits</span>$<span class='no'>XC</span><span class='kw'>[[</span><span class='fl'>2</span>]]))
-<span class='co'># show best pairing</span>
-<span class='no'>res</span><span class='kw'>[[</span><span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/which.min'>which.min</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/lapply'>sapply</a></span>(<span class='no'>res</span>, <span class='kw'>function</span>(<span class='no'>r</span>) <span class='no'>r</span>$<span class='no'>dist</span>))]]</div><div class='output co'>#&gt; $dist
-#&gt; [1] 43.16511
-#&gt; 
-#&gt; $ind
-#&gt; [1] 1 2 3 4 5 6
-#&gt; </div><div class='input'>
-# Measure which approach is faster depending on k (uncomment)
-#for (i in 2:12) {
-#    # fit polytopes to 2 subsamples
-#    arc_data = fit_pch_bootstrap(data, n = 2, sample_prop = 0.65, seed = 2543,
-#                             order_type = "align", noc = as.integer(i),
-#                             delta = 0, type = "s")
-#    print(i)
-#    # measure how much time each method takes
-#    print(microbenchmark::microbenchmark(align_arc(arc_data$pch_fits$XC[[1]], arc_data$pch_fits$XC[[2]]),
-#                                         align_arc_opt(arc_data$pch_fits$XC[[1]], arc_data$pch_fits$XC[[2]]),
-#                                         times = 10))
-#}
-</div></pre>
+#&gt; </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

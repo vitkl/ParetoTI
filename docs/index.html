@@ -15,7 +15,7 @@
     Inferring biological tasks using Pareto analysis of high-dimensional data.
     This package performs archetypal analysis using a python 2.7 implementation of PCHA algorithm. 
     It was originally implemented in Matlab by Morten Mørup (http://www.mortenmorup.dk/MMhomepageUpdated_files/Page327.htm)
-    and re-implemented in python by Ulf Aslak Jensen.    
+    and re-implemented in python by Ulf Aslak.    
     Statistical significance of how well polytope defined by archetypes describes the data is determined using permutations of the dataset 
     that disrupt relationships between variables but keep the distribution of each variable constant. \
     We also implement a bootstraping-based procedure to identify the correct number of archetypes. 
@@ -23,7 +23,7 @@
     For convenience, we provide logistic regression model for classifying cells (or other objects) with logistic regression,
     and GeoSketch method for reducing the size of the data while preseving rare populations.
     Package is currently under development!
-    Alternative methods for polytope fitting will be considered such as AANet (https://github.com/KrishnaswamyLab/AAnet/) and SPAMS implemented in c++ via R interface (https://arxiv.org/pdf/1405.6472.pdf, http://spams-devel.gforge.inria.fr/downloads.html)">
+    Alternative methods for archetypal analysis will be considered such as AANet (https://github.com/KrishnaswamyLab/AAnet/) and SPAMS implemented in c++ via R interface (https://arxiv.org/pdf/1405.6472.pdf, http://spams-devel.gforge.inria.fr/downloads.html)">
 <meta name="twitter:card" content="summary">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -43,7 +43,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.8</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -93,8 +93,9 @@
 <a href="#r-toolbox-for-archetypal-analysis-and-pareto-task-inference-for-unsupervised-characterisation-of-single-cell-data" class="anchor"></a>R toolbox for Archetypal Analysis and Pareto Task Inference for unsupervised characterisation of single cell data</h3>
 <p>This package allows describing a continuum of cell states by identifying representative cells with most distinctive expression (archetypes). Detecting which genes and functional annotations (e.g. GO) make those cells distinctive gives marker genes and predicted functions for each state.</p>
 <p>Archetypal Analysis avoids drawing arbitrary cluster boundaries when a continuum of cell states is apparent (e.g. within-cell-type heterogeniety, multi-step differentiation trajectories, <a href="https://vitkl.github.io/ParetoTI/articles/Comparison_to_kmeans.html#find-archetypes-with-pcha-and-cluster-centers-with-k-means">this artificial example</a>). Yet the method provides a similar and easy to understand conceptual framework for unsupervised discovery of cell subpopulations.</p>
-<p>In theory (see <a href="https://www.nature.com/articles/nmeth.3254">citation</a>), archetypes are cells specialised at a combination of tasks, and the continuum of transcriptional states between archetypes mirrors the trade-offs between tasks. In practice, many factors lead could to a distinct expression profile (archetype), including technical bias, cell doublets, stress response induced by cell dissociation and other factors. So it is necessary to keep <a href="https://youtu.be/4WVelCswXo4?t=2256">the small-world large-world distinction</a> in mind: specific statistical/computational method will find the best archetypes (specialised cells) it could find conditional on that method’s assumptions about the data - rather than the true archetypes you are trying to discover. So you have to supervise and rule out spurious causes the same way you would do for annotating cell clusters.</p>
+<p>In theory, archetypes are cells specialised at a combination of tasks, cells expressing a distinct combination of gene modules / gene expression programmes. While the continuum of transcriptional states between archetypes mirrors how much of those programmes cells share, and in some cases the trade-offs between tasks (see <a href="https://www.nature.com/articles/nmeth.3254">citation</a>). In practice, many factors lead could to a distinct expression profile (archetype), including technical bias, cell doublets, stress response induced by cell dissociation and other factors. So it is necessary to keep <a href="https://youtu.be/4WVelCswXo4?t=2256">the small-world large-world distinction</a> in mind: specific statistical/computational method will find the best archetypes (specialised cells) it could find conditional on that method’s assumptions about the data - rather than the true archetypes you are trying to discover. So you have to supervise and rule out spurious causes the same way you would do for annotating cell clusters.</p>
 <p>Caution: the package in currently in development and testing. If you encounter problems please contact Vitalii Kleshchevnikov (vk7 at sanger.ac.uk) or report bugs on <a href="https://github.com/vitkl/ParetoTI/issues">github</a>.</p>
+<p><a href="https://zenodo.org/badge/latestdoi/146516634"><img src="https://zenodo.org/badge/146516634.svg" alt="DOI"></a></p>
 <div id="background" class="section level4">
 <h4 class="hasAnchor">
 <a href="#background" class="anchor"></a>Background</h4>
@@ -116,7 +117,7 @@
 <p>You need to install development version of this package from github.com and install a python dependencies (PCHA algorithm implementation, and (optionally) keras, geosketch, fbpca, umap-learn). If you want to take advantage of high-performance computing cluster you need to do extra set up, please follow the instructions here: <a href="https://github.com/mschubert/clustermq" class="uri">https://github.com/mschubert/clustermq</a>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Install ParetoTI package, this should also install reticulate package, if not - install manually.</span>
 <span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"BiocManager"</span>) <span class="co"># for installing BioConductor dependencies</span>
-BiocManager<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/BiocManager/topics/install">install</a></span>(<span class="st">"vitkl/ParetoTI"</span>, <span class="dt">dependencies =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Depends"</span>, <span class="st">"Imports"</span>, <span class="st">"LinkingTo"</span>, <span class="st">"Suggests"</span>))</code></pre></div>
+BiocManager<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/BiocManager/topics/install">install</a></span>(<span class="st">"vitkl/ParetoTI"</span>, <span class="dt">dependencies =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Depends"</span>, <span class="st">"Imports"</span>, <span class="st">"LinkingTo"</span>))</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load package</span>
 <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ParetoTI)
 <span class="co"># If package does not load because "py_pcha is not found" make sure you do not have</span>
@@ -126,15 +127,24 @@ BiocManager<span class="op">::</span><span class="kw"><a href="https://www.rdocu
 <span class="co"># and (optionally) install *extra_packages*.</span>
 ParetoTI<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/ParetoTI/topics/install_py_pcha">install_py_pcha</a></span>(<span class="dt">method =</span> <span class="st">"conda"</span>, 
                           <span class="dt">extra_packages =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"tensorflow"</span>, <span class="st">"pandas"</span>, <span class="st">"keras"</span>, <span class="st">"h5py"</span>,
-                                        <span class="st">"geosketch"</span>, <span class="st">"pydot"</span>, <span class="st">"sklearn"</span>, <span class="st">"umap-learn"</span>))</code></pre></div>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># If no conda manager installed on your machine, install python 2.7 miniconda distribution:</span>
+                                        <span class="st">"geosketch"</span>, <span class="st">"pydot"</span>, <span class="st">"scikit-learn==0.20"</span>,
+                                        <span class="st">"umap-learn"</span>))</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># If no conda manager installed on your machine, install python 3 miniconda distribution:</span>
 <span class="co"># https://conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation</span>
-<span class="co"># or try virtualenv (uncomment):</span>
-## ParetoTI::install_py_pcha(method = "virtualenv")
-<span class="co"># You can also install these python modules directly in terminal,</span>
-<span class="co"># you just ensure that the conda environment is named "reticulate_PCHA" (uncomment):</span>
-## conda create -n reticulate_PCHA python=2.7.13 pip
-## source activate reticulate_PCHA &amp;&amp; pip install --upgrade py_pcha numpy scipy datetime tensorflow pandas keras h5py geosketch pydot sklearn umap-learn</code></pre></div>
+<span class="co"># or try virtualenv:</span>
+ParetoTI<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/ParetoTI/topics/install_py_pcha">install_py_pcha</a></span>(<span class="dt">method =</span> <span class="st">"virtualenv"</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="co"># You can also install these python modules directly in terminal,</span>
+<span class="co"># To help ParetoTI find the right python create conda environment named "reticulate_PCHA" (uncomment):</span>
+<span class="co"># (other enviroment containing py_pcha will be used if reticulate_PCHA doesn't exist)    </span>
+conda create <span class="op">-</span>n reticulate_PCHA python<span class="op">=</span><span class="fl">3.7</span>.<span class="dv">3</span> pip    
+<span class="co"># Light install:    </span>
+source activate reticulate_PCHA <span class="op">&amp;&amp;</span> pip install <span class="op">--</span>upgrade py_pcha numpy scipy datetime geosketch umap<span class="op">-</span>learn    
+<span class="co"># To use more features:    </span>
+source activate reticulate_PCHA <span class="op">&amp;&amp;</span> pip install <span class="op">--</span>upgrade py_pcha numpy scipy datetime tensorflow pandas keras h5py geosketch pydot sklearn umap<span class="op">-</span>learn    
+
+<span class="co"># On some platforms R sees only the "base" conda enviroment (like RStudio Server)    </span>
+<span class="co"># In that case use:</span>
+source activate base <span class="op">&amp;&amp;</span> pip install <span class="op">--</span>upgrade py_pcha numpy scipy datetime geosketch umap<span class="op">-</span>learn</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Finally, check that py_pcha library is successfully installed and discoverable</span>
 reticulate<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/reticulate/topics/py_discover_config">py_discover_config</a></span>(<span class="st">"py_pcha"</span>)</code></pre></div>
 <p><strong>Example: Finding archetypes in data created by simulating a triangle </strong></p>

@@ -64,7 +64,7 @@ generate_data() produces matrix of random data that fits a polytope defined by a
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -86,6 +86,9 @@ generate_data() produces matrix of random data that fits a polytope defined by a
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/Comparison_to_kmeans.html">Comparison of achetypal analysis and k-means clustering</a>
+    </li>
     <li>
       <a href="../articles/Hepatocyte_example.html">Example of using archetypal analysis to find representative cells &amp; describe heterogeniety in hepatocyte population between those archetypes</a>
     </li>
@@ -155,10 +158,6 @@ generate_data() produces matrix of random data that fits a polytope defined by a
       <th>size</th>
       <td><p>scale the data within a polytope</p></td>
     </tr>
-    <tr>
-      <th>N_dim</th>
-      <td><p>number of dimentions. Can be set to large number of dimentions, in that case arc_coord will be recycled keeping true dimensionality of the data as specified in arc_coord.</p></td>
-    </tr>
     </table>
     
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
@@ -175,9 +174,11 @@ generate_data() produces matrix of random data that fits a polytope defined by a
     <pre class="examples"><div class='input'><span class='co'># Random data that fits into the triangle</span>
 <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4355</span>)
 <span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'>generate_arc</span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
-                          <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>N_dim</span> <span class='kw'>=</span> <span class='fl'>2</span>)</div><div class='output co'>#&gt; <span class='error'>Error in generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),     mean = 0, sd = 1, N_dim = 2): unused argument (N_dim = 2)</span></div><div class='input'><span class='no'>data</span> <span class='kw'>=</span> <span class='fu'>generate_data</span>(<span class='no'>archetypes</span>$<span class='no'>XC</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='co'># Find Euclidian distance between data points and archetypes</span>
-<span class='no'>distance</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/MathFun'>sqrt</a></span>(<span class='fu'><a href='arch_dist.html'>arch_dist</a></span>(<span class='no'>data</span>, <span class='no'>archetypes</span>))</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='co'># Find Euclidian distance between archetypes</span>
-<span class='no'>arc_distance</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/MathFun'>sqrt</a></span>(<span class='fu'><a href='arch_dist.html'>arch_dist</a></span>(<span class='no'>archetypes</span>, <span class='no'>archetypes</span>))</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div></pre>
+                          <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>)
+<span class='no'>data</span> <span class='kw'>=</span> <span class='fu'>generate_data</span>(<span class='no'>archetypes</span>$<span class='no'>XC</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)
+<span class='co'># Find Euclidian distance between data points and archetypes</span>
+<span class='no'>distance</span> <span class='kw'>=</span> <span class='fu'><a href='arch_dist.html'>arch_dist</a></span>(<span class='no'>data</span>, <span class='no'>archetypes</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: first element used of 'length.out' argument</span></div><div class='output co'>#&gt; <span class='error'>Error in seq_len(ncol(archetypes)): argument must be coercible to non-negative integer</span></div><div class='input'><span class='co'># Find Euclidian distance between archetypes</span>
+<span class='no'>arc_distance</span> <span class='kw'>=</span> <span class='fu'><a href='arch_dist.html'>arch_dist</a></span>(<span class='no'>archetypes</span>, <span class='no'>archetypes</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: first element used of 'length.out' argument</span></div><div class='output co'>#&gt; <span class='error'>Error in seq_len(ncol(archetypes)): argument must be coercible to non-negative integer</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -85,6 +85,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/Comparison_to_kmeans.html">Comparison of achetypal analysis and k-means clustering</a>
+    </li>
     <li>
       <a href="../articles/Hepatocyte_example.html">Example of using archetypal analysis to find representative cells &amp; describe heterogeniety in hepatocyte population between those archetypes</a>
     </li>
@@ -165,9 +168,9 @@
 <span class='fu'><a href='plot_arc.html'>plot_arc</a></span>(<span class='kw'>arch_data</span> <span class='kw'>=</span> <span class='no'>arc_data</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>,
          <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='st'>"all"</span>, <span class='kw'>arch_size</span> <span class='kw'>=</span> <span class='fl'>2</span>,
          <span class='kw'>colors</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"#D62728"</span>, <span class='st'>"#1F77B4"</span>, <span class='st'>"#2CA02C"</span>, <span class='st'>"#17BED0"</span>, <span class='st'>"grey"</span>)) +
-  <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span>()</div><div class='output co'>#&gt; <span class='error'>Error in plot_arc(arch_data = arc_data, data = data, which_dimensions = 1:2,     type = "all", arch_size = 2, colors = c("#D62728", "#1F77B4",         "#2CA02C", "#17BED0", "grey")): object 'arc_data' not found</span></div><div class='input'><span class='co'># Show variance explained by a polytope with each k</span>
+  <span class='fu'><a href='https://www.rdocumentation.org/packages/ggplot2/topics/ggtheme'>theme_bw</a></span>()</div><div class='output co'>#&gt; <span class='error'>Error in is(arch_data, "pch_fit"): object 'arc_data' not found</span></div><div class='input'><span class='co'># Show variance explained by a polytope with each k</span>
 <span class='fu'>plot_arc_var</span>(<span class='no'>arc_data</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"varexpl"</span>, <span class='st'>"SSE"</span>, <span class='st'>"res_varexpl"</span>)[<span class='fl'>1</span>],
-             <span class='kw'>point_size</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>line_size</span> <span class='kw'>=</span> <span class='fl'>1.5</span>) + <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span>()</div><div class='output co'>#&gt; <span class='error'>Error in is(arc_data, "k_pch_fit"): object 'arc_data' not found</span></div></pre>
+             <span class='kw'>point_size</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>line_size</span> <span class='kw'>=</span> <span class='fl'>1.5</span>) + <span class='fu'><a href='https://www.rdocumentation.org/packages/ggplot2/topics/ggtheme'>theme_bw</a></span>()</div><div class='output co'>#&gt; <span class='error'>Error in is(arc_data, "k_pch_fit"): object 'arc_data' not found</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

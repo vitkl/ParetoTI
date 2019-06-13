@@ -8,11 +8,13 @@
 ##' @param dist_fun function use to compute distance, should take one argument and compute distances between rows.
 ##' @param marker_genes filtered data.table containing markers for each archetype, normally the output of \code{\link[ParetoTI]{get_top_decreasing}} stored in $enriched_genes. When \code{type = "genesXarch"} dimensions are filtered using gene names supplied in \code{marker_genes}.
 ##' @param marker_genes_mean show the strength of marker gene association with archetypes? (mean_diff in the output of \code{\link[ParetoTI]{get_top_decreasing}} stored in $enriched_genes). By default is FALSE - show only marker gene membership (0/1).
+##' @param marker_genes_mean_col which column in \code{marker_genes} stores the strength of marker gene association with archetypes?
 ##' @return Matrix of the same dimention as the original matrix but with values in each column permuted.
 ##' @export plot_arch_struct
 plot_arch_struct = function(arc, type = c("cells", "space", "marker_genes", "genesXarch")[1],
                             dist_fun = function(x) dist(x, method = "euclidean"),
-                            marker_genes = NULL, marker_genes_mean = F) {
+                            marker_genes = NULL, marker_genes_mean = F,
+                            marker_genes_mean_col = "mean_diff") {
 
   if(!is(arc, "pch_fit")) stop("arc should be of class pch_fit (single archetype fit)")
 
@@ -57,11 +59,11 @@ plot_arch_struct = function(arc, type = c("cells", "space", "marker_genes", "gen
     if(!is.null(marker_genes)) {
       if(marker_genes_mean){ # use matrix of marker gene effect-size
         dist_dt = dcast.data.table(marker_genes, genes ~ arch_name,
-                                   value.var = "mean_diff", fill = 0)
+                                   value.var = marker_genes_mean_col, fill = 0)
 
       } else { # use binary matrix of marker genes instead
         dist_dt = dcast.data.table(marker_genes, genes ~ arch_name,
-                                   value.var = "mean_diff", fill = 0,
+                                   value.var = marker_genes_mean_col, fill = 0,
                                    fun.aggregate = length)
       }
 

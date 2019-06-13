@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -85,6 +85,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/Comparison_to_kmeans.html">Comparison of achetypal analysis and k-means clustering</a>
+    </li>
     <li>
       <a href="../articles/Hepatocyte_example.html">Example of using archetypal analysis to find representative cells &amp; describe heterogeniety in hepatocyte population between those archetypes</a>
     </li>
@@ -117,8 +120,8 @@
     
     </div>
 
-    <pre class="usage"><span class='fu'>.archLines</span>(<span class='no'>arc_data</span>, <span class='kw'>arc_lab</span> <span class='kw'>=</span> <span class='st'>"archetypes"</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"average"</span>,
-  <span class='st'>"all"</span>)[<span class='fl'>1</span>], <span class='kw'>average_func</span> <span class='kw'>=</span> <span class='no'>mean</span>)</pre>
+    <pre class="usage"><span class='fu'>.archLines</span>(<span class='no'>arc_data</span>, <span class='kw'>arc_lab</span> <span class='kw'>=</span> <span class='st'>"archetypes"</span>, <span class='kw'>pch_fit</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
+  <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"average"</span>, <span class='st'>"all"</span>)[<span class='fl'>1</span>], <span class='kw'>average_func</span> <span class='kw'>=</span> <span class='no'>mean</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -128,8 +131,16 @@
       <td><p>data.table that contains positions of archetypes</p></td>
     </tr>
     <tr>
-      <th>label</th>
-      <td><p>character specifying which data point to connect (when multiple replicates of fitted polytopes)</p></td>
+      <th>arc_lab</th>
+      <td><p>labels for archetypes</p></td>
+    </tr>
+    <tr>
+      <th>pch_fit</th>
+      <td><p>not used</p></td>
+    </tr>
+    <tr>
+      <th>type</th>
+      <td><p>average across arc_lab (average)?</p></td>
     </tr>
     </table>
     

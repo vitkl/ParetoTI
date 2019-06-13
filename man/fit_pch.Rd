@@ -60,7 +60,8 @@ randomise_fit_pch1(i = 1, data, ks = 2:4, replace = FALSE,
 fit_convhulln(data, positions = TRUE)
 
 merge_arch_dist(arch_data, data, feature_data, colData = NULL,
-  colData_id, dist_metric = "euclidian", rank = TRUE)
+  colData_id, dist_metric = c("euclidean", "arch_weights")[1],
+  rank = TRUE)
 
 \method{print}{pch_fit}(res)
 
@@ -166,9 +167,9 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 
 \item{colData_id}{column in colData that contains values matching colnames of feature_data.}
 
-\item{dist_metric}{how to describe distance to archetypes. Currently euclidian distance is implemented.}
+\item{dist_metric}{how to describe distance to archetypes. Currently euclidean distance and archetype weights are implemented. Archetypes weights come from \code{arch_data$S} matrix so bootstrapped archetype positions cannot be used - only single fit to all data.}
 
-\item{rank}{rank by distance metric (euclidian distance)?}
+\item{rank}{rank by distance metric (euclidean distance)?}
 
 \item{replace}{fit_pch_resample/fit_pch_bootstrap: TRUE and FALSE are passed to \code{\link[base]{sample.int}} for density-based sampling, "geo_sketch" tells to sample examples using geosketch method preserving geometry of the data. See \link[ParetoTI]{geo_sketch}.}
 }

@@ -44,17 +44,29 @@ library(ParetoTI)
 # and (optionally) install *extra_packages*.
 ParetoTI::install_py_pcha(method = "conda", 
                           extra_packages = c("tensorflow", "pandas", "keras", "h5py",
-                                        "geosketch", "pydot", "sklearn", "umap-learn"))
+                                        "geosketch", "pydot", "scikit-learn==0.20",
+                                        "umap-learn"))
 ```
 ```r
-# If no conda manager installed on your machine, install python 2.7 miniconda distribution:
+# If no conda manager installed on your machine, install python 3 miniconda distribution:
 # https://conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation
-# or try virtualenv (uncomment):
-## ParetoTI::install_py_pcha(method = "virtualenv")
+# or try virtualenv:
+ParetoTI::install_py_pcha(method = "virtualenv")
+```
+
+```python
 # You can also install these python modules directly in terminal,
-# you just ensure that the conda environment is named "reticulate_PCHA" (uncomment):
-## conda create -n reticulate_PCHA python=2.7.13 pip
-## source activate reticulate_PCHA && pip install --upgrade py_pcha numpy scipy datetime tensorflow pandas keras h5py geosketch pydot sklearn umap-learn
+# To help ParetoTI find the right python create conda environment named "reticulate_PCHA" (uncomment):
+# (other enviroment containing py_pcha will be used if reticulate_PCHA doesn't exist)    
+conda create -n reticulate_PCHA python=3.7.3 pip    
+# Light install:    
+source activate reticulate_PCHA && pip install --upgrade py_pcha numpy scipy datetime geosketch umap-learn    
+# To use more features:    
+source activate reticulate_PCHA && pip install --upgrade py_pcha numpy scipy datetime tensorflow pandas keras h5py geosketch pydot sklearn umap-learn    
+
+# On some platforms R sees only the "base" conda enviroment (like RStudio Server)    
+# In that case use:
+source activate base && pip install --upgrade py_pcha numpy scipy datetime geosketch umap-learn
 ```
 ```r
 # Finally, check that py_pcha library is successfully installed and discoverable

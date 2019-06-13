@@ -34,9 +34,10 @@
 
 <meta property="og:description" content="find_decreasing() Fits gam models to find features that are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.
 fit_arc_gam_1() Finds single GAM model fit and it's first derivative for a single feature and one or several archetypes.
-get_top_decreasing() Get top-12 genes and top-3 gene sets for each archetype.
-find_decreasing_wilcox() find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to vertex (1 vs all Wilcox test).
-bin_cells_by_arch() find which cells are in bin closest to vertex." />
+get_top_decreasing() Find genes highest at each archetype above p-values threshold, and print top-12 genes and top-3 gene sets for each archetype.
+find_decreasing_wilcox() find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to archetype (1 vs all Wilcox test).
+bin_cells_by_arch() find which cells are in bin closest to archetype.
+find_tradeoff_wilcox(): find features that are most different between 2 archetypes (at a tradeoff, DE, differentially expressed genes) by finding features with highest value (median) in bin closest to archetype (1 vs all Wilcox test)." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -67,7 +68,7 @@ bin_cells_by_arch() find which cells are in bin closest to vertex." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -89,6 +90,9 @@ bin_cells_by_arch() find which cells are in bin closest to vertex." />
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/Comparison_to_kmeans.html">Comparison of achetypal analysis and k-means clustering</a>
+    </li>
     <li>
       <a href="../articles/Hepatocyte_example.html">Example of using archetypal analysis to find representative cells &amp; describe heterogeniety in hepatocyte population between those archetypes</a>
     </li>
@@ -119,9 +123,10 @@ bin_cells_by_arch() find which cells are in bin closest to vertex." />
     
     <p><code>find_decreasing()</code> Fits gam models to find features that are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.</p>
 <p><code>fit_arc_gam_1()</code> Finds single GAM model fit and it's first derivative for a single feature and one or several archetypes.</p>
-<p><code>get_top_decreasing()</code> Get top-12 genes and top-3 gene sets for each archetype.</p>
-<p><code>find_decreasing_wilcox()</code> find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to vertex (1 vs all Wilcox test).</p>
-<p><code>bin_cells_by_arch()</code> find which cells are in bin closest to vertex.</p>
+<p><code>get_top_decreasing()</code> Find genes highest at each archetype above p-values threshold, and print top-12 genes and top-3 gene sets for each archetype.</p>
+<p><code>find_decreasing_wilcox()</code> find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to archetype (1 vs all Wilcox test).</p>
+<p><code>bin_cells_by_arch()</code> find which cells are in bin closest to archetype.</p>
+<p><code>find_tradeoff_wilcox()</code>: find features that are most different between 2 archetypes (at a tradeoff, DE, differentially expressed genes) by finding features with highest value (median) in bin closest to archetype (1 vs all Wilcox test).</p>
     
     </div>
 
@@ -139,7 +144,7 @@ bin_cells_by_arch() find which cells are in bin closest to vertex." />
   <span class='kw'>cutoff_genes</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>cutoff_sets</span> <span class='kw'>=</span> <span class='fl'>0.01</span>,
   <span class='kw'>cutoff_metric</span> <span class='kw'>=</span> <span class='st'>"wilcoxon_p_val"</span>, <span class='kw'>p.adjust.method</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"fdr"</span>,
   <span class='st'>"none"</span>)[<span class='fl'>1</span>], <span class='kw'>gam_fit_pval</span> <span class='kw'>=</span> <span class='fl'>0.01</span>, <span class='kw'>invert_cutoff</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>order_by</span> <span class='kw'>=</span> <span class='st'>"mean_diff"</span>, <span class='kw'>order_decreasing</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>order_by</span> <span class='kw'>=</span> <span class='st'>"mean_diff"</span>, <span class='kw'>order_decreasing</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>,
   <span class='kw'>min_max_diff_cutoff_g</span> <span class='kw'>=</span> <span class='fl'>0.3</span>, <span class='kw'>min_max_diff_cutoff_f</span> <span class='kw'>=</span> <span class='fl'>0.1</span>)
 
 <span class='fu'>find_decreasing_wilcox</span>(<span class='no'>data_attr</span>, <span class='no'>arc_col</span>, <span class='kw'>features</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"Gpx1"</span>, <span class='st'>"Alb"</span>,
@@ -148,7 +153,11 @@ bin_cells_by_arch() find which cells are in bin closest to vertex." />
   <span class='st'>"r_stats"</span>)[<span class='fl'>1</span>])
 
 <span class='fu'>bin_cells_by_arch</span>(<span class='no'>data_attr</span>, <span class='no'>arc_col</span>, <span class='kw'>bin_prop</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
-  <span class='kw'>return_names</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
+  <span class='kw'>return_names</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+
+<span class='fu'>find_tradeoff_wilcox</span>(<span class='no'>data_attr</span>, <span class='kw'>arc_col</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"archetype_1"</span>,
+  <span class='st'>"archetype_2"</span>), <span class='kw'>features</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"Gpx1"</span>, <span class='st'>"Alb"</span>, <span class='st'>"Cyp2e1"</span>, <span class='st'>"Apoa2"</span>)[<span class='fl'>3</span>],
+  <span class='kw'>bin_prop</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>na.rm</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -243,11 +252,15 @@ bin_cells_by_arch() find which cells are in bin closest to vertex." />
     </tr>
     <tr>
       <th>order_by</th>
-      <td><p>order decreasing feature list by measure in summary sets. By default is deriv20, the average value of derivative at 20 of point closest to vertex.</p></td>
+      <td><p>order decreasing feature list by measure in summary sets. By default is mean_diff, the average difference between cells in bin closest to archetype and all other cells. When using GAM instead of Wilcox test set this to one of c( "deriv100", "deriv50", "deriv20"), the average value of derivative at 20/50/100 percent of points closest to archetype.</p></td>
+    </tr>
+    <tr>
+      <th>order_decreasing</th>
+      <td><p>order significant categories using <code>order_by</code></p></td>
     </tr>
     <tr>
       <th>min_max_diff_cutoff_g</th>
-      <td><p>what should be the mean difference (log-ratio, when y is log-space) of gene expression at the point closest to archetype compared to point furthest from archetype? When Wilcox method was used it is difference between mean of bin closest to archetype and all other cells. By default, at least 0.3 for genes 0.1 for functions.</p></td>
+      <td><p>what should be the mean difference (log-ratio, when y is log-space) of gene expression at the point closest to archetype compared to point furthest from archetype? When Wilcox method was used it is difference between mean of bin closest to archetype and all other cells. By default, at least 0.3 for genes and 0.1 for functions.</p></td>
     </tr>
     <tr>
       <th>min_max_diff_cutoff_f</th>
@@ -273,7 +286,8 @@ bin_cells_by_arch() find which cells are in bin closest to vertex." />
 <p><code>fit_arc_gam_1()</code> list containing function call, 1st derivative values of GAM model (derivs), summary of GAM model (p-value and r^2, gam_sm)</p>
 <p><code>get_top_decreasing()</code> print summary to output, and return list with character vector with one element for each archetype, and 2 data.table- with selection of enriched genes and functions.</p>
 <p><code>find_decreasing_wilcox()</code> data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.</p>
-<p><code>bin_cells_by_arch()</code> list of indices of cells or names of cells that are in bin closest to each vertex</p>
+<p><code>bin_cells_by_arch()</code> list of indices of cells or names of cells that are in bin closest to each archetype</p>
+<p><code>find_tradeoff_wilcox()</code> data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.</p>
     
 
   </div>

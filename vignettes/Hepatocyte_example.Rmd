@@ -163,6 +163,17 @@ p_pca = plot_arc(arch_data = arc, data = PCs4arch,
 plotly::layout(p_pca, title = "Hepatocytes colored by Apoa2")
 
 # You can also check which cells have high entropy of logistic regression predictions when classifying all cells in a tissue into cell types. These could have been misclassified by the method and wrongly assigned to Hepatocytes, or these could be doublets.
+
+# find archetypes on all data (allows using archetype weights to describe cells)
+arc_1 = fit_pch(PCs4arch, volume_ratio = "t_ratio", maxiter = 500,
+                            noc = 4, delta = 0,
+                            conv_crit = 1e-04)
+# check that positions are similar to bootstrapping average from above
+p_pca = plot_arc(arch_data = arc_1, data = PCs4arch, 
+                 which_dimensions = 1:3, line_size = 1.5, 
+                 data_lab = as.numeric(logcounts(hepatocytes["Alb",])),
+                 text_size = 60, data_size = 6) 
+plotly::layout(p_pca, title = "Hepatocytes colored by Alb")
 ```
 
 ## Find genes and gene sets enriched near vertices
@@ -177,9 +188,10 @@ activ = measure_activity(hepatocytes, # row names are assumed to be gene identif
                                                binary = F, nCores = 3,
                                                plotStats = FALSE))
 # Merge distances, gene expression and gene set activity into one matrix
-data_attr = merge_arch_dist(arch_data = average_pch_fits(arc), data = PCs4arch, 
+data_attr = merge_arch_dist(arch_data = arc_1, data = PCs4arch, 
                             feature_data = as.matrix(logcounts(hepatocytes)),
                             colData = activ,
+                            dist_metric = c("euclidean", "arch_weights")[1],
                             colData_id = "cells", rank = F) 
 
 # Use Wilcox test to find genes maximally expressed in 10% closest to each vertex
@@ -211,17 +223,6 @@ plotly::layout(p_pca, title = "ribosomal_large_subunit_biogenesis activity")
 To measure goodness of observed fit I compare observed tetrahedron shape to shape of data with no relationships between variables. This is done by comparing the ratio of tertahedron volume to volume of convex hull, a complex shape that contains all of the data. Empirical p-value is fraction of random t-ratios that are at least as high as the observed t-ratio.
 
 ```{r}
-# fit a polytope once to make randomisation test faster
-arc_1 = fit_pch(PCs4arch, volume_ratio = "t_ratio", maxiter = 500,
-                            noc = 4, delta = 0,
-                            conv_crit = 1e-04)
-# check that positions are similar to bootstrapping average from above
-p_pca = plot_arc(arch_data = arc_1, data = PCs4arch, 
-                 which_dimensions = 1:3, line_size = 1.5, 
-                 data_lab = logcounts(hepatocytes["Alb",]),
-                 text_size = 60, data_size = 6) 
-plotly::layout(p_pca, title = "Hepatocytes colored by Alb")
-
 # use permutations within each dimension - this is only possible for less than 8 vertices because computing convex hull gets exponentially slower with more dimensions
 start = Sys.time()
 pch_rand = randomise_fit_pch(PCs4arch, arc_data = arc_1,

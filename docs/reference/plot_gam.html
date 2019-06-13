@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -85,6 +85,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/Comparison_to_kmeans.html">Comparison of achetypal analysis and k-means clustering</a>
+    </li>
     <li>
       <a href="../articles/Hepatocyte_example.html">Example of using archetypal analysis to find representative cells &amp; describe heterogeniety in hepatocyte population between those archetypes</a>
     </li>
@@ -118,7 +121,9 @@
     </div>
 
     <pre class="usage"><span class='fu'>plot_gam</span>(<span class='kw'>gam_deriv</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>gam_fit</span>, <span class='no'>data</span>, <span class='kw'>feature</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
-  <span class='kw'>groupCovs</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>title_size</span> <span class='kw'>=</span> <span class='fl'>10</span>,
+  <span class='kw'>archetype</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>groupCovs</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>title_size</span> <span class='kw'>=</span> <span class='fl'>10</span>,
+  <span class='kw'>point_size</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>point_alpha</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>point_position</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"identity"</span>,
+  <span class='st'>"jitter"</span>), <span class='kw'>rug_size</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>rug_alpha</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
   <span class='kw'>title</span> <span class='kw'>=</span> <span class='st'>"GAM model: gene expression = function(distance from archetype)"</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
@@ -138,11 +143,31 @@
     </tr>
     <tr>
       <th>feature</th>
-      <td><p>character vector (1L), column than containg feature values</p></td>
+      <td><p>character vector, which features (e.g. genes) to plot?</p></td>
+    </tr>
+    <tr>
+      <th>archetype</th>
+      <td><p>character vector, which archetypes to plot?</p></td>
     </tr>
     <tr>
       <th>groupCovs</th>
       <td><p>argument for <a href='https://www.rdocumentation.org/packages/voxel/topics/plotGAM'>plotGAM</a></p></td>
+    </tr>
+    <tr>
+      <th>title_size</th>
+      <td><p>size of individial plot titles and axis titles</p></td>
+    </tr>
+    <tr>
+      <th>point_position</th>
+      <td><p>point position option, a way to add jitter but "identity" by default</p></td>
+    </tr>
+    <tr>
+      <th>title</th>
+      <td><p>main title for all features and archetypes</p></td>
+    </tr>
+    <tr>
+      <th>point_size/rug_size/point_alpha/rug_alpha</th>
+      <td><p>size and alpha controls for points and geom_rug.</p></td>
     </tr>
     </table>
     

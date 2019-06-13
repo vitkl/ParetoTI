@@ -37,7 +37,7 @@ filter_go_annot() filters GO annotations by ontology file, GO branch, number of 
 measure_activity() annotates genes with GO terms and measures their activities
 load_go_ontology() load GO slim ontology file and return file path
 map_gwas_annot() Load known GWAS loci for all phenotypes in GWAS Catalog. For each the keys find which phenotypes it is associated with using genes mapped by GWAS Catalog.
-map_promoter_tf() load GO slim ontology file and return file path" />
+map_promoter_tf() load data mapping TF-&amp;gt;target gene regulation via co-occurence of multiple motifs for the same TF in promoters (courtesy of Krzysztof Polanski who generated this resource). This TF datasets does not produce useful results with &amp;gt; 5 scRNA-seq datasets, so more bespoke approach is needed, and TF-target mapping can be provided with &quot;custom&quot; option of measure_activity()." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -68,7 +68,7 @@ map_promoter_tf() load GO slim ontology file and return file path" />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -90,6 +90,9 @@ map_promoter_tf() load GO slim ontology file and return file path" />
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/Comparison_to_kmeans.html">Comparison of achetypal analysis and k-means clustering</a>
+    </li>
     <li>
       <a href="../articles/Hepatocyte_example.html">Example of using archetypal analysis to find representative cells &amp; describe heterogeniety in hepatocyte population between those archetypes</a>
     </li>
@@ -123,7 +126,7 @@ map_promoter_tf() load GO slim ontology file and return file path" />
 <p>measure_activity() annotates genes with GO terms and measures their activities</p>
 <p>load_go_ontology() load GO slim ontology file and return file path</p>
 <p>map_gwas_annot() Load known GWAS loci for all phenotypes in GWAS Catalog. For each the <code>keys</code> find which phenotypes it is associated with using genes mapped by GWAS Catalog.</p>
-<p>map_promoter_tf() load GO slim ontology file and return file path</p>
+<p>map_promoter_tf() load data mapping TF-&gt;target gene regulation via co-occurence of multiple motifs for the same TF in promoters (courtesy of Krzysztof Polanski who generated this resource). This TF datasets does not produce useful results with &gt; 5 scRNA-seq datasets, so more bespoke approach is needed, and TF-target mapping can be provided with "custom" option of measure_activity().</p>
     
     </div>
 
@@ -137,15 +140,14 @@ map_promoter_tf() load GO slim ontology file and return file path" />
   <span class='kw'>ontology_type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"BP"</span>, <span class='st'>"MF"</span>, <span class='st'>"CC"</span>))
 
 <span class='fu'>measure_activity</span>(<span class='no'>expr_mat</span>, <span class='kw'>which</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"BP"</span>, <span class='st'>"MF"</span>, <span class='st'>"CC"</span>, <span class='st'>"gwas"</span>,
-  <span class='st'>"promoter_TF"</span>, <span class='st'>"custom"</span>)[<span class='fl'>1</span>], <span class='kw'>activity_method</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"AUCell"</span>,
-  <span class='st'>"pseudoinverse"</span>)[<span class='fl'>1</span>], <span class='kw'>keys</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/colnames'>rownames</a></span>(<span class='no'>expr_mat</span>), <span class='kw'>keytype</span> <span class='kw'>=</span> <span class='st'>"ALIAS"</span>,
-  <span class='kw'>ontology_file</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>taxonomy_id</span> <span class='kw'>=</span> <span class='fl'>10090</span>, <span class='kw'>evidence_code</span> <span class='kw'>=</span> <span class='st'>"all"</span>,
-  <span class='kw'>localHub</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='st'>"custom"</span>)[<span class='fl'>1</span>], <span class='kw'>activity_method</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"AUCell"</span>, <span class='st'>"pseudoinverse"</span>)[<span class='fl'>1</span>],
+  <span class='kw'>keys</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/colnames'>rownames</a></span>(<span class='no'>expr_mat</span>), <span class='kw'>keytype</span> <span class='kw'>=</span> <span class='st'>"ALIAS"</span>, <span class='kw'>ontology_file</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>taxonomy_id</span> <span class='kw'>=</span> <span class='fl'>10090</span>, <span class='kw'>evidence_code</span> <span class='kw'>=</span> <span class='st'>"all"</span>, <span class='kw'>localHub</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>ann_hub_cache</span> <span class='kw'>=</span> <span class='kw pkg'>AnnotationHub</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/AnnotationHub/topics/getAnnotationHubOption'>getAnnotationHubOption</a></span>(<span class='st'>"CACHE"</span>),
-  <span class='kw'>lower</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>upper</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>return_as_matrix</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
-  <span class='kw'>annot_dt</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>assay_name</span> <span class='kw'>=</span> <span class='st'>"logcounts"</span>,
-  <span class='kw'>aucell_options</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>aucMaxRank</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>nrow</a></span>(<span class='no'>expr_mat</span>) * <span class='fl'>0.05</span>, <span class='kw'>binary</span> <span class='kw'>=</span> <span class='no'>F</span>,
-  <span class='kw'>nCores</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>plotStats</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>))
+  <span class='kw'>lower</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>upper</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>variant_context</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>return_as_matrix</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>annot_dt</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>assay_name</span> <span class='kw'>=</span> <span class='st'>"logcounts"</span>, <span class='kw'>aucell_options</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='kw'>aucMaxRank</span> <span class='kw'>=</span>
+  <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>nrow</a></span>(<span class='no'>expr_mat</span>) * <span class='fl'>0.05</span>, <span class='kw'>binary</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>nCores</span> <span class='kw'>=</span> <span class='fl'>3</span>, <span class='kw'>plotStats</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>))
 
 <span class='fu'>load_go_ontology</span>(<span class='kw'>ont_dir</span> <span class='kw'>=</span> <span class='st'>"./data/"</span>, <span class='kw'>ont_file</span> <span class='kw'>=</span> <span class='st'>"goslim_generic.obo"</span>)
 
@@ -154,7 +156,7 @@ map_promoter_tf() load GO slim ontology file and return file path" />
   <span class='kw'>ann_hub_cache</span> <span class='kw'>=</span> <span class='kw pkg'>AnnotationHub</span><span class='kw ns'>::</span><span class='fu'><a href='https://www.rdocumentation.org/packages/AnnotationHub/topics/getAnnotationHubOption'>getAnnotationHubOption</a></span>(<span class='st'>"CACHE"</span>),
   <span class='kw'>gwas_url</span> <span class='kw'>=</span> <span class='st'>"https://www.ebi.ac.uk/gwas/api/search/downloads/alternative"</span>,
   <span class='kw'>gwas_file</span> <span class='kw'>=</span> <span class='st'>"gwas_catalog_v1.0.2-associations_e93_r2019-01-31.tsv"</span>,
-  <span class='kw'>lower</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>upper</span> <span class='kw'>=</span> <span class='fl'>Inf</span>)
+  <span class='kw'>lower</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>upper</span> <span class='kw'>=</span> <span class='fl'>Inf</span>, <span class='kw'>variant_context</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
 
 <span class='fu'>map_promoter_tf</span>(<span class='kw'>keys</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"TP53"</span>, <span class='st'>"ZZZ3"</span>), <span class='kw'>keytype</span> <span class='kw'>=</span> <span class='st'>"SYMBOL"</span>,
   <span class='kw'>lower</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>upper</span> <span class='kw'>=</span> <span class='fl'>Inf</span>)</pre>
@@ -220,11 +222,15 @@ map_promoter_tf() load GO slim ontology file and return file path" />
     </tr>
     <tr>
       <th>which</th>
-      <td><p>which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets. Use "gwas" for constructing gene sets with gwas_catalog v1.0.2. GWAS option works only with human hgnc identifiers. Use "promoter_TF" to look at TF activities measured by mapping TF-&gt;target gene regulation via co-occurence of multiple motifs for the same TF in promoters (courtesy of Krzysztof Polanski who generated this resource). TF data is added supplied with the package and works only for human data, only SYMBOL and ENSEMBL can be used as keytype. Use "custom" to provide your own gene sets in <code>annot_dt</code> table.</p></td>
+      <td><p>which set activities to measure? Currently implemented "BP", "MF", "CC" gene ontology subsets. Use "gwas" for constructing gene sets with gwas_catalog v1.0.2. GWAS option works only with human hgnc identifiers. TF data is added supplied with the package and works only for human data, only SYMBOL and ENSEMBL can be used as keytype. Use "custom" to provide your own gene sets in <code>annot_dt</code> table.</p></td>
     </tr>
     <tr>
       <th>activity_method</th>
       <td><p>find activities using <a href='find_set_activity_AUCell.html'>find_set_activity_AUCell</a> or <a href='find_set_activity_AUCell.html'>find_set_activity_pseudoinv</a>?</p></td>
+    </tr>
+    <tr>
+      <th>variant_context</th>
+      <td><p>select traits (which = "gwas") based on variant context (coding, intronic, UTR, intergenic). Find availlable options by running <code>annot = map_gwas_annot(); t = table(annot$annot_dt$CONTEXT); t[!grepl(";| x ", names(t))]</code>. Suggested options: <code>c("3_prime_UTR_variant", "5_prime_UTR_variant", "frameshift_variant", "inframe_deletion", "inframe_insertion", "intergenic_variant", "intron_variant", "missense_variant", "non_coding_transcript_exon_variant" "regulatory_region_variant", "splice_acceptor_variant", "splice_donor_variant", "splice_region_variant", "start_lost", "stop_gained", "stop_lost", "synonymous_variant", "TF_binding_site_variant", "TFBS_ablation", "upstream_gene_variant")</code>.</p></td>
     </tr>
     <tr>
       <th>return_as_matrix</th>

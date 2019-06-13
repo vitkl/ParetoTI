@@ -100,6 +100,10 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                          conv_crit = conv_crit, maxiter = maxiter)
       names(res) = c("XC", "S", "C", "SSE", "varexpl")
       if(!is.null(rownames(data))) rownames(res$XC) = rownames(data)
+      if(!is.null(colnames(data))) {
+        colnames(res$S) = colnames(data)
+      }
+
       class(res) = "pch_fit"
       res
     }, error = function(err) {
@@ -798,21 +802,42 @@ fit_convhulln = function(data, positions = TRUE) {
 ##' @param feature_data matrix with dim(dimensions, examples) where rownames are feature names and colnames are sample_id.
 ##' @param colData annotations of examples in feature_data - dim(examples, dimensions), e.g. colData in SingleCellExperiment object or output of \link[ParetoTI]{find_set_activity_AUCell}.
 ##' @param colData_id column in colData that contains values matching colnames of feature_data.
-##' @param dist_metric how to describe distance to archetypes. Currently euclidian distance is implemented.
-##' @param rank rank by distance metric (euclidian distance)?
+##' @param dist_metric how to describe distance to archetypes. Currently euclidean distance and archetype weights are implemented. Archetypes weights come from \code{arch_data$S} matrix so bootstrapped archetype positions cannot be used - only single fit to all data.
+##' @param rank rank by distance metric (euclidean distance)?
 ##' @return \code{merge_arch_dist()} list: data.table with samples in rows (speficied by sample_id column) and features in columns (including distance to archetypes); and character vectors listing names of archetypes, feature columns and colData columns.
 ##' @export merge_arch_dist
 ##' @import data.table
 merge_arch_dist = function(arch_data, data, feature_data,
                            colData = NULL, colData_id,
-                           dist_metric = "euclidian", rank = TRUE){
+                           dist_metric = c("euclidean", "arch_weights")[1],
+                           rank = TRUE){
+
   if(!is(arch_data, "pch_fit")) stop("arch_data should contain a single fit (pch_fit object): use fit_pch() or fit_pch_bootstrap() followed by average_pch_fits()")
+
   # find distance of data points to archetypes ---------------------------------
-  dist = arch_dist(data, arch_data$XC, dist_metric = dist_metric)
+  if(dist_metric == "arch_weights"){
+
+    dist = 1 - t(arch_data$S)
+    if(is.null(colnames(dist))) {
+      colnames(dist) = paste0("archetype_", seq_len(ncol(dist))) # archetype names
+    }
+    if(is.null(colnames(data))) {
+      rownames(dist) = colnames(data) # data point names
+    }
+
+  } else if(dist_metric == "euclidean") {
+
+    dist = arch_dist(data, arch_data$XC, dist_metric = dist_metric)
+
+  }
+
   arc_col = colnames(dist)
+
   # if no rownames provided add V1, V2 ... Vn names
   if(is.null(rownames(dist))) rownames(dist) = paste0("V", seq_len(nrow(dist)))
+
   dist = as.data.table(dist, keep.rownames = "sample_id")
+
   # convert distances to ranks and scale between 0 and 1 -----------------------
   # (max rank for min distance)
   if(isTRUE(rank)){

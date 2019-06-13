@@ -60,7 +60,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -82,6 +82,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/Comparison_to_kmeans.html">Comparison of achetypal analysis and k-means clustering</a>
+    </li>
     <li>
       <a href="../articles/Hepatocyte_example.html">Example of using archetypal analysis to find representative cells &amp; describe heterogeniety in hepatocyte population between those archetypes</a>
     </li>
@@ -124,9 +127,15 @@
       <tr>
         
         <td>
-          <p><code><a href="align_arc.html">align_arc()</a></code> <code><a href="align_arc.html">gen_permut()</a></code> <code><a href="align_arc.html">align_arc_opt()</a></code> </p>
+          <p><code><a href="align_arc.html">align_arc()</a></code> <code><a href="align_arc.html">gen_permut()</a></code> </p>
         </td>
         <td><p>Match/align arhetypes</p></td>
+      </tr><tr>
+        
+        <td>
+          <p><code><a href="annotate_archetypes.html">annotate_archetypes()</a></code> </p>
+        </td>
+        <td><p>Annotate archetypes with custom labels</p></td>
       </tr><tr>
         
         <td>
@@ -142,7 +151,7 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="find_decreasing.html">find_decreasing()</a></code> <code><a href="find_decreasing.html">fit_arc_gam_1()</a></code> <code><a href="find_decreasing.html">get_top_decreasing()</a></code> <code><a href="find_decreasing.html">find_decreasing_wilcox()</a></code> <code><a href="find_decreasing.html">bin_cells_by_arch()</a></code> </p>
+          <p><code><a href="find_decreasing.html">find_decreasing()</a></code> <code><a href="find_decreasing.html">fit_arc_gam_1()</a></code> <code><a href="find_decreasing.html">get_top_decreasing()</a></code> <code><a href="find_decreasing.html">find_decreasing_wilcox()</a></code> <code><a href="find_decreasing.html">bin_cells_by_arch()</a></code> <code><a href="find_decreasing.html">find_tradeoff_wilcox()</a></code> </p>
         </td>
         <td><p>Find features that are decreasing functions of distance from archetype</p></td>
       </tr><tr>
@@ -220,6 +229,12 @@
       </tr><tr>
         
         <td>
+          <p><code><a href="plot_arch_struct.html">plot_arch_struct()</a></code> </p>
+        </td>
+        <td><p>Find and plot similarity structure between archetypes</p></td>
+      </tr><tr>
+        
+        <td>
           <p><code><a href="plot_gam.html">plot_gam()</a></code> </p>
         </td>
         <td><p>Plot gam model fit for multiple genes and archetypes (Generalised Additive Model, mgcv)</p></td>
@@ -232,9 +247,9 @@
       </tr><tr>
         
         <td>
-          <p><code><a href="project.html">project()</a></code> </p>
+          <p><code><a href="project_to_pcs.html">project_to_pcs()</a></code> </p>
         </td>
-        <td><p>Project polytope fit and data in low dimentions (PCA)</p></td>
+        <td><p>Project archetype and data in low dimentions (PCA)</p></td>
       </tr><tr>
         
         <td>

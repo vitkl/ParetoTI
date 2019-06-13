@@ -32,7 +32,7 @@
 
 <meta property="og:title" content="Compute distance to archetypes — arch_dist" />
 
-<meta property="og:description" content="arch_dist() calculates Euclidian distance from every point to every archetype give matrices that contain this data." />
+<meta property="og:description" content="arch_dist() calculates Euclidean distance from every point to every archetype give matrices that contain this data." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -63,7 +63,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.7</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
       </span>
     </div>
 
@@ -85,6 +85,9 @@
     <span class="caret"></span>
   </a>
   <ul class="dropdown-menu" role="menu">
+    <li>
+      <a href="../articles/Comparison_to_kmeans.html">Comparison of achetypal analysis and k-means clustering</a>
+    </li>
     <li>
       <a href="../articles/Hepatocyte_example.html">Example of using archetypal analysis to find representative cells &amp; describe heterogeniety in hepatocyte population between those archetypes</a>
     </li>
@@ -113,11 +116,11 @@
 
     <div class="ref-description">
     
-    <p><code>arch_dist()</code> calculates Euclidian distance from every point to every archetype give matrices that contain this data.</p>
+    <p><code>arch_dist()</code> calculates Euclidean distance from every point to every archetype give matrices that contain this data.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>arch_dist</span>(<span class='no'>data</span>, <span class='no'>archetypes</span>, <span class='kw'>dist_metric</span> <span class='kw'>=</span> <span class='st'>"euclidian"</span>)</pre>
+    <pre class="usage"><span class='fu'>arch_dist</span>(<span class='no'>data</span>, <span class='no'>archetypes</span>, <span class='kw'>dist_metric</span> <span class='kw'>=</span> <span class='st'>"euclidean"</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -132,7 +135,7 @@
     </tr>
     <tr>
       <th>dist_metric</th>
-      <td><p>distance metric, currently only "euclidian" implemented</p></td>
+      <td><p>distance metric, currently only "euclidean" implemented</p></td>
     </tr>
     </table>
     
@@ -152,8 +155,8 @@
 #&gt; [2,]           3           4</div><div class='input'><span class='co'># Random data that fits into the triangle</span>
 <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4355</span>)
 <span class='no'>archetypes</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
-                          <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>N_dim</span> <span class='kw'>=</span> <span class='fl'>2</span>)</div><div class='output co'>#&gt; <span class='error'>Error in generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),     mean = 0, sd = 1, N_dim = 2): unused argument (N_dim = 2)</span></div><div class='input'><span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>archetypes</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='co'># Find Euclidian distance between data points and archetypes</span>
-<span class='no'>distance</span> <span class='kw'>=</span> <span class='fu'>arch_dist</span>(<span class='no'>data</span>, <span class='no'>archetypes</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='co'># Find Euclidian distance between archetypes</span>
+                          <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>N_dim</span> <span class='kw'>=</span> <span class='fl'>2</span>)</div><div class='output co'>#&gt; <span class='error'>Error in generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),     mean = 0, sd = 1, N_dim = 2): unused argument (N_dim = 2)</span></div><div class='input'><span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>archetypes</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='co'># Find Euclidean distance between data points and archetypes</span>
+<span class='no'>distance</span> <span class='kw'>=</span> <span class='fu'>arch_dist</span>(<span class='no'>data</span>, <span class='no'>archetypes</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div><div class='input'><span class='co'># Find Euclidean distance between archetypes</span>
 <span class='no'>arc_distance</span> <span class='kw'>=</span> <span class='fu'>arch_dist</span>(<span class='no'>archetypes</span>, <span class='no'>archetypes</span>)</div><div class='output co'>#&gt; <span class='error'>Error in ncol(archetypes): object 'archetypes' not found</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

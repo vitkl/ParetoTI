@@ -5,7 +5,7 @@
 \title{Install python module py_pcha and numpy}
 \usage{
 install_py_pcha(method = "auto", conda = "auto",
-  python_version = "python 3.7.3", envname = "reticulate_PCHA_37",
+  python_version = "python 3.7.3", envname = "reticulate_PCHA",
   overwrite_env = F, extra_packages = character(0),
   packages = c("pip", "py_pcha", "numpy", "scipy", "datetime"))
 }
@@ -41,11 +41,7 @@ install_py_pcha()
 install_py_pcha(extra_packages = c("tensorflow", "pandas", "keras", "h5py",
                                    "geosketch", "pydot", "sklearn", "umap-learn"))
 
-## If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution:
-
-# "Older versions of pip and distribute default to http://pypi.python.org/simple, which no longer works. A solution is to install an up-to-date pip and distribute using pip install -i https://pypi.python.org/simple -U pip distribute into the virtual environment before running the rest of the build process."
-
-# use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir
+## See for installation details
 }
 }
 \author{

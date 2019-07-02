@@ -43,7 +43,8 @@ library(ParetoTI)
 # Install python dependencies (like py_pcha) into python conda environment,
 # and (optionally) install *extra_packages*.
 ParetoTI::install_py_pcha(method = "conda", 
-                          extra_packages = c("tensorflow", "pandas", "keras", "h5py",
+                          extra_packages = c("tensorflow", "tensorflow-probability",
+                                        "pandas", "keras", "h5py",
                                         "geosketch", "pydot", "scikit-learn==0.20",
                                         "umap-learn"))
 ```
@@ -62,9 +63,10 @@ conda create -n reticulate_PCHA python=3.7.3 pip
 # Light install:    
 source activate reticulate_PCHA && pip install --upgrade py_pcha numpy scipy datetime geosketch umap-learn    
 # To use more features:    
-source activate reticulate_PCHA && pip install --upgrade py_pcha numpy scipy datetime tensorflow pandas keras h5py geosketch pydot sklearn umap-learn    
+source activate reticulate_PCHA && pip install --upgrade py_pcha numpy scipy datetime tensorflow tensorflow-probability pandas keras h5py geosketch pydot sklearn umap-learn    
 
-# On some platforms R sees only the "base" conda enviroment (like RStudio Server)    
+# Sometimes on some platforms R sees only the "base" conda enviroment 
+# (like when RStudio Server is setup incorrectly)    
 # In that case use:
 source activate base && pip install --upgrade py_pcha numpy scipy datetime geosketch umap-learn
 ```

@@ -70,9 +70,15 @@ source activate reticulate_PCHA && pip install --upgrade py_pcha numpy scipy dat
 # In that case use:
 source activate base && pip install --upgrade py_pcha numpy scipy datetime geosketch umap-learn
 ```
+
 ```r
 # Finally, check that py_pcha library is successfully installed and discoverable
 reticulate::py_discover_config("py_pcha")
+```
+```r
+# To make sure R uses the correct conda enviroment you can run this when you start R:
+reticulate::use_condaenv("reticulate_PCHA", conda = "auto",
+                         required = TRUE) # set TRUE to force R to use reticulate_PCHA
 ```
 
 **Example: Finding archetypes in data created by simulating a triangle  **  

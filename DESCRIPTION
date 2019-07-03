@@ -1,7 +1,7 @@
 Package: ParetoTI
 Type: Package
-Title: R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data (based on ParTI) 
-Version: 0.1.9
+Title: R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data
+Version: 0.1.10
 Author: Vitalii Kleshchevnikov
 Maintainer: Vitalii Kleshchevnikov <vk7@sanger.ac.uk>
 Authors@R: c(person("Vitalii", "Kleshchevnikov",, "vk7@sanger.ac.uk", role = c("aut", "cre")))
@@ -27,5 +27,5 @@ URL: https://vitkl.github.io/ParetoTI/
 BugReports: https://github.com/vitkl/ParetoTI/issues
 Depends: reticulate, data.table, lpSolve
 Imports: parallel, plotly, BioQC, geometry, ggplot2, AnnotationHub, GO.db, ontologyIndex, Biobase, corpcor, AUCell
-Suggests: doMC, cowplot, keras, SummarizedExperiment, SingleCellExperiment
-Enhances: clustermq, voxel, Rtsne, umap
+Suggests: doMC, cowplot, keras, clustermq, voxel, Rtsne, umap, greta
+Enhances: SummarizedExperiment, SingleCellExperiment, Seurat (>= 3.0.2)

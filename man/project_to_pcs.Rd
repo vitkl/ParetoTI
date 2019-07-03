@@ -2,23 +2,46 @@
 % Please edit documentation in R/project.R
 \name{project_to_pcs}
 \alias{project_to_pcs}
-\title{Project archetype and data in low dimentions (PCA)}
+\alias{project_from_pc}
+\title{Project archetypes and data in PCA dimentions}
 \usage{
-project_to_pcs(arc_data = NULL, data, n_dim = 3, s = NULL)
+project_to_pcs(arc_data = NULL, data, n_dim = nrow(data), s = NULL,
+  pc_method = c("svd", "irlba"), log2 = FALSE, offset = 1,
+  zscore = FALSE)
+
+project_from_pc(arc_data, s, undo_zscore = FALSE, undo_log2 = FALSE,
+  offset = 1)
 }
 \arguments{
-\item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes and other data produced by \code{\link[ParetoTI]{fit_pch}}(). arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the polytope fitting algorithm.}
+\item{arc_data}{objects of class "pch_fit", "b_pch_fit" storing the position of archetypes and other data produced by \code{\link[ParetoTI]{fit_pch}}(). arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the archetypal analysis.}
 
-\item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}
+\item{data}{matrix of data used in archetypal analysis, dim(variables/dimentions, examples)}
 
 \item{n_dim}{number of principal component dimensions}
 
-\item{s}{list 's' containing SVD decomposition results (U, d, Vt), standard deviation and mean of genes used for decomposition (sds, means)}
+\item{s}{list 's' containing SVD decomposition results (U, d, Vt), standard deviation and mean of genes used for decomposition (sd, means)}
+
+\item{pc_method}{method to use for finding PCs: \code{\link[base]{svd}} or \code{\link[irlba]{irlba}}}
+
+\item{log2}{log2-transform before to z-scoring and PC-projection}
+
+\item{offset}{log2 transformation offset (e.g. \code{log2(x + offset)})}
+
+\item{zscore}{standardise (substract the mean and divide by standard deviation) prior to PC-projection}
+
+\item{undo_zscore}{undo z-scoring by multiplying by standard deviation and adding the mean? Undo z-scoring precedes exponentiation.}
+
+\item{undo_log2}{undo log2-transformation by exponentiating and substracting pseudocount?}
+}
+\value{
+project_to_pcs(): list with projected $data, archetypes ($arc_data) and $s list of decomposition matrices, sds and means
+
+project_from_pc(): archetypes projected to data space
 }
 \description{
-project_to_pcs() projects archetypes (\code{arc_data}) and data points (\code{arc_data}) to PC space. Data is standardised prior to PCA by default.
+project_to_pcs() projects archetypes (\code{arc_data}) and data points (\code{arc_data}) to PC space. Archetypes are projected into PC space of data, e.i. archetypes do not affect PCA and are just projected afterwards.
 
-project_from_pc() projects archetypes and data points to original space provided SVD decomposition results
+project_from_pc() projects archetypes and data points to original space provided SVD decomposition results. Optionally do the reverse of log2 transformation to obtain normalised expression space.
 }
 \examples{
 # Random data that fits into the triangle
@@ -26,4 +49,25 @@ set.seed(4355)
 arc_data = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
                           mean = 0, sd = 1)
 data = generate_data(arc_data$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+# Plot
+plot_arc(arch_data = arc_data, data = data,
+         which_dimensions = 1:2, data_alpha = 0.5) +
+         ggplot2::theme_bw()
+
+# Project to PCs (in this case just rotate to align x-axis with
+#                  the axis of most variation because the data is already 2D)
+pcs = project_to_pcs(arc_data, data, n_dim = 2, pc_method = c("svd", "irlba")[1])
+# Plot in PC coordinates
+plot_arc(arch_data = pcs$arc_data, data = pcs$data,
+         which_dimensions = 1:2, data_alpha = 0.5) +
+         ggplot2::theme_bw()
+
+# Project from PCs back to expression
+projected = project_from_pc(pcs$arc_data, pcs$s,
+                            undo_zscore = FALSE, undo_log2 = FALSE)
+
+# Plot plot in projected coordinates
+plot_arc(arch_data = projected, data = data,
+         which_dimensions = 1:2, data_alpha = 0.5) +
+         ggplot2::theme_bw()
 }

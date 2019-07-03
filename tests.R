@@ -4,6 +4,7 @@ library(devtools)
 document()
 install()
 
+unloadNamespace("ParetoTI")
 devtools::load_all("../ParetoTI/")
 
 #install.packages("BiocManager") # for installing BioConductor dependencies
@@ -11,6 +12,37 @@ BiocManager::install("vitkl/ParetoTI", dependencies = T)
 BiocManager::install("vitkl/ParetoTI", dependencies = c("Depends", "Imports", "LinkingTo"))
 
 library(ParetoTI)
+
+# Random data that fits into the triangle
+set.seed(4355)
+arc_data = generate_arc(arc_coord = list(c(5, 1, 4), c(10, 15, 1), c(30, 20, 5)),
+                          mean = 0, sd = 1)
+data = generate_data(arc_data$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
+#arc_data = fit_pch_bootstrap(data, n = 10, sample_prop = 0.5, noc = as.integer(3))
+arc_data = fit_pch(data, noc = as.integer(3))
+# Plot
+plot_arc(arch_data = arc_data, data = data,
+         which_dimensions = 1:2, data_alpha = 0.5) +
+  ggplot2::theme_bw()
+
+# Project to PCs (in this case just rotate to align x-axis with
+# the axis of most variation because the data is already 2D)
+pcs = project_to_pcs(arc_data, data, n_dim = 3,
+                     pc_method = c("svd", "irlba")[1],
+                     zscore = F, log2 = F, offset = 2)
+# Plot in PC coordinates
+plot_arc(arch_data = pcs$arc_data, data = pcs$data,
+         which_dimensions = 1:2, data_alpha = 0.5) +
+  ggplot2::theme_bw()
+
+# Project from PCs back to expression
+projected = project_from_pc(pcs$arc_data, pcs$s,
+                            undo_zscore = F, undo_log2 = F, offset = 2)
+
+# Plot plot in projected coordinates
+plot_arc(arch_data = projected, data = data,
+         which_dimensions = 1:2, data_alpha = 0.5) +
+  ggplot2::theme_bw()
 
 devtools::install_url("http://spams-devel.gforge.inria.fr/hitcounter2.php?file=file/36615/spams-R-v2.6-2017-03-22.tar.gz")
 
@@ -95,6 +127,19 @@ plot_arc(arch_data = arc_data, data = data,
          which_dimensions = 1:2, data_alpha = 0.5) +
   ggplot2::theme_bw()
 
+colnames( arc_data$XC) = paste0("A_", 1:3)
+rownames( arc_data$XC) = paste0("R_", 1:3)
+rownames( data) = paste0("R_", 1:3)
+
+# test projection to PCs
+pcs = project_to_pcs(arc_data, data, n_dim = 3, pc_method = c("svd", "irlba")[1])
+plot_arc(arch_data = pcs$arc_data, data = pcs$data,
+         which_dimensions = 1:2, data_alpha = 0.5) +
+  ggplot2::theme_bw()
+
+# test projection from PCs
+ pcs$s$u %*% pcs$arc_data$XC
+ arc_data$XC
 
 speed_test = microbenchmark::microbenchmark({
   # Fit a polytope with 3 vertices to data matrix

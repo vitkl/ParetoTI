@@ -16,13 +16,14 @@
 \alias{print.r_pch_fit}
 \alias{plot.r_pch_fit}
 \alias{plot_dim_var}
+\alias{pch_fit}
 \title{Find the smallest polytope (Principal Convex Hull) that contains most of the data}
 \usage{
 fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
   verbose = FALSE, conv_crit = 1e-04, maxiter = 500,
   check_installed = T, order_by = seq(1, nrow(data)),
-  order_type = c("cosine", "side", "align")[3],
-  volume_ratio = c("t_ratio", "variance_ratio", "none")[1],
+  order_type = c("align", "cosine", "side"),
+  volume_ratio = c("t_ratio", "variance_ratio", "none"),
   converge_else_fail = TRUE, var_in_dims = FALSE,
   normalise_var = TRUE, method = c("pcha", "kmeans"),
   method_options = list())
@@ -81,6 +82,9 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
   colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400",
   "#FF7E0F"), nudge_y = 0.5, nudge_x = 0.5, text_lab_size = 4,
   line_size = 0.5)
+
+pch_fit(XC, S, C, SSE, varexpl, arc_vol, hull_vol, t_ratio, var_vert,
+  var_dim, total_var, summary, call)
 }
 \arguments{
 \item{data}{numeric matrix or object coercible to matrix in which to find archetypes, dim(variables/dimentions, examples)}
@@ -227,6 +231,8 @@ call - function call.
 plot.r_pch_fit() plot distribution of t-ratio, total variance in archetype positions and variance explained used to calculate empirical p-value
 
 plot_dim_var() plot distribution of variance in archetype positions in each dimension and corresponding empirical p-values
+
+\code{pch_fit()} a constructor function for the "pch_fit" class
 }
 \details{
 \code{fit_pch()} provides an R interface to python implementation of PCHA algorithm (Principal Convex Hull Analysis) by Ulf Aslak (https://github.com/ulfaslak/py_pcha) which was originally developed for Archetypal Analysis by Mørup et. al.

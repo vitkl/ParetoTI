@@ -42,7 +42,8 @@ randomise_fit_pch1() disrupts the relationships between variables (one sampling 
 fit_convhulln() computes smallest convex hull that encloses a set of points using convhulln and returns positions of convex hull points (positions = TRUE).
 merge_arch_dist() calculates distance to archtypes, and merges distance matrix to data that was used to identify archetypes, optionally adds other features of data points (through colData).
 plot.r_pch_fit() plot distribution of t-ratio, total variance in archetype positions and variance explained used to calculate empirical p-value
-plot_dim_var() plot distribution of variance in archetype positions in each dimension and corresponding empirical p-values" />
+plot_dim_var() plot distribution of variance in archetype positions in each dimension and corresponding empirical p-values
+pch_fit() a constructor function for the &quot;pch_fit&quot; class" />
 <meta name="twitter:card" content="summary" />
 
 
@@ -73,7 +74,7 @@ plot_dim_var() plot distribution of variance in archetype positions in each dime
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.11</span>
       </span>
     </div>
 
@@ -137,14 +138,15 @@ plot_dim_var() plot distribution of variance in archetype positions in each dime
 <p><code>merge_arch_dist()</code> calculates distance to archtypes, and merges distance matrix to data that was used to identify archetypes, optionally adds other features of data points (through colData).</p>
 <p>plot.r_pch_fit() plot distribution of t-ratio, total variance in archetype positions and variance explained used to calculate empirical p-value</p>
 <p>plot_dim_var() plot distribution of variance in archetype positions in each dimension and corresponding empirical p-values</p>
+<p><code>pch_fit()</code> a constructor function for the "pch_fit" class</p>
     
     </div>
 
     <pre class="usage"><span class='fu'>fit_pch</span>(<span class='no'>data</span>, <span class='kw'>noc</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>3</span>), <span class='kw'>I</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>U</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>delta</span> <span class='kw'>=</span> <span class='fl'>0</span>,
   <span class='kw'>verbose</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>conv_crit</span> <span class='kw'>=</span> <span class='fl'>1e-04</span>, <span class='kw'>maxiter</span> <span class='kw'>=</span> <span class='fl'>500</span>,
   <span class='kw'>check_installed</span> <span class='kw'>=</span> <span class='no'>T</span>, <span class='kw'>order_by</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/seq'>seq</a></span>(<span class='fl'>1</span>, <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>nrow</a></span>(<span class='no'>data</span>)),
-  <span class='kw'>order_type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"cosine"</span>, <span class='st'>"side"</span>, <span class='st'>"align"</span>)[<span class='fl'>3</span>],
-  <span class='kw'>volume_ratio</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"t_ratio"</span>, <span class='st'>"variance_ratio"</span>, <span class='st'>"none"</span>)[<span class='fl'>1</span>],
+  <span class='kw'>order_type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"align"</span>, <span class='st'>"cosine"</span>, <span class='st'>"side"</span>),
+  <span class='kw'>volume_ratio</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"t_ratio"</span>, <span class='st'>"variance_ratio"</span>, <span class='st'>"none"</span>),
   <span class='kw'>converge_else_fail</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>var_in_dims</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
   <span class='kw'>normalise_var</span> <span class='kw'>=</span> <span class='fl'>TRUE</span>, <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"pcha"</span>, <span class='st'>"kmeans"</span>),
   <span class='kw'>method_options</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>())
@@ -207,7 +209,10 @@ plot_dim_var() plot distribution of variance in archetype positions in each dime
   <span class='kw'>dim_names</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"V1"</span>, <span class='st'>"V2"</span>, <span class='st'>"V3"</span>, <span class='st'>"V4"</span>, <span class='st'>"V5"</span>, <span class='st'>"V6"</span>),
   <span class='kw'>colors</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"#1F77B4"</span>, <span class='st'>"#D62728"</span>, <span class='st'>"#2CA02C"</span>, <span class='st'>"#17BED0"</span>, <span class='st'>"#006400"</span>,
   <span class='st'>"#FF7E0F"</span>), <span class='kw'>nudge_y</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>nudge_x</span> <span class='kw'>=</span> <span class='fl'>0.5</span>, <span class='kw'>text_lab_size</span> <span class='kw'>=</span> <span class='fl'>4</span>,
-  <span class='kw'>line_size</span> <span class='kw'>=</span> <span class='fl'>0.5</span>)</pre>
+  <span class='kw'>line_size</span> <span class='kw'>=</span> <span class='fl'>0.5</span>)
+
+<span class='fu'>pch_fit</span>(<span class='no'>XC</span>, <span class='no'>S</span>, <span class='no'>C</span>, <span class='no'>SSE</span>, <span class='no'>varexpl</span>, <span class='no'>arc_vol</span>, <span class='no'>hull_vol</span>, <span class='no'>t_ratio</span>, <span class='no'>var_vert</span>,
+  <span class='no'>var_dim</span>, <span class='no'>total_var</span>, <span class='no'>summary</span>, <span class='no'>call</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -449,7 +454,7 @@ call - function call.</p>
     <span class='kw'>return_data</span> <span class='kw'>=</span> <span class='no'>T</span>, <span class='kw'>return_arc</span> <span class='kw'>=</span> <span class='no'>T</span>, <span class='kw'>sample_prop</span> <span class='kw'>=</span> <span class='fl'>0.65</span>,
     <span class='kw'>order_type</span> <span class='kw'>=</span> <span class='st'>"align"</span>, <span class='kw'>noc</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/integer'>as.integer</a></span>(<span class='fl'>3</span>),
     <span class='kw'>delta</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>bootstrap_type</span> <span class='kw'>=</span> <span class='st'>"cmq"</span>)</div><div class='output co'>#&gt; <span class='error'>Error in apply(x, MARGIN = MARGIN, FUN = function(x_i, n) {    x_i[sample.int(n, n, replace = replace, prob = prob)]}, n): dim(X) must have a positive length</span></div><div class='input'><span class='no'>p</span> <span class='kw'>=</span> <span class='fu'><a href='plot_arc.html'>plot_arc</a></span>(<span class='no'>arc_data</span>, <span class='no'>data</span>, <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>line_size</span> <span class='kw'>=</span> <span class='fl'>1</span>)</div><div class='output co'>#&gt; <span class='error'>Error in is(arch_data, "pch_fit"): object 'arc_data' not found</span></div><div class='input'><span class='co'># plot shapes of observed data and randomised data side-by-side using cowplot</span>
-<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>cowplot</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: package ‘cowplot’ was built under R version 3.5.2</span></div><div class='output co'>#&gt; <span class='message'>Loading required package: ggplot2</span></div><div class='output co'>#&gt; <span class='message'></span>
+<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/library'>library</a></span>(<span class='no'>cowplot</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: package ‘cowplot’ was built under R version 3.5.2</span></div><div class='output co'>#&gt; <span class='message'>Loading required package: ggplot2</span></div><div class='output co'>#&gt; <span class='warning'>Warning: package ‘ggplot2’ was built under R version 3.5.2</span></div><div class='output co'>#&gt; <span class='message'></span>
 #&gt; <span class='message'>Attaching package: ‘cowplot’</span></div><div class='output co'>#&gt; <span class='message'>The following object is masked from ‘package:ggplot2’:</span>
 #&gt; <span class='message'></span>
 #&gt; <span class='message'>    ggsave</span></div><div class='input'><span class='co'># create compound plot</span>

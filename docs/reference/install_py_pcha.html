@@ -64,7 +64,7 @@ select_conda is a helper function that tells R to use python conda environment c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.11</span>
       </span>
     </div>
 
@@ -123,7 +123,7 @@ select_conda is a helper function that tells R to use python conda environment c
     </div>
 
     <pre class="usage"><span class='fu'>install_py_pcha</span>(<span class='kw'>method</span> <span class='kw'>=</span> <span class='st'>"auto"</span>, <span class='kw'>conda</span> <span class='kw'>=</span> <span class='st'>"auto"</span>,
-  <span class='kw'>python_version</span> <span class='kw'>=</span> <span class='st'>"python 3.7.3"</span>, <span class='kw'>envname</span> <span class='kw'>=</span> <span class='st'>"reticulate_PCHA_37"</span>,
+  <span class='kw'>python_version</span> <span class='kw'>=</span> <span class='st'>"python 3.7.3"</span>, <span class='kw'>envname</span> <span class='kw'>=</span> <span class='st'>"reticulate_PCHA"</span>,
   <span class='kw'>overwrite_env</span> <span class='kw'>=</span> <span class='no'>F</span>, <span class='kw'>extra_packages</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/character'>character</a></span>(<span class='fl'>0</span>),
   <span class='kw'>packages</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"pip"</span>, <span class='st'>"py_pcha"</span>, <span class='st'>"numpy"</span>, <span class='st'>"scipy"</span>, <span class='st'>"datetime"</span>))</pre>
     
@@ -174,11 +174,7 @@ python -m pip install --user -i https://pypi.python.org/simple --upgrade pip set
 <span class='fu'>install_py_pcha</span>(<span class='kw'>extra_packages</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"tensorflow"</span>, <span class='st'>"pandas"</span>, <span class='st'>"keras"</span>, <span class='st'>"h5py"</span>,
                                    <span class='st'>"geosketch"</span>, <span class='st'>"pydot"</span>, <span class='st'>"sklearn"</span>, <span class='st'>"umap-learn"</span>))
 
-<span class='co'>## If installation fails with an error "Cannot fetch index base URL http://pypi.python.org/simple/" try this solution:</span>
-
-<span class='co'># "Older versions of pip and distribute default to http://pypi.python.org/simple, which no longer works. A solution is to install an up-to-date pip and distribute using pip install -i https://pypi.python.org/simple -U pip distribute into the virtual environment before running the rest of the build process."</span>
-
-<span class='co'># use command line to set directory for user libraries, update pip, setuptools, wheel in that directory, useful to add that directory to .bashrc PYTHONPATH=dir</span>
+<span class='co'>## See for installation details</span>
 <span class='co'># }</span></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">

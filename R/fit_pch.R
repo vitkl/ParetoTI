@@ -80,15 +80,22 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    delta = 0, verbose = FALSE, conv_crit = 1e-4,
                    maxiter = 500, check_installed = T,
                    order_by = seq(1, nrow(data)),
-                   order_type = c("cosine", "side", "align")[3],
-                   volume_ratio = c("t_ratio", "variance_ratio", "none")[1],
+                   order_type = c("align", "cosine", "side"),
+                   volume_ratio = c("t_ratio", "variance_ratio", "none"),
                    converge_else_fail = TRUE,
                    var_in_dims = FALSE, normalise_var = TRUE,
                    method = c("pcha", "kmeans"), method_options = list()) {
 
-  if(check_installed) .py_pcha_installed()
+  # check arguments
+  method = match.arg(method)
+  volume_ratio = match.arg(volume_ratio)
+  order_type = match.arg(order_type)
 
-  if(isTRUE(method[1] == "pcha")){
+
+  if(method == "pcha"){
+
+    if(check_installed) .py_pcha_installed()
+
     # run PCHA -------------------------------------------------------------------
 
     # coerce to matrix
@@ -112,8 +119,10 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     })
     #---------------------------------------------------------------------------
 
-  } else if(isTRUE(method[1] == "kmeans")) {
+  } else if(method == "kmeans") {
+
     # run k-means --------------------------------------------------------------
+
     # set defaults or replace them with provided options
     default = list(iter.max = 10, nstart = 1,
                    algorithm = c("Hartigan-Wong", "Lloyd", "Forgy",
@@ -122,19 +131,26 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     options = c(default[default_retain], method_options)
 
     res = kmeans(Matrix::t(data), centers = as.integer(noc),
-                 iter.max = default$iter.max, nstart = default$nstart,
-                 algorithm = default$algorithm, trace = default$trace)
-    res = list(XC = t(res$centers),
-               S = Matrix::sparseMatrix(i = res$cluster,
-                                        j = seq_len(length(res$cluster)), x = 1),
-               C = Matrix::sparseMatrix(i = res$cluster,
-                                        j = seq_len(length(res$cluster)), x = 0),
+                 iter.max = options$iter.max, nstart = options$nstart,
+                 algorithm = options$algorithm, trace = options$trace)
+
+    # Create S as binary cluster membership matrix
+    S = Matrix::sparseMatrix(i = res$cluster,
+                             j = seq_len(length(res$cluster)), x = 1)
+    # compute C so that X %*% C gives cluster averages
+    C = S / matrix(Matrix::rowSums(S), nrow = nrow(S), ncol = ncol(S), byrow = FALSE)
+    C = Matrix::t(C)
+
+    # create pch_fit object to be returned
+    res = list(XC = t(res$centers), S = S, C = C,
                SSE = res$tot.withinss, varexpl = res$betweenss / res$totss)
     if(!is.null(rownames(data))) rownames(res$XC) = rownames(data)
     colnames(res$XC) = NULL
     class(res) = "pch_fit"
+
     #---------------------------------------------------------------------------
-  } else stop("method should be pcha or kmeans")
+
+  }  else stop("method should be pcha or kmeans")
 
   if(is.null(res)) return(NULL)
 
@@ -145,7 +161,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     arch_order = .find_archetype_order(XC2, noc, order_type = order_type)
     res$XC = res$XC[, arch_order]
     res$S = res$S[arch_order, ]
-    res$C = res$C[arch_order, ]
+    res$C = res$C[, arch_order]
   } else {
     # when only one archetype make sure data is still in the matrix form
     res$XC = matrix(res$XC, length(res$XC), 1)
@@ -158,7 +174,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
   # when calculating convex hull and volume of the polytope
   # adjust number of dimensions to noc
   data_dim = seq(1, noc-1)
-  if(volume_ratio == "t_ratio" & nrow(data) >= length(data_dim) & noc > 2){
+  if(volume_ratio == "t_ratio" & nrow(data) >= length(data_dim) & noc > 2 & method != "poisson_aa"){
     # calculate volume or area of the polytope only when number of archetypes (noc) > number of dimenstions which means
     # find volume of the convex hull of the data
     hull_vol = fit_convhulln(data[data_dim, ], positions = FALSE)
@@ -201,7 +217,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 
   } else {
 
-    # 3 none
+    # 3 NA
 
     if(volume_ratio == "t_ratio" & isTRUE(converge_else_fail)) message(paste0("Convex hull and t-ratio not computed for noc: ", noc," and nrow(data) = ", nrow(data),". fit_pch() can calculate volume or area of the polytope only when\nthe number of archetypes (noc) > the number of dimensions (when polytope is convex):\ncheck that noc > nrow(data),\nselect only revelant dimensions or increase noc"))
     res$hull_vol = NA
@@ -1094,4 +1110,21 @@ plot_dim_var = function(rand_arch,
     res$var_dim$k = integer(0)
   }
   res
+}
+
+##' @rdname fit_pch
+##' @name pch_fit
+##' @description \code{pch_fit()} a constructor function for the "pch_fit" class
+##' @export pch_fit
+pch_fit = function(XC, S, C, SSE, varexpl, arc_vol, hull_vol, t_ratio, var_vert,
+                   var_dim, total_var, summary, call) {
+
+  # add integrity checks
+
+  # create object
+  structure(list(XC = XC, S = S, C = C, SSE = SSE, varexpl = varexpl,
+                 arc_vol = arc_vol, hull_vol = hull_vol, t_ratio = t_ratio,
+                 var_vert = var_vert, var_dim = var_dim, total_var = total_var,
+                 summary = summary, call = call),
+            class = "pch_fit")
 }

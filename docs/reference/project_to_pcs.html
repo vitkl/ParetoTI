@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Project archetype and data in low dimentions (PCA) — project_to_pcs • ParetoTI</title>
+<title>Project archetypes and data in PCA dimentions — project_to_pcs • ParetoTI</title>
 
 <!-- jquery -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
@@ -30,10 +30,10 @@
 
 
 
-<meta property="og:title" content="Project archetype and data in low dimentions (PCA) — project_to_pcs" />
+<meta property="og:title" content="Project archetypes and data in PCA dimentions — project_to_pcs" />
 
-<meta property="og:description" content="project_to_pcs() projects archetypes (arc_data) and data points (arc_data) to PC space. Data is standardised prior to PCA by default.
-project_from_pc() projects archetypes and data points to original space provided SVD decomposition results" />
+<meta property="og:description" content="project_to_pcs() projects archetypes (arc_data) and data points (arc_data) to PC space. Archetypes are projected into PC space of data, e.i. archetypes do not affect PCA and are just projected afterwards.
+project_from_pc() projects archetypes and data points to original space provided SVD decomposition results. Optionally do the reverse of log2 transformation to obtain normalised expression space." />
 <meta name="twitter:card" content="summary" />
 
 
@@ -64,7 +64,7 @@ project_from_pc() projects archetypes and data points to original space provided
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.11</span>
       </span>
     </div>
 
@@ -110,19 +110,24 @@ project_from_pc() projects archetypes and data points to original space provided
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Project archetype and data in low dimentions (PCA)</h1>
+    <h1>Project archetypes and data in PCA dimentions</h1>
     
     <div class="hidden name"><code>project_to_pcs.Rd</code></div>
     </div>
 
     <div class="ref-description">
     
-    <p>project_to_pcs() projects archetypes (<code>arc_data</code>) and data points (<code>arc_data</code>) to PC space. Data is standardised prior to PCA by default.</p>
-<p>project_from_pc() projects archetypes and data points to original space provided SVD decomposition results</p>
+    <p>project_to_pcs() projects archetypes (<code>arc_data</code>) and data points (<code>arc_data</code>) to PC space. Archetypes are projected into PC space of data, e.i. archetypes do not affect PCA and are just projected afterwards.</p>
+<p>project_from_pc() projects archetypes and data points to original space provided SVD decomposition results. Optionally do the reverse of log2 transformation to obtain normalised expression space.</p>
     
     </div>
 
-    <pre class="usage"><span class='fu'>project_to_pcs</span>(<span class='kw'>arc_data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>data</span>, <span class='kw'>n_dim</span> <span class='kw'>=</span> <span class='fl'>50</span>, <span class='kw'>s</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)</pre>
+    <pre class="usage"><span class='fu'>project_to_pcs</span>(<span class='kw'>arc_data</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='no'>data</span>, <span class='kw'>n_dim</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/nrow'>nrow</a></span>(<span class='no'>data</span>), <span class='kw'>s</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>pc_method</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"svd"</span>, <span class='st'>"irlba"</span>), <span class='kw'>log2</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>offset</span> <span class='kw'>=</span> <span class='fl'>1</span>,
+  <span class='kw'>zscore</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+
+<span class='fu'>project_from_pc</span>(<span class='no'>arc_data</span>, <span class='no'>s</span>, <span class='kw'>undo_zscore</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>undo_log2</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>,
+  <span class='kw'>offset</span> <span class='kw'>=</span> <span class='fl'>1</span>)</pre>
     
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -141,9 +146,38 @@ project_from_pc() projects archetypes and data points to original space provided
     </tr>
     <tr>
       <th>s</th>
-      <td><p>list 's' containing SVD decomposition results (U, d, Vt), standard deviation and mean of genes used for decomposition (sds, means)</p></td>
+      <td><p>list 's' containing SVD decomposition results (U, d, Vt), standard deviation and mean of genes used for decomposition (sd, means)</p></td>
+    </tr>
+    <tr>
+      <th>pc_method</th>
+      <td><p>method to use for finding PCs: <code><a href='https://www.rdocumentation.org/packages/base/topics/svd'>svd</a></code> or <code><a href='https://www.rdocumentation.org/packages/irlba/topics/irlba'>irlba</a></code></p></td>
+    </tr>
+    <tr>
+      <th>log2</th>
+      <td><p>log2-transform before to z-scoring and PC-projection</p></td>
+    </tr>
+    <tr>
+      <th>offset</th>
+      <td><p>log2 transformation offset (e.g. <code><a href='https://www.rdocumentation.org/packages/base/topics/Log'>log2(x + offset)</a></code>)</p></td>
+    </tr>
+    <tr>
+      <th>zscore</th>
+      <td><p>standardise (substract the mean and divide by standard deviation) prior to PC-projection</p></td>
+    </tr>
+    <tr>
+      <th>undo_zscore</th>
+      <td><p>undo z-scoring by multiplying by standard deviation and adding the mean? Undo z-scoring precedes exponentiation.</p></td>
+    </tr>
+    <tr>
+      <th>undo_log2</th>
+      <td><p>undo log2-transformation by exponentiating and substracting pseudocount?</p></td>
     </tr>
     </table>
+    
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>project_to_pcs(): list with projected $data, archetypes ($arc_data) and $s list of decomposition matrices, sds and means</p>
+<p>project_from_pc(): archetypes projected to data space</p>
     
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
@@ -151,13 +185,34 @@ project_from_pc() projects archetypes and data points to original space provided
 <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/Random'>set.seed</a></span>(<span class='fl'>4355</span>)
 <span class='no'>arc_data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_arc</a></span>(<span class='kw'>arc_coord</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(<span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='fl'>5</span>, <span class='fl'>0</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>10</span>, <span class='fl'>15</span>), <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(-<span class='fl'>30</span>, -<span class='fl'>20</span>)),
                           <span class='kw'>mean</span> <span class='kw'>=</span> <span class='fl'>0</span>, <span class='kw'>sd</span> <span class='kw'>=</span> <span class='fl'>1</span>)
-<span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>arc_data</span>$<span class='no'>XC</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)</div></pre>
+<span class='no'>data</span> <span class='kw'>=</span> <span class='fu'><a href='generate_arc.html'>generate_data</a></span>(<span class='no'>arc_data</span>$<span class='no'>XC</span>, <span class='kw'>N_examples</span> <span class='kw'>=</span> <span class='fl'>1e4</span>, <span class='kw'>jiiter</span> <span class='kw'>=</span> <span class='fl'>0.04</span>, <span class='kw'>size</span> <span class='kw'>=</span> <span class='fl'>0.9</span>)
+<span class='co'># Plot</span>
+<span class='fu'><a href='plot_arc.html'>plot_arc</a></span>(<span class='kw'>arch_data</span> <span class='kw'>=</span> <span class='no'>arc_data</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>,
+         <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>data_alpha</span> <span class='kw'>=</span> <span class='fl'>0.5</span>) +
+         <span class='kw pkg'>ggplot2</span><span class='kw ns'>::</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span>()</div><div class='img'><img src='project_to_pcs-1.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='co'># Project to PCs (in this case just rotate to align x-axis with</span>
+<span class='co'>#                  the axis of most variation because the data is already 2D)</span>
+<span class='no'>pcs</span> <span class='kw'>=</span> <span class='fu'>project_to_pcs</span>(<span class='no'>arc_data</span>, <span class='no'>data</span>, <span class='kw'>n_dim</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>pc_method</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"svd"</span>, <span class='st'>"irlba"</span>)[<span class='fl'>1</span>])
+<span class='co'># Plot in PC coordinates</span>
+<span class='fu'><a href='plot_arc.html'>plot_arc</a></span>(<span class='kw'>arch_data</span> <span class='kw'>=</span> <span class='no'>pcs</span>$<span class='no'>arc_data</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>pcs</span>$<span class='no'>data</span>,
+         <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>data_alpha</span> <span class='kw'>=</span> <span class='fl'>0.5</span>) +
+         <span class='kw pkg'>ggplot2</span><span class='kw ns'>::</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span>()</div><div class='img'><img src='project_to_pcs-2.png' alt='' width='700' height='433' /></div><div class='input'>
+<span class='co'># Project from PCs back to expression</span>
+<span class='no'>projected</span> <span class='kw'>=</span> <span class='fu'>project_from_pc</span>(<span class='no'>pcs</span>$<span class='no'>arc_data</span>, <span class='no'>pcs</span>$<span class='no'>s</span>,
+                            <span class='kw'>undo_zscore</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>undo_log2</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+
+<span class='co'># Plot plot in projected coordinates</span>
+<span class='fu'><a href='plot_arc.html'>plot_arc</a></span>(<span class='kw'>arch_data</span> <span class='kw'>=</span> <span class='no'>projected</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>data</span>,
+         <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>, <span class='kw'>data_alpha</span> <span class='kw'>=</span> <span class='fl'>0.5</span>) +
+         <span class='kw pkg'>ggplot2</span><span class='kw ns'>::</span><span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span>()</div><div class='img'><img src='project_to_pcs-3.png' alt='' width='700' height='433' /></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>
     <ul class="nav nav-pills nav-stacked">
       <li><a href="#arguments">Arguments</a></li>
-            
+      
+      <li><a href="#value">Value</a></li>
+      
       <li><a href="#examples">Examples</a></li>
     </ul>
 

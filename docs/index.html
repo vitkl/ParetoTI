@@ -5,11 +5,11 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data (based on ParTI)  • ParetoTI</title>
+<title>R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data • ParetoTI</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
-<script src="pkgdown.js"></script><meta property="og:title" content="R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data (based on ParTI) ">
+<script src="pkgdown.js"></script><meta property="og:title" content="R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data">
 <meta property="og:description" content="R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data, partially based on ParTI described in
     Yuval Hart &amp; Uri Alon paper in Nature Methods (2015):
     Inferring biological tasks using Pareto analysis of high-dimensional data.
@@ -43,7 +43,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.9</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.11</span>
       </span>
     </div>
 
@@ -126,7 +126,8 @@ BiocManager<span class="op">::</span><span class="kw"><a href="https://www.rdocu
 <span class="co"># Install python dependencies (like py_pcha) into python conda environment,</span>
 <span class="co"># and (optionally) install *extra_packages*.</span>
 ParetoTI<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/ParetoTI/topics/install_py_pcha">install_py_pcha</a></span>(<span class="dt">method =</span> <span class="st">"conda"</span>, 
-                          <span class="dt">extra_packages =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"tensorflow"</span>, <span class="st">"pandas"</span>, <span class="st">"keras"</span>, <span class="st">"h5py"</span>,
+                          <span class="dt">extra_packages =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"tensorflow"</span>, <span class="st">"tensorflow-probability"</span>,
+                                        <span class="st">"pandas"</span>, <span class="st">"keras"</span>, <span class="st">"h5py"</span>,
                                         <span class="st">"geosketch"</span>, <span class="st">"pydot"</span>, <span class="st">"scikit-learn==0.20"</span>,
                                         <span class="st">"umap-learn"</span>))</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># If no conda manager installed on your machine, install python 3 miniconda distribution:</span>
@@ -140,13 +141,17 @@ conda create <span class="op">-</span>n reticulate_PCHA python<span class="op">=
 <span class="co"># Light install:    </span>
 source activate reticulate_PCHA <span class="op">&amp;&amp;</span> pip install <span class="op">--</span>upgrade py_pcha numpy scipy datetime geosketch umap<span class="op">-</span>learn    
 <span class="co"># To use more features:    </span>
-source activate reticulate_PCHA <span class="op">&amp;&amp;</span> pip install <span class="op">--</span>upgrade py_pcha numpy scipy datetime tensorflow pandas keras h5py geosketch pydot sklearn umap<span class="op">-</span>learn    
+source activate reticulate_PCHA <span class="op">&amp;&amp;</span> pip install <span class="op">--</span>upgrade py_pcha numpy scipy datetime tensorflow tensorflow<span class="op">-</span>probability pandas keras h5py geosketch pydot sklearn umap<span class="op">-</span>learn    
 
-<span class="co"># On some platforms R sees only the "base" conda enviroment (like RStudio Server)    </span>
+<span class="co"># Sometimes on some platforms R sees only the "base" conda enviroment </span>
+<span class="co"># (like when RStudio Server is setup incorrectly)    </span>
 <span class="co"># In that case use:</span>
 source activate base <span class="op">&amp;&amp;</span> pip install <span class="op">--</span>upgrade py_pcha numpy scipy datetime geosketch umap<span class="op">-</span>learn</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Finally, check that py_pcha library is successfully installed and discoverable</span>
 reticulate<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/reticulate/topics/py_discover_config">py_discover_config</a></span>(<span class="st">"py_pcha"</span>)</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># To make sure R uses the correct conda enviroment you can run this when you start R:</span>
+reticulate<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/reticulate/topics/use_python">use_condaenv</a></span>(<span class="st">"reticulate_PCHA"</span>, <span class="dt">conda =</span> <span class="st">"auto"</span>,
+                         <span class="dt">required =</span> <span class="ot">TRUE</span>) <span class="co"># set TRUE to force R to use reticulate_PCHA</span></code></pre></div>
 <p><strong>Example: Finding archetypes in data created by simulating a triangle </strong></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ParetoTI)
 <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)
@@ -165,24 +170,24 @@ arc_data =<span class="st"> </span><span class="kw"><a href="reference/fit_pch.h
 <span class="co"># Plot static 2D scatterplot using ggplot2</span>
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_data, <span class="dt">data =</span> data,
          <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
-<span class="st">  </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()
+<span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()
   
 <span class="co"># Plot data as 2D density rather than scatterplot</span>
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_data, <span class="dt">data =</span> data,
     <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="dt">geom =</span> ggplot2<span class="op">::</span>geom_bin2d) <span class="op">+</span>
-<span class="st">  </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</code></pre></div>
+<span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Project to UMAP coordinates (3D -&gt; 2D)</span>
 arc_umap =<span class="st"> </span><span class="kw"><a href="reference/plot_arc.html">arch_to_umap</a></span>(arc_data, data, <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,
                         <span class="dt">method =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"naive"</span>, <span class="co"># implemented in R and slow</span>
                                    <span class="st">"umap-learn"</span>)) <span class="co"># requires python module</span>
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_umap<span class="op">$</span>arch_data, <span class="dt">data =</span> arc_umap<span class="op">$</span>data,
     <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
-<span class="st">    </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</code></pre></div>
+<span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Project to tSNE coordinates (3D -&gt; 2D, requires Rtsne package)</span>
 arc_tsne =<span class="st"> </span><span class="kw"><a href="reference/plot_arc.html">arch_to_tsne</a></span>(arc_data, data, <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>)
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_tsne<span class="op">$</span>arch_data, <span class="dt">data =</span> arc_tsne<span class="op">$</span>data,
     <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
-<span class="st">    </span><span class="kw"><a href="https://www.rdocumentation.org/packages/ggplot2/topics/ggtheme">theme_bw</a></span>()</code></pre></div>
+<span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</code></pre></div>
 </div>
 </div>
 <div id="details-and-comparison-to-parti-in-matlab" class="section level3">

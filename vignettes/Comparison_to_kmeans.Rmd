@@ -26,7 +26,7 @@ archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20
 data = generate_data(archetypes$XC, N_examples = 1e3, jiiter = 0.04, size = 0.99)
 
 # plot
-plot_arc(arch_data = archetypes, data = data,
+plot_arc(arc_data = archetypes, data = data,
          which_dimensions = 1:2) + ylim(-19, 17) +
   ggtitle("Ground truth archetypes")
 ```
@@ -40,10 +40,10 @@ arc = fit_pch(data, noc = 3)
 clusters = fit_pch(data, noc = 3, method = "kmeans")
 
 # show both side-by-side
-plot_grid(plot_arc(arch_data = arc, data = data,
+plot_grid(plot_arc(arc_data = arc, data = data,
                    which_dimensions = 1:2) +
             ylim(-18, 17) + ggtitle("Detected archetypes (PCHA)"),
-          plot_arc(arch_data = clusters, data = data,
+          plot_arc(arc_data = clusters, data = data,
                    which_dimensions = 1:2,
                    data_lab = as.character(apply(clusters$S, 2, which.max))) +
             ylim(-18, 17) + ggtitle("K-means clusters"),
@@ -61,10 +61,10 @@ clusters_rob = fit_pch_bootstrap(data, n = 200, sample_prop = 0.65, seed = 2543,
                                  noc = 3, method = "kmeans")
 
 # show both side-by-side
-plot_grid(plot_arc(arch_data = arc_rob, data = data,
+plot_grid(plot_arc(arc_data = arc_rob, data = data,
                    which_dimensions = 1:2) +
             ylim(-18, 17) + ggtitle("Detected archetypes (PCHA)"),
-          plot_arc(arch_data = clusters_rob, data = data,
+          plot_arc(arc_data = clusters_rob, data = data,
                    which_dimensions = 1:2,
                    data_lab = as.character(apply(clusters$S, 2, which.max))) +
             ylim(-18, 17) + ggtitle("K-means clusters"),

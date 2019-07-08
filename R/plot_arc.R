@@ -32,11 +32,11 @@
 ##' archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
 ##'                           mean = 0, sd = 1)
 ##' data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
-##' plot_arc(arch_data = archetypes, data = data,
+##' plot_arc(arc_data = archetypes, data = data,
 ##'     which_dimensions = 1:2) +
 ##'     theme_bw()
 ##' # Plot data as 2D density rather than points
-##' plot_arc(arch_data = archetypes, data = data,
+##' plot_arc(arc_data = archetypes, data = data,
 ##'     which_dimensions = 1:2, geom = ggplot2::geom_bin2d)
 ##'
 ##' # Random data that fits into the triangle (3D)
@@ -45,12 +45,12 @@
 ##'                           mean = 0, sd = 1)
 ##' data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 ##'
-##' plot_arc(arch_data = archetypes, data = data,
+##' plot_arc(arc_data = archetypes, data = data,
 ##'     which_dimensions = 1:3)
 ##'
 ##' # Project to tSNE coordinates (from 3D to 2D)
 ##' arc_tsne = arch_to_tsne(archetypes, data, which_dimensions = 1:2)
-##' plot_arc(arch_data = arc_tsne$arch_data, data = arc_tsne$data,
+##' plot_arc(arc_data = arc_tsne$arc_data, data = arc_tsne$data,
 ##'     which_dimensions = 1:2) +
 ##'     theme_bw()
 ##'
@@ -58,10 +58,10 @@
 ##' arc_umap = arch_to_umap(archetypes, data, which_dimensions = 1:2,
 ##'                         method = c("naive", # implemented in R and slow
 ##'                                    "umap-learn")) # requires python module
-##' plot_arc(arch_data = arc_umap$arch_data, data = arc_umap$data,
+##' plot_arc(arc_data = arc_umap$arc_data, data = arc_umap$data,
 ##'     which_dimensions = 1:2) +
 ##'     theme_bw()
-plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
+plot_arc = function(arc_data = NULL, data, which_dimensions = as.integer(1:2),
                     type = c("average", "all")[1], average_func = mean,
                     geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
                     colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"),
@@ -76,15 +76,15 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
   if((uniqueN(data_lab) + uniqueN(arc_lab)) > uniqueN(colors) & !is.integer(data_lab) & ! is.numeric(data_lab)) {
     stop("uniqueN(data_lab) > colors, please add more colors")
   }
-  if(length(arc_lab) > 1 & !(is(arch_data, "pch_fit") |
-                             is(arch_data, "random_arc") | is.null(arch_data))) {
+  if(length(arc_lab) > 1 & !(is(arc_data, "pch_fit") |
+                             is(arc_data, "random_arc") | is.null(arc_data))) {
     stop("Archetype labels can be used only with single fit of the model
-          - class(arch_data) == 'pch_fit'")
+          - class(arc_data) == 'pch_fit'")
   }
 
-  if(!is.null(arch_data)) {
+  if(!is.null(arc_data)) {
 
-    for_plot = ParetoTI:::.arc_data_table(arch_data, data,
+    for_plot = ParetoTI:::.arc_data_table(arc_data, data,
                                           data_lab = data_lab, arc_lab = arc_lab,
                                           which_dimensions = which_dimensions)
 
@@ -92,7 +92,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     if(arc_names_num) for_plot$arc_data[, arch_id := gsub("^.+_|$", "", arch_id)]
 
     lines_for_plot = ParetoTI:::.archLines(for_plot$arc_data, arc_lab = arc_lab,
-                                           pch_fit = is(arch_data, "pch_fit") | is(arch_data, "random_arc"),
+                                           pch_fit = is(arc_data, "pch_fit") | is(arc_data, "random_arc"),
                                            type, average_func)
 
   } else {
@@ -102,7 +102,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     for_plot$data$lab = data_lab
 
   }
-  if(is(arch_data, "b_pch_fit") & type == "average"){
+  if(is(arc_data, "b_pch_fit") & type == "average"){
 
     for_plot$arc_data[grepl("archetypes", lab), lab := "archetypes"]
     for_plot$arc_data[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
@@ -113,7 +113,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     gg_line_size = 1.5
 
   } else {
-    if(!is.null(arch_data)) {
+    if(!is.null(arc_data)) {
 
       for_plot$arc_data[, lab := factor(lab, levels = sort(unique(lab), decreasing = TRUE))]
       setorder(for_plot$arc_data, lab)
@@ -217,7 +217,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                                                      group = lab, colour = lab), size = gg_arch_size,
                                         color = arc_line_colors)
 
-      if(uniqueN(arch_data$summary$k) == 1){
+      if(uniqueN(arc_data$summary$k) == 1){
         plot = plot +
           ggplot2::geom_text(data = unique(lines_for_plot), inherit.aes = FALSE,
                              ggplot2::aes(x = get(x), y = get(y), label = arch_id,
@@ -286,7 +286,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
                   marker = list(size = ly_arch_size, color = arc_line_colors),
                   line = list(width = ly_line_size, color = arc_line_colors),
                   inherit = TRUE)
-      if(uniqueN(arch_data$summary$k) == 1){
+      if(uniqueN(arc_data$summary$k) == 1){
         plot = add_text(p = plot, mode = "markers", showlegend = FALSE,
                         x = x, y = y, z = z, textposition = "top center",
                         colors = ~ lab, name = ~ lab,
@@ -314,7 +314,7 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
     for (i in seq_len(nrow(combs))) {
       dims = as.integer(combs[i, ])
 
-      p_pca = plot_arc(arch_data = arch_data, data = data,
+      p_pca = plot_arc(arc_data = arc_data, data = data,
                        which_dimensions = dims,
                        type = type, average_func = average_func,
                        geom = geom, colors = colors,
@@ -340,20 +340,20 @@ plot_arc = function(arch_data = NULL, data, which_dimensions = as.integer(1:2),
 ##' @param pca perform PCA? Argument to \code{\link[Rtsne]{Rtsne}}.
 ##' @param partial_pca perform partial PCA? Argument to \code{\link[Rtsne]{Rtsne}}.
 ##' @param ... additional arguments to \code{\link[Rtsne]{Rtsne}} and \code{\link[umap]{umap}}.
-##' @return arch_to_tsne() list with: arch_data containing archetype positions in tSNE coordinates, and data positions in tSNE coordinates
+##' @return arch_to_tsne() list with: arc_data containing archetype positions in tSNE coordinates, and data positions in tSNE coordinates
 ##' @export arch_to_tsne
-arch_to_tsne = function(arch_data, data, which_dimensions = 1:2,
+arch_to_tsne = function(arc_data, data, which_dimensions = 1:2,
                         pca = FALSE, partial_pca = FALSE, ...) {
 
-  if(!(is(arch_data, "pch_fit") | is(arch_data, "random_arc"))) {
-    arch_data = average_pch_fits(arch_data)
+  if(!(is(arc_data, "pch_fit") | is(arc_data, "random_arc"))) {
+    arc_data = average_pch_fits(arc_data)
   }
 
   # set names if archetypes are not named
-  if(is.null(colnames(arch_data$XC))) {
-    colnames(arch_data$XC) = paste0("archetype_", seq_len(ncol(arch_data$XC)))
+  if(is.null(colnames(arc_data$XC))) {
+    colnames(arc_data$XC) = paste0("archetype_", seq_len(ncol(arc_data$XC)))
   }
-  for_tnse = t(cbind(data, arch_data$XC))
+  for_tnse = t(cbind(data, arc_data$XC))
 
   tnse = Rtsne::Rtsne(for_tnse, which_dimensions[2], pca = pca,
                       partial_pca = partial_pca, ...)
@@ -361,9 +361,9 @@ arch_to_tsne = function(arch_data, data, which_dimensions = 1:2,
   colnames(tnse) = paste0("TSNE", seq_len(ncol(tnse)))
   rownames(tnse) = rownames(for_tnse)
 
-  arch_data$XC = t(tnse[colnames(arch_data$XC),])
+  arc_data$XC = t(tnse[colnames(arc_data$XC),])
 
-  list(arch_data = arch_data, data = t(tnse[seq_len(ncol(data)),]))
+  list(arc_data = arc_data, data = t(tnse[seq_len(ncol(data)),]))
 }
 
 ##' @rdname plot_arc
@@ -373,23 +373,23 @@ arch_to_tsne = function(arch_data, data, which_dimensions = 1:2,
 ##' @param n_neighbors sensible default for \code{\link[umap]{umap}}, pass other parameters via ...
 ##' @param min_dist sensible default for \code{\link[umap]{umap}}
 ##' @param metric sensible default for \code{\link[umap]{umap}}
-##' @return arch_to_umap() list with: arch_data containing archetype positions in UMAP coordinates, data positions in UMAP coordinates, and umap_config parameters used to find this representation.
+##' @return arch_to_umap() list with: arc_data containing archetype positions in UMAP coordinates, data positions in UMAP coordinates, and umap_config parameters used to find this representation.
 ##' @export arch_to_umap
-arch_to_umap = function(arch_data, data, which_dimensions = 1:2,
+arch_to_umap = function(arc_data, data, which_dimensions = 1:2,
                         method = c("naive", "umap-learn")[1],
                         n_neighbors = 30L, min_dist = 0.3,
                         metric = ifelse(method[1] == "umap-learn",
                                         "correlation", "euclidean"), ...) {
 
-  if(!(is(arch_data, "pch_fit") | is(arch_data, "random_arc"))) {
-    arch_data = average_pch_fits(arch_data)
+  if(!(is(arc_data, "pch_fit") | is(arc_data, "random_arc"))) {
+    arc_data = average_pch_fits(arc_data)
   }
 
   # set names if archetypes are not named
-  if(is.null(colnames(arch_data$XC))) {
-    colnames(arch_data$XC) = paste0("archetype_", seq_len(ncol(arch_data$XC)))
+  if(is.null(colnames(arc_data$XC))) {
+    colnames(arc_data$XC) = paste0("archetype_", seq_len(ncol(arc_data$XC)))
   }
-  for_umap = t(cbind(data, arch_data$XC))
+  for_umap = t(cbind(data, arc_data$XC))
 
   umap_out = umap::umap(for_umap, n_components = which_dimensions[2],
                         method = method[1],
@@ -400,9 +400,9 @@ arch_to_umap = function(arch_data, data, which_dimensions = 1:2,
   colnames(umap_out) = paste0("UMAP", seq_len(ncol(umap_out)))
   rownames(umap_out) = rownames(for_umap)
 
-  arch_data$XC = t(umap_out[colnames(arch_data$XC),])
+  arc_data$XC = t(umap_out[colnames(arc_data$XC),])
 
-  list(arch_data = arch_data, data = t(umap_out[seq_len(ncol(data)),]),
+  list(arc_data = arc_data, data = t(umap_out[seq_len(ncol(data)),]),
        umap_config = umap_config)
 }
 

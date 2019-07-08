@@ -21,7 +21,7 @@
 ##' data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 ##' arc_data = k_fit_pch(data, ks = 1:4, check_installed = T, delta=0.1, order_by_side = F)
 ##' # Show polytopes and the data
-##' plot_arc(arch_data = arc_data, data = data,
+##' plot_arc(arc_data = arc_data, data = data,
 ##'          which_dimensions = 1:2, type = "all", arch_size = 2,
 ##'          colors = c("#D62728", "#1F77B4", "#2CA02C", "#17BED0", "grey")) +
 ##'   theme_bw()

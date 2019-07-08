@@ -24,7 +24,7 @@ data = generate_data(arc_data$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 #arc_data = fit_pch_bootstrap(data, n = 10, sample_prop = 0.5, noc = as.integer(3))
 arc_data = fit_pch(data, noc = as.integer(3))
 # Plot
-plot_arc(arch_data = arc_data, data = data,
+plot_arc(arc_data = arc_data, data = data,
          which_dimensions = 1:2, data_alpha = 0.5) +
   ggplot2::theme_bw()
 
@@ -34,7 +34,7 @@ pcs = project_to_pcs(arc_data, data, n_dim = 3,
                      pc_method = c("svd", "irlba")[1],
                      zscore = F, log2 = F, offset = 2)
 # Plot in PC coordinates
-plot_arc(arch_data = pcs$arc_data, data = pcs$data,
+plot_arc(arc_data = pcs$arc_data, data = pcs$data,
          which_dimensions = 1:2, data_alpha = 0.5) +
   ggplot2::theme_bw()
 
@@ -43,7 +43,7 @@ projected = project_from_pc(pcs$arc_data, pcs$s,
                             undo_zscore = F, undo_log2 = F, offset = 2)
 
 # Plot plot in projected coordinates
-plot_arc(arch_data = projected, data = data,
+plot_arc(arc_data = projected, data = data,
          which_dimensions = 1:2, data_alpha = 0.5) +
   ggplot2::theme_bw()
 
@@ -106,11 +106,11 @@ set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
                           mean = 0, sd = 1)
 data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
-plot_arc(arch_data = archetypes, data = data,
+plot_arc(arc_data = archetypes, data = data,
          which_dimensions = 1:2) +
   ggplot2::theme_bw()
 # Plot data as 2D density rather than points
-plot_arc(arch_data = archetypes, data = data,
+plot_arc(arc_data = archetypes, data = data,
          which_dimensions = 1:2, geom = ggplot2::geom_bin2d) +
   ggplot2::theme_bw()
 
@@ -119,14 +119,14 @@ set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20, -5)),
                           mean = 0, sd = 1)
 data = generate_data(archetypes$XC, N_examples = 1e3, jiiter = 0.04, size = 0.99)
-plot_arc(arch_data = archetypes, data = data,
+plot_arc(arc_data = archetypes, data = data,
          which_dimensions = 1:3, data_alpha = 0.5)
 
 # test fitPCH
 arc_data = fit_pch(data, noc = as.integer(3), delta = 0)
-plot_arc(arch_data = arc_data, data = data,
+plot_arc(arc_data = arc_data, data = data,
          which_dimensions = 1:3)
-plot_arc(arch_data = arc_data, data = data,
+plot_arc(arc_data = arc_data, data = data,
          which_dimensions = 1:2, data_alpha = 0.5) +
   ggplot2::theme_bw()
 
@@ -136,7 +136,7 @@ rownames( data) = paste0("R_", 1:3)
 
 # test projection to PCs
 pcs = project_to_pcs(arc_data, data, n_dim = 3, pc_method = c("svd", "irlba")[1])
-plot_arc(arch_data = pcs$arc_data, data = pcs$data,
+plot_arc(arc_data = pcs$arc_data, data = pcs$data,
          which_dimensions = 1:2, data_alpha = 0.5) +
   ggplot2::theme_bw()
 
@@ -214,9 +214,9 @@ arc = fit_pch(data, noc = 4)
 # find clusters
 clusters = fit_pch(data, noc = 4, method = "kmeans")
 
-plot_grid(plot_arc(arch_data = arc, data = data,
+plot_grid(plot_arc(arc_data = arc, data = data,
                    which_dimensions = 1:2) + ylim(-18, 17),
-          plot_arc(arch_data = clusters, data = data,
+          plot_arc(arc_data = clusters, data = data,
                    which_dimensions = 1:2,
                    data_lab = as.character(apply(clusters$S, 2, which.max))) + ylim(-18, 17),
           align = "vh")
@@ -224,7 +224,7 @@ plot_grid(plot_arc(arch_data = arc, data = data,
 # bootstrap with kmeans
 clusters_rob = fit_pch_bootstrap(data, n = 200, sample_prop = 0.65, seed = 2543,
                                  noc=4, method = "kmeans")
-plot_arc(arch_data = clusters_rob, data = data,
+plot_arc(arc_data = clusters_rob, data = data,
          which_dimensions = 1:2,
          data_lab = as.character(apply(clusters$S, 2, which.max))) + ylim(-18, 17)
 
@@ -281,18 +281,18 @@ ggplot(res, aes(x = value, fill = type)) +
   scale_y_log10() +
   theme_bw()
 
-plot_arc(arch_data = arc_data_rob_cmq, data = data,
+plot_arc(arc_data = arc_data_rob_cmq, data = data,
          which_dimensions = 1:3, line_size = 1.5)
-plot_arc(arch_data = arc_data_rob_cmq, data = data,
+plot_arc(arc_data = arc_data_rob_cmq, data = data,
          which_dimensions = 1:2, line_size = 1) +
   theme_bw()
 
 # test function for different k
 arc_ks = k_fit_pch(data, ks = 1:4, check_installed = T, delta=0)
-plot_arc(arch_data = arc_ks, data = data,
+plot_arc(arc_data = arc_ks, data = data,
          which_dimensions = 1:3, type = "all", arch_size = 2,
          colors = c("#D62728", "#1F77B4", "#2CA02C", "#17BED0", "grey"))
-plot_arc(arch_data = arc_ks, data = data,
+plot_arc(arc_data = arc_ks, data = data,
          which_dimensions = 1:2, type = "all", arch_size = 2,
          colors = c("#D62728", "#1F77B4", "#2CA02C", "#17BED0", "grey")) +
   theme_bw()
@@ -360,7 +360,7 @@ microbenchmark::microbenchmark({
 }, times = 10)
 res$XC = as.matrix(res$XC)
 class(res) = "pch_fit"
-plot_arc(arch_data = res, data = data,
+plot_arc(arc_data = res, data = data,
          which_dimensions = 1:3)
 
 # set directory for user libraries, update pip, setuptools, wheel in that environment
@@ -380,7 +380,7 @@ pkgdown::build_site()
 ## illustrations for rotation report
 
 
-plot_arc(arch_data = arc_data, data = data,
+plot_arc(arc_data = arc_data, data = data,
          which_dimensions = 1:2,
          nudge = c(0, 0.1),
          colors = c("#FFC003", "#D62728")) +
@@ -392,7 +392,7 @@ archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-20, 10, 0), c(-10, -10
 data = generate_data(archetypes$XC, N_examples = 5*1e2, jiiter = 0.04, size = 0.9)
 arc_data = fit_pch(data, noc = as.integer(3), # number of vertices = 3
                    delta = 0)
-plot_arc(arch_data = arc_data, data = data,
+plot_arc(arc_data = arc_data, data = data,
          which_dimensions = 1:2,
          nudge = c(0, 0.1),
          colors = c("#747171", "#D62728")) +
@@ -447,7 +447,7 @@ set.seed(4355)
 archetypes3 = generate_arc(arc_coord = list(c(5, 0, 17, 4), c(-10, 15, -10, 8), c(-20, -20, 5, 1)),
                           mean = 0, sd = 1)
 data3 = generate_data(archetypes3$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
-p1 = plot_arc(arch_data = archetypes3, data = data3,
+p1 = plot_arc(arc_data = archetypes3, data = data3,
          which_dimensions = 1:2) +
   ggplot2::theme_bw()
 
@@ -455,7 +455,7 @@ p1 = plot_arc(arch_data = archetypes3, data = data3,
 archetypes2 = generate_arc(arc_coord = list(c(5, -2, 3, -1)*3, c(-2, 1.5, 2, 3)*3),
                           mean = 0, sd = 1)
 data2 = generate_data(archetypes2$XC, N_examples = 1e4, jiiter = 0.04, size = 0.99)
-p2 = plot_arc(arch_data = archetypes2, data = data2,
+p2 = plot_arc(arc_data = archetypes2, data = data2,
          which_dimensions = 1:2) +
   ggplot2::theme_bw()
 
@@ -463,7 +463,7 @@ data_mix = rbind(data3, data2)
 arc_data = k_fit_pch(data_mix, k = 1:8, delta = 0, volume_ratio = "none")
 
 u_data = arch_to_umap(arc_data, data_mix, method = "umap-learn", metric = "euclidean")
-p3 = plot_arc(arch_data = u_data$arch_data, data = u_data$data,
+p3 = plot_arc(arc_data = u_data$arc_data, data = u_data$data,
          which_dimensions = 1:2, line_size = 0) +
   ggplot2::theme_bw()
 p3

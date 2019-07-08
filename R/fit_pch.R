@@ -871,22 +871,22 @@ fit_convhulln = function(data, positions = TRUE) {
 ##' @param feature_data matrix with dim(dimensions, examples) where rownames are feature names and colnames are sample_id.
 ##' @param colData annotations of examples in feature_data - dim(examples, dimensions), e.g. colData in SingleCellExperiment object or output of \link[ParetoTI]{find_set_activity_AUCell}.
 ##' @param colData_id column in colData that contains values matching colnames of feature_data.
-##' @param dist_metric how to describe distance to archetypes. Currently euclidean distance and archetype weights are implemented. Archetypes weights come from \code{arch_data$S} matrix so bootstrapped archetype positions cannot be used - only single fit to all data.
+##' @param dist_metric how to describe distance to archetypes. Currently euclidean distance and archetype weights are implemented. Archetypes weights come from \code{arc_data$S} matrix so bootstrapped archetype positions cannot be used - only single fit to all data.
 ##' @param rank rank by distance metric (euclidean distance)?
 ##' @return \code{merge_arch_dist()} list: data.table with samples in rows (speficied by sample_id column) and features in columns (including distance to archetypes); and character vectors listing names of archetypes, feature columns and colData columns.
 ##' @export merge_arch_dist
 ##' @import data.table
-merge_arch_dist = function(arch_data, data, feature_data,
+merge_arch_dist = function(arc_data, data, feature_data,
                            colData = NULL, colData_id,
                            dist_metric = c("euclidean", "arch_weights")[1],
                            rank = TRUE){
 
-  if(!is(arch_data, "pch_fit")) stop("arch_data should contain a single fit (pch_fit object): use fit_pch() or fit_pch_bootstrap() followed by average_pch_fits()")
+  if(!is(arc_data, "pch_fit")) stop("arc_data should contain a single fit (pch_fit object): use fit_pch() or fit_pch_bootstrap() followed by average_pch_fits()")
 
   # find distance of data points to archetypes ---------------------------------
   if(dist_metric == "arch_weights"){
 
-    dist = 1 - t(arch_data$S)
+    dist = 1 - t(arc_data$S)
     if(is.null(colnames(dist))) {
       colnames(dist) = paste0("archetype_", seq_len(ncol(dist))) # archetype names
     }
@@ -896,7 +896,7 @@ merge_arch_dist = function(arch_data, data, feature_data,
 
   } else if(dist_metric == "euclidean") {
 
-    dist = arch_dist(data, arch_data$XC, dist_metric = dist_metric)
+    dist = arch_dist(data, arc_data$XC, dist_metric = dist_metric)
 
   }
 
@@ -1180,4 +1180,44 @@ pch_fit = function(XC, S, C, SSE, varexpl, arc_vol, hull_vol, t_ratio, var_vert,
                  var_vert = var_vert, var_dim = var_dim, total_var = total_var,
                  summary = summary, call = call),
             class = "pch_fit")
+}
+
+##' @rdname fit_pch
+##' @name subset.k_pch_fit
+##' @description \code{subset.k_pch_fit()} subsetting method for k_pch_fit object, allows selecting specific number of archetypes from k_fit_pch function output. E.g. useful to do PCA and UMAP projection for selected number of archetypes to aviod recalculation.
+##' @export subset.k_pch_fit
+subset.k_pch_fit = function(arc_data, ks) {
+
+  # find the index of elements to be subset
+  subset_ind = arc_data$summary[, k %in% ks]
+
+  # subset elements
+  arc_data$summary = arc_data$summary[subset_ind,]
+  # list to subset:
+  sub_names = names(arc_data$pch_fits)
+  sub_names = sub_names[sub_names != "var_dim"]
+
+  for (sub_name in sub_names) {
+    arc_data$pch_fits[[sub_name]] = arc_data$pch_fits[[sub_name]][subset_ind]
+  }
+
+  if(nrow(arc_data$pch_fits$var_dim) == length(subset_ind)){
+    arc_data$pch_fits$var_dim = arc_data$pch_fits$var_dim[subset_ind,]
+  }
+
+  # if subsetting only one element simplify k_pch_fit into pch_fit
+  if(sum(subset_ind) == 1) {
+    summary = arc_data$summary
+    call = arc_data$call
+    arc_data = arc_data$pch_fits
+    arc_data$XC = arc_data$XC[[1]]
+    arc_data$S = arc_data$S[[1]]
+    arc_data$C = arc_data$C[[1]]
+    arc_data$summary = summary
+    arc_data$call = call
+    class(arc_data) = "pch_fit"
+  }
+
+  arc_data
+
 }

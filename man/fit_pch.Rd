@@ -25,7 +25,7 @@ fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
   order_type = c("align", "cosine", "side"),
   volume_ratio = c("t_ratio", "variance_ratio", "none"),
   converge_else_fail = TRUE, var_in_dims = FALSE,
-  normalise_var = TRUE, method = c("pcha", "kmeans"),
+  normalise_var = TRUE, method = c("pcha", "kmeans", "poisson_aa"),
   method_options = list())
 
 k_fit_pch(data, ks = 2:4, check_installed = TRUE, bootstrap = FALSE,

@@ -10,6 +10,9 @@ devtools::load_all("../ParetoTI/")
 #install.packages("BiocManager") # for installing BioConductor dependencies
 BiocManager::install("vitkl/ParetoTI", dependencies = T)
 BiocManager::install("vitkl/ParetoTI", dependencies = c("Depends", "Imports", "LinkingTo"))
+BiocManager::install("vitkl/ParetoTI",
+                     dependencies = c("Depends", "Imports", "LinkingTo"),
+                     ref = "probabilistic")
 
 library(ParetoTI)
 

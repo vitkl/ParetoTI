@@ -84,7 +84,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    volume_ratio = c("t_ratio", "variance_ratio", "none"),
                    converge_else_fail = TRUE,
                    var_in_dims = FALSE, normalise_var = TRUE,
-                   method = c("pcha", "kmeans"), method_options = list()) {
+                   method = c("pcha", "kmeans", "poisson_aa"), method_options = list()) {
 
   # check arguments
   method = match.arg(method)

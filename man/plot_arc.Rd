@@ -6,7 +6,7 @@
 \alias{arch_to_umap}
 \title{Plot data with archetypes in 2D, 3D and a panel of 2D}
 \usage{
-plot_arc(arch_data = NULL, data, which_dimensions = as.integer(1:2),
+plot_arc(arc_data = NULL, data, which_dimensions = as.integer(1:2),
   type = c("average", "all")[1], average_func = mean,
   geom = list(ggplot2::geom_point, ggplot2::geom_bin2d)[[1]],
   colors = c("#1F77B4", "#D62728", "#2CA02C", "#17BED0", "#006400",
@@ -15,15 +15,17 @@ plot_arc(arch_data = NULL, data, which_dimensions = as.integer(1:2),
   arc_lab = "archetypes", arc_names_num = TRUE, legend_name = "data",
   text_size = NULL, nudge = c(0.05, 0.1))
 
-arch_to_tsne(arch_data, data, which_dimensions = 1:2, pca = FALSE,
+arch_to_tsne(arc_data, data, which_dimensions = 1:2, pca = FALSE,
   partial_pca = FALSE, ...)
 
-arch_to_umap(arch_data, data, which_dimensions = 1:2,
+arch_to_umap(arc_data, data, which_dimensions = 1:2,
   method = c("naive", "umap-learn")[1], n_neighbors = 30L,
   min_dist = 0.3, metric = ifelse(method[1] == "umap-learn",
   "correlation", "euclidean"), ...)
 }
 \arguments{
+\item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the archetypal analysis. Set to NULL if you want to show data alone.}
+
 \item{data}{matrix of data in which archetypes/polytope were found, dim(variables/dimentions, examples)}
 
 \item{which_dimensions}{indices or character vector specifying dimension names. 2D plot, 3D plot or a panel for 2D plots when more than 3 dimensions. For \code{arch_to_tsne()} use 1:2 or 1:3. When \code{which_dimensions} exceeds the number of dimensions in arc_data these archetypes will be omitted. This can happen when fitting simplexes: lines and triangles are only 2D, so will be omitted from 3D plots.}
@@ -69,15 +71,13 @@ arch_to_umap(arch_data, data, which_dimensions = 1:2,
 \item{min_dist}{sensible default for \code{\link[umap]{umap}}}
 
 \item{metric}{sensible default for \code{\link[umap]{umap}}}
-
-\item{arc_data}{objects of class "pch_fit", "b_pch_fit", "k_pch_fit" storing the position of archetypes, and other data from \code{\link[ParetoTI]{fit_pch}}() run. arc_data$XC is matrix of dim(dimensions, archetypes) or list where each element is XC matrix from an independent run of the archetypal analysis. Set to NULL if you want to show data alone.}
 }
 \value{
 \code{plot_arc()} ggplot2 (2D) or plotly (3D) plot
 
-arch_to_tsne() list with: arch_data containing archetype positions in tSNE coordinates, and data positions in tSNE coordinates
+arch_to_tsne() list with: arc_data containing archetype positions in tSNE coordinates, and data positions in tSNE coordinates
 
-arch_to_umap() list with: arch_data containing archetype positions in UMAP coordinates, data positions in UMAP coordinates, and umap_config parameters used to find this representation.
+arch_to_umap() list with: arc_data containing archetype positions in UMAP coordinates, data positions in UMAP coordinates, and umap_config parameters used to find this representation.
 }
 \description{
 \code{plot_arc()} plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "b_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").
@@ -94,11 +94,11 @@ set.seed(4355)
 archetypes = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
                           mean = 0, sd = 1)
 data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
-plot_arc(arch_data = archetypes, data = data,
+plot_arc(arc_data = archetypes, data = data,
     which_dimensions = 1:2) +
     theme_bw()
 # Plot data as 2D density rather than points
-plot_arc(arch_data = archetypes, data = data,
+plot_arc(arc_data = archetypes, data = data,
     which_dimensions = 1:2, geom = ggplot2::geom_bin2d)
 
 # Random data that fits into the triangle (3D)
@@ -107,12 +107,12 @@ archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20
                           mean = 0, sd = 1)
 data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 
-plot_arc(arch_data = archetypes, data = data,
+plot_arc(arc_data = archetypes, data = data,
     which_dimensions = 1:3)
 
 # Project to tSNE coordinates (from 3D to 2D)
 arc_tsne = arch_to_tsne(archetypes, data, which_dimensions = 1:2)
-plot_arc(arch_data = arc_tsne$arch_data, data = arc_tsne$data,
+plot_arc(arc_data = arc_tsne$arc_data, data = arc_tsne$data,
     which_dimensions = 1:2) +
     theme_bw()
 
@@ -120,7 +120,7 @@ plot_arc(arch_data = arc_tsne$arch_data, data = arc_tsne$data,
 arc_umap = arch_to_umap(archetypes, data, which_dimensions = 1:2,
                         method = c("naive", # implemented in R and slow
                                    "umap-learn")) # requires python module
-plot_arc(arch_data = arc_umap$arch_data, data = arc_umap$data,
+plot_arc(arc_data = arc_umap$arc_data, data = arc_umap$data,
     which_dimensions = 1:2) +
     theme_bw()
 }

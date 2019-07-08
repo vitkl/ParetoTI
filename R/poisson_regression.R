@@ -31,7 +31,7 @@
 ##' # As you can see, the third dimension has lowest deviance
 ##' dev
 ##' # because the vertices of the triangle have almost identical position in third dimension.
-##' plot_arc(arch_data = arc_data, data = data,
+##' plot_arc(arc_data = arc_data, data = data,
 ##'          which_dimensions = 1:3, data_alpha = 0.5)
 ##' # You can use deviance to find which dimension have variability to be explained with Archetypal Analysis
 ##'

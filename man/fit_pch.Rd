@@ -17,6 +17,7 @@
 \alias{plot.r_pch_fit}
 \alias{plot_dim_var}
 \alias{pch_fit}
+\alias{subset.k_pch_fit}
 \title{Find the smallest polytope (Principal Convex Hull) that contains most of the data}
 \usage{
 fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
@@ -60,9 +61,8 @@ randomise_fit_pch1(i = 1, data, ks = 2:4, replace = FALSE,
 
 fit_convhulln(data, positions = TRUE)
 
-merge_arch_dist(arch_data, data, feature_data, colData = NULL,
-  colData_id, dist_metric = c("euclidean", "arch_weights")[1],
-  rank = TRUE)
+merge_arch_dist(arc_data, data, feature_data, colData = NULL, colData_id,
+  dist_metric = c("euclidean", "arch_weights")[1], rank = TRUE)
 
 \method{print}{pch_fit}(res)
 
@@ -85,6 +85,8 @@ plot_dim_var(rand_arch, ks = unique(rand_arch$rand_dist$k),
 
 pch_fit(XC, S, C, SSE, varexpl, arc_vol, hull_vol, t_ratio, var_vert,
   var_dim, total_var, summary, call)
+
+subset.k_pch_fit(arc_data, ks)
 }
 \arguments{
 \item{data}{numeric matrix or object coercible to matrix in which to find archetypes, dim(variables/dimentions, examples)}
@@ -171,7 +173,7 @@ pch_fit(XC, S, C, SSE, varexpl, arc_vol, hull_vol, t_ratio, var_vert,
 
 \item{colData_id}{column in colData that contains values matching colnames of feature_data.}
 
-\item{dist_metric}{how to describe distance to archetypes. Currently euclidean distance and archetype weights are implemented. Archetypes weights come from \code{arch_data$S} matrix so bootstrapped archetype positions cannot be used - only single fit to all data.}
+\item{dist_metric}{how to describe distance to archetypes. Currently euclidean distance and archetype weights are implemented. Archetypes weights come from \code{arc_data$S} matrix so bootstrapped archetype positions cannot be used - only single fit to all data.}
 
 \item{rank}{rank by distance metric (euclidean distance)?}
 
@@ -233,6 +235,8 @@ plot.r_pch_fit() plot distribution of t-ratio, total variance in archetype posit
 plot_dim_var() plot distribution of variance in archetype positions in each dimension and corresponding empirical p-values
 
 \code{pch_fit()} a constructor function for the "pch_fit" class
+
+\code{subset.k_pch_fit()} subsetting method for k_pch_fit object, allows selecting specific number of archetypes from k_fit_pch function output. E.g. useful to do PCA and UMAP projection for selected number of archetypes to aviod recalculation.
 }
 \details{
 \code{fit_pch()} provides an R interface to python implementation of PCHA algorithm (Principal Convex Hull Analysis) by Ulf Aslak (https://github.com/ulfaslak/py_pcha) which was originally developed for Archetypal Analysis by Mørup et. al.

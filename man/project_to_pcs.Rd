@@ -50,7 +50,7 @@ arc_data = generate_arc(arc_coord = list(c(5, 0), c(-10, 15), c(-30, -20)),
                           mean = 0, sd = 1)
 data = generate_data(arc_data$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 # Plot
-plot_arc(arch_data = arc_data, data = data,
+plot_arc(arc_data = arc_data, data = data,
          which_dimensions = 1:2, data_alpha = 0.5) +
          ggplot2::theme_bw()
 
@@ -58,7 +58,7 @@ plot_arc(arch_data = arc_data, data = data,
 #                  the axis of most variation because the data is already 2D)
 pcs = project_to_pcs(arc_data, data, n_dim = 2, pc_method = c("svd", "irlba")[1])
 # Plot in PC coordinates
-plot_arc(arch_data = pcs$arc_data, data = pcs$data,
+plot_arc(arc_data = pcs$arc_data, data = pcs$data,
          which_dimensions = 1:2, data_alpha = 0.5) +
          ggplot2::theme_bw()
 
@@ -67,7 +67,7 @@ projected = project_from_pc(pcs$arc_data, pcs$s,
                             undo_zscore = FALSE, undo_log2 = FALSE)
 
 # Plot plot in projected coordinates
-plot_arc(arch_data = projected, data = data,
+plot_arc(arc_data = projected, data = data,
          which_dimensions = 1:2, data_alpha = 0.5) +
          ggplot2::theme_bw()
 }

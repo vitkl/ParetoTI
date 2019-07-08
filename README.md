@@ -98,15 +98,15 @@ data = generate_data(archetypes$XC, N_examples = 1e4, jiiter = 0.04, size = 0.9)
 arc_data = fit_pch(data, noc = as.integer(3), delta = 0)
 
 # Show results as interactive 3D scatterplot using plotly
-plot_arc(arch_data = arc_data, data = data,
+plot_arc(arc_data = arc_data, data = data,
          which_dimensions = 1:3)
 # Plot static 2D scatterplot using ggplot2
-plot_arc(arch_data = arc_data, data = data,
+plot_arc(arc_data = arc_data, data = data,
          which_dimensions = 1:2) +
   theme_bw()
   
 # Plot data as 2D density rather than scatterplot
-plot_arc(arch_data = arc_data, data = data,
+plot_arc(arc_data = arc_data, data = data,
     which_dimensions = 1:2, geom = ggplot2::geom_bin2d) +
   theme_bw()
 ```
@@ -115,14 +115,14 @@ plot_arc(arch_data = arc_data, data = data,
 arc_umap = arch_to_umap(arc_data, data, which_dimensions = 1:2,
                         method = c("naive", # implemented in R and slow
                                    "umap-learn")) # requires python module
-plot_arc(arch_data = arc_umap$arch_data, data = arc_umap$data,
+plot_arc(arc_data = arc_umap$arc_data, data = arc_umap$data,
     which_dimensions = 1:2) +
     theme_bw()
 ```
 ```r
 # Project to tSNE coordinates (3D -> 2D, requires Rtsne package)
 arc_tsne = arch_to_tsne(arc_data, data, which_dimensions = 1:2)
-plot_arc(arch_data = arc_tsne$arch_data, data = arc_tsne$data,
+plot_arc(arc_data = arc_tsne$arc_data, data = arc_tsne$data,
     which_dimensions = 1:2) +
     theme_bw()
 ```

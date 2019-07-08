@@ -43,7 +43,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.12</span>
       </span>
     </div>
 
@@ -165,27 +165,27 @@ data =<span class="st"> </span><span class="kw"><a href="reference/generate_arc.
 arc_data =<span class="st"> </span><span class="kw"><a href="reference/fit_pch.html">fit_pch</a></span>(data, <span class="dt">noc =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/integer">as.integer</a></span>(<span class="dv">3</span>), <span class="dt">delta =</span> <span class="dv">0</span>)
 
 <span class="co"># Show results as interactive 3D scatterplot using plotly</span>
-<span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_data, <span class="dt">data =</span> data,
+<span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc_data, <span class="dt">data =</span> data,
          <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">3</span>)
 <span class="co"># Plot static 2D scatterplot using ggplot2</span>
-<span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_data, <span class="dt">data =</span> data,
+<span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc_data, <span class="dt">data =</span> data,
          <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
 <span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()
   
 <span class="co"># Plot data as 2D density rather than scatterplot</span>
-<span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_data, <span class="dt">data =</span> data,
+<span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc_data, <span class="dt">data =</span> data,
     <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>, <span class="dt">geom =</span> ggplot2<span class="op">::</span>geom_bin2d) <span class="op">+</span>
 <span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Project to UMAP coordinates (3D -&gt; 2D)</span>
 arc_umap =<span class="st"> </span><span class="kw"><a href="reference/plot_arc.html">arch_to_umap</a></span>(arc_data, data, <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,
                         <span class="dt">method =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"naive"</span>, <span class="co"># implemented in R and slow</span>
                                    <span class="st">"umap-learn"</span>)) <span class="co"># requires python module</span>
-<span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_umap<span class="op">$</span>arch_data, <span class="dt">data =</span> arc_umap<span class="op">$</span>data,
+<span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc_umap<span class="op">$</span>arc_data, <span class="dt">data =</span> arc_umap<span class="op">$</span>data,
     <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Project to tSNE coordinates (3D -&gt; 2D, requires Rtsne package)</span>
 arc_tsne =<span class="st"> </span><span class="kw"><a href="reference/plot_arc.html">arch_to_tsne</a></span>(arc_data, data, <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>)
-<span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_tsne<span class="op">$</span>arch_data, <span class="dt">data =</span> arc_tsne<span class="op">$</span>data,
+<span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc_tsne<span class="op">$</span>arc_data, <span class="dt">data =</span> arc_tsne<span class="op">$</span>data,
     <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
 <span class="st">    </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</code></pre></div>
 </div>

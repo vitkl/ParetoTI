@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.11</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.12</span>
       </span>
     </div>
 
@@ -98,7 +98,7 @@ archetypes =<span class="st"> </span><span class="kw"><a href="../reference/gene
 data =<span class="st"> </span><span class="kw"><a href="../reference/generate_arc.html">generate_data</a></span>(archetypes<span class="op">$</span>XC, <span class="dt">N_examples =</span> <span class="fl">1e3</span>, <span class="dt">jiiter =</span> <span class="fl">0.04</span>, <span class="dt">size =</span> <span class="fl">0.99</span>)
 
 <span class="co"># plot</span>
-<span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> archetypes, <span class="dt">data =</span> data,
+<span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> archetypes, <span class="dt">data =</span> data,
          <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span><span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot.window">ylim</a></span>(<span class="op">-</span><span class="dv">19</span>, <span class="dv">17</span>) <span class="op">+</span>
 <span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">"Ground truth archetypes"</span>)</code></pre></div>
 <p><img src="Comparison_to_kmeans_files/figure-html/sim-1.png" width="432"></p>
@@ -112,10 +112,10 @@ arc =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.htm
 clusters =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch</a></span>(data, <span class="dt">noc =</span> <span class="dv">3</span>, <span class="dt">method =</span> <span class="st">"kmeans"</span>)
 
 <span class="co"># show both side-by-side</span>
-<span class="kw">plot_grid</span>(<span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc, <span class="dt">data =</span> data,
+<span class="kw">plot_grid</span>(<span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc, <span class="dt">data =</span> data,
                    <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
 <span class="st">            </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot.window">ylim</a></span>(<span class="op">-</span><span class="dv">18</span>, <span class="dv">17</span>) <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"Detected archetypes (PCHA)"</span>),
-          <span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> clusters, <span class="dt">data =</span> data,
+          <span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> clusters, <span class="dt">data =</span> data,
                    <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,
                    <span class="dt">data_lab =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/character">as.character</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/apply">apply</a></span>(clusters<span class="op">$</span>S, <span class="dv">2</span>, which.max))) <span class="op">+</span>
 <span class="st">            </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot.window">ylim</a></span>(<span class="op">-</span><span class="dv">18</span>, <span class="dv">17</span>) <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"K-means clusters"</span>),
@@ -133,10 +133,10 @@ clusters_rob =<span class="st"> </span><span class="kw"><a href="../reference/fi
                                  <span class="dt">noc =</span> <span class="dv">3</span>, <span class="dt">method =</span> <span class="st">"kmeans"</span>)
 
 <span class="co"># show both side-by-side</span>
-<span class="kw">plot_grid</span>(<span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> arc_rob, <span class="dt">data =</span> data,
+<span class="kw">plot_grid</span>(<span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc_rob, <span class="dt">data =</span> data,
                    <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
 <span class="st">            </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot.window">ylim</a></span>(<span class="op">-</span><span class="dv">18</span>, <span class="dv">17</span>) <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"Detected archetypes (PCHA)"</span>),
-          <span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arch_data =</span> clusters_rob, <span class="dt">data =</span> data,
+          <span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> clusters_rob, <span class="dt">data =</span> data,
                    <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,
                    <span class="dt">data_lab =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/character">as.character</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/apply">apply</a></span>(clusters<span class="op">$</span>S, <span class="dv">2</span>, which.max))) <span class="op">+</span>
 <span class="st">            </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot.window">ylim</a></span>(<span class="op">-</span><span class="dv">18</span>, <span class="dv">17</span>) <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"K-means clusters"</span>),

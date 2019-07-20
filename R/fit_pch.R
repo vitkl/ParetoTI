@@ -939,6 +939,11 @@ merge_arch_dist = function(arc_data, data, feature_data,
   # remove failed fits
   pch_fit_list = pch_fit_list[!vapply(pch_fit_list, is.null,
                                       FUN.VALUE = logical(1))]
+
+  if(is(pch_fit_list[[1]], "k_pch_fit")){
+    pch_fit_list = lapply(pch_fit_list, function(pch) pch$pch_fits)
+  }
+
   # combine results
   list(XC = lapply(pch_fit_list, function(pch) pch$XC),
        S = lapply(pch_fit_list, function(pch) pch$S),
@@ -952,6 +957,41 @@ merge_arch_dist = function(arc_data, data, feature_data,
        var_dim = data.table::rbindlist(lapply(pch_fit_list, function(pch) pch$var_dim)),
        total_var = vapply(pch_fit_list, function(pch) pch$total_var, FUN.VALUE = numeric(1L)),
        summary = data.table::rbindlist(lapply(pch_fit_list, function(pch) pch$summary)))
+}
+
+##' @rdname fit_pch
+##' @name c.k_pch_fit
+##' @export c.k_pch_fit
+c.k_pch_fit = function(...) {
+
+  pch_fit_list = list(...)
+
+  res = list()
+  # combine function calls
+  res$call = lapply(pch_fit_list, function(pch) pch$call)
+
+  # combine k_pch_fit objects
+  pch_list = lapply(pch_fit_list, function(pch) pch$pch_fits)
+  res$pch_fits = list(XC = unlist(lapply(pch_list, function(pch) pch$XC), recursive = F),
+                  S = unlist(lapply(pch_list, function(pch) pch$S), recursive = F),
+                  C = unlist(lapply(pch_list, function(pch) pch$C), recursive = F),
+                  SSE = unlist(lapply(pch_list, function(pch) pch$SSE)),
+                  varexpl = unlist(lapply(pch_list, function(pch) pch$varexpl)),
+                  hull_vol = unlist(lapply(pch_list, function(pch) pch$hull_vol)),
+                  arc_vol = unlist(lapply(pch_list, function(pch) pch$arc_vol)),
+                  t_ratio = unlist(lapply(pch_list, function(pch) pch$t_ratio)),
+                  var_vert = unlist(lapply(pch_list, function(pch) pch$var_vert), recursive = F),
+                  var_dim = data.table::rbindlist(lapply(pch_list, function(pch) pch$var_dim)),
+                  total_var = unlist(lapply(pch_list, function(pch) pch$total_var)),
+                  summary = data.table::rbindlist(lapply(pch_list, function(pch) pch$summary)))
+  res$pch_fits$summary = NULL
+
+  # combine summaries
+  res$summary = rbindlist(lapply(pch_fit_list, function(pch) pch$summary))
+
+  class(res) = "k_pch_fit"
+
+  res
 }
 
 ## .find_archetype_order orders archetypes by cosine relative to the unit vector c(1, 1)

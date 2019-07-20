@@ -10,6 +10,7 @@
 \alias{randomise_fit_pch1}
 \alias{fit_convhulln}
 \alias{merge_arch_dist}
+\alias{c.k_pch_fit}
 \alias{print.pch_fit}
 \alias{print.k_pch_fit}
 \alias{print.b_pch_fit}
@@ -63,6 +64,8 @@ fit_convhulln(data, positions = TRUE)
 
 merge_arch_dist(arc_data, data, feature_data, colData = NULL, colData_id,
   dist_metric = c("euclidean", "arch_weights")[1], rank = TRUE)
+
+\method{c}{k_pch_fit}(...)
 
 \method{print}{pch_fit}(res)
 

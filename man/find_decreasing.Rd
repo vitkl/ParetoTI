@@ -27,12 +27,12 @@ get_top_decreasing(summary_genes, summary_sets = NULL,
   min_max_diff_cutoff_g = 0.3, min_max_diff_cutoff_f = 0.1)
 
 find_decreasing_wilcox(data_attr, arc_col, features = c("Gpx1", "Alb",
-  "Cyp2e1", "Apoa2")[3], bin_prop = 0.1, na.rm = FALSE, type = c("s",
-  "m", "cmq")[1], clust_options = list(), method = c("BioQC",
-  "r_stats")[1])
+  "Cyp2e1", "Apoa2")[3], bin_prop = 0.1, dist_cutoff = NULL,
+  na.rm = FALSE, type = c("s", "m", "cmq")[1],
+  clust_options = list(), method = c("BioQC", "r_stats")[1])
 
 bin_cells_by_arch(data_attr, arc_col, bin_prop = 0.1,
-  return_names = FALSE)
+  dist_cutoff = NULL, return_names = FALSE)
 
 find_tradeoff_wilcox(data_attr, arc_col = c("archetype_1",
   "archetype_2"), features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
@@ -92,6 +92,8 @@ find_tradeoff_wilcox(data_attr, arc_col = c("archetype_1",
 \item{min_max_diff_cutoff_f}{see min_max_diff_cutoff_g}
 
 \item{bin_prop}{proportion of data to put in bin closest to archetype}
+
+\item{dist_cutoff}{cutoff of cell distances to archetypes (high bound) to put cells into in bin closest to archetype.}
 
 \item{method}{how to find_decreasing_wilcox()? Use \link[BioQC]{wmwTest} or \link[stats]{wilcox.test}. BioQC::wmwTest can be up to 1000 times faster, so it is default.}
 

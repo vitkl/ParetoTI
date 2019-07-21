@@ -187,21 +187,24 @@ activ = measure_activity(hepatocytes, # row names are assumed to be gene identif
                          aucell_options = list(aucMaxRank = nrow(hepatocytes) * 0.1,
                                                binary = F, nCores = 3,
                                                plotStats = FALSE))
+
 # Merge distances, gene expression and gene set activity into one matrix
 data_attr = merge_arch_dist(arc_data = arc_1, data = PCs4arch, 
                             feature_data = as.matrix(logcounts(hepatocytes)),
                             colData = activ,
-                            dist_metric = c("euclidean", "arch_weights")[1],
+                            dist_metric = c("euclidean", "arch_weights")[2],
                             colData_id = "cells", rank = F) 
 
 # Use Wilcox test to find genes maximally expressed in 10% closest to each vertex
 enriched_genes = find_decreasing_wilcox(data_attr$data, data_attr$arc_col,
                                 features = data_attr$features_col,
-                                bin_prop = 0.1, method = "BioQC")
+                                bin_prop = 0.1, dist_cutoff = 0.5,
+                                method = "BioQC")
 
 enriched_sets = find_decreasing_wilcox(data_attr$data, data_attr$arc_col,
                                 features = data_attr$colData_col,
-                                bin_prop = 0.1, method = "BioQC")
+                                bin_prop = 0.1, dist_cutoff = 0.5,
+                                method = "BioQC")
 
 # Take a look at top genes and functions for each archetype
 labs = get_top_decreasing(summary_genes = enriched_genes, summary_sets = enriched_sets,
@@ -211,9 +214,9 @@ labs = get_top_decreasing(summary_genes = enriched_genes, summary_sets = enriche
                           order_by = "mean_diff", order_decreasing = T,
                           min_max_diff_cutoff_g = 0.4, min_max_diff_cutoff_f = 0.03)
 
-p_pca = plot_arc(arc_data = arc, data = PCs4arch,
+p_pca = plot_arc(arc_data = arc_1, data = PCs4arch,
                  which_dimensions = 1:3, line_size = 1.5,
-                 data_lab = activ$ribosomal_large_subunit_biogenesis,
+                 data_lab = data_attr$data$archetype_1, # $ribosomal_large_subunit_biogenesis,
                  text_size = 60, data_size = 6)
 plotly::layout(p_pca, title = "ribosomal_large_subunit_biogenesis activity")
 ```

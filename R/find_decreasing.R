@@ -301,24 +301,27 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
 ##' @name find_decreasing_wilcox
 ##' @description \code{find_decreasing_wilcox()} find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to archetype (1 vs all Wilcox test).
 ##' @param bin_prop proportion of data to put in bin closest to archetype
+##' @param dist_cutoff cutoff of cell distances to archetypes (high bound) to put cells into in bin closest to archetype.
 ##' @param method how to find_decreasing_wilcox()? Use \link[BioQC]{wmwTest} or \link[stats]{wilcox.test}. BioQC::wmwTest can be up to 1000 times faster, so it is default.
 ##' @return \code{find_decreasing_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.
 ##' @export find_decreasing_wilcox
 ##' @import data.table
 find_decreasing_wilcox = function(data_attr, arc_col,
                                   features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
-                                  bin_prop = 0.1, na.rm = FALSE,
+                                  bin_prop = 0.1, dist_cutoff = NULL,
+                                  na.rm = FALSE,
                                   type = c("s", "m", "cmq")[1],
                                   clust_options = list(),
                                   method = c("BioQC", "r_stats")[1]) {
 
   # find which cells are in bin closest to each archetype
   if(!between(bin_prop, 0, 1)) stop("bin_prop should be between 0 and 1")
-  arch_bin = bin_cells_by_arch(data_attr, arc_col, bin_prop, return_names = FALSE)
+  arch_bin = bin_cells_by_arch(data_attr, arc_col, bin_prop,
+                               dist_cutoff = dist_cutoff, return_names = FALSE)
 
   if(method == "BioQC"){
     ## create gene sets using bin_prop,
-    ## define gene set as 0.1 points closest to archetype
+    ## define gene set as bin_prop points closest to archetype
     ## use BioQC::wmwTest to do Wilcoxon tests
 
     # extract relevant features to matrix (cells in rows, features in columns)
@@ -333,14 +336,21 @@ find_decreasing_wilcox = function(data_attr, arc_col,
     decreasing = melt.data.table(decreasing, id.vars = "x_name",
                                  value.name = "p", variable.name = "y_name")
     # find mean and median difference between bin closest to archetype vs other bins
-    decreasing[, c("median_diff", "mean_diff", "top_bin_mean") := .({
+    decreasing[, c("median_diff", "mean_diff", "top_bin_mean", "sample_count") := .({
+      # median_diff
       as.numeric(median(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm) -
                    median(feature_mat[-arch_bin[x_name][[1]], y_name], na.rm = na.rm))
     }, {
+      # mean_diff
       as.numeric(mean(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm) -
                    mean(feature_mat[-arch_bin[x_name][[1]], y_name], na.rm = na.rm))
-    },
-    as.numeric(mean(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm))),
+    },{
+      # top_bin_mean
+      as.numeric(mean(feature_mat[arch_bin[x_name][[1]], y_name], na.rm = na.rm))
+    }, {
+      # sample_count
+      length(feature_mat[arch_bin[x_name][[1]], y_name])
+    }),
     by = .(y_name, x_name)]
 
   } else if(method == "r_stats"){
@@ -399,7 +409,7 @@ find_decreasing_wilcox = function(data_attr, arc_col,
   }
   setorder(decreasing, x_name, p)
   decreasing$metric = "wilcoxon_p_val"
-  decreasing[,.(x_name, y_name, p, median_diff, mean_diff, top_bin_mean, metric)]
+  decreasing[,.(x_name, y_name, p, median_diff, mean_diff, top_bin_mean, sample_count, metric)]
 }
 
 .find_decreasing_wilcox_1 = function(feature_mat, arch_bin,
@@ -432,18 +442,36 @@ find_decreasing_wilcox = function(data_attr, arc_col,
 ##' @return \code{bin_cells_by_arch()} list of indices of cells or names of cells that are in bin closest to each archetype
 ##' @export bin_cells_by_arch
 ##' @import data.table
-bin_cells_by_arch = function(data_attr, arc_col, bin_prop = 0.1, return_names = FALSE){
+bin_cells_by_arch = function(data_attr, arc_col,
+                             bin_prop = 0.1, dist_cutoff = NULL,
+                             return_names = FALSE){
 
   # extract distance to archetypes into matrix,
-  dist_to_arch = as.matrix(data_attr[, arc_col, with = FALSE])
+  dist_to_arch_n = as.matrix(data_attr[, arc_col, with = FALSE])
   # convert distances to order
-  dist_to_arch = apply(dist_to_arch, MARGIN = 2, order, decreasing = FALSE)
+  dist_to_arch = apply(dist_to_arch_n, MARGIN = 2, order, decreasing = FALSE)
 
-  # find how many points fit into bin closest to archetype
-  bin1_length = round(nrow(dist_to_arch) * bin_prop, 0)
-  # pick indices of cells in 1st bin
-  dist_to_arch = dist_to_arch[seq_len(bin1_length), ]
-  arch_bin = lapply(seq(1, ncol(dist_to_arch)), function(i) dist_to_arch[,i])
+  if(is.null(dist_cutoff)) { # when bin size but not distance cutoff
+
+    # find how many points fit into bin closest to archetype
+    bin1_length = round(nrow(dist_to_arch) * bin_prop, 0)
+
+    bin1_ind = lapply(seq_len(ncol(dist_to_arch)), function(i) seq_len(bin1_length))
+
+  } else { # when distance rather than bin size cutoff
+
+    # find how many points fit into bin closest to archetype (archetype-specific)
+    bin1_ind = lapply(seq_len(ncol(dist_to_arch)), function(i) {
+
+      bin1_length = sum(dist_to_arch_n[, i] < dist_cutoff)
+      seq_len(bin1_length)
+
+    })
+
+  }
+
+  # pick indices of cells in top-1 bin
+  arch_bin = lapply(seq_len(ncol(dist_to_arch)), function(i) dist_to_arch[bin1_ind[[i]], i])
   names(arch_bin) = colnames(dist_to_arch)
 
   # optionally: convert indices to cells
@@ -461,8 +489,8 @@ bin_cells_by_arch = function(data_attr, arc_col, bin_prop = 0.1, return_names = 
 ##' @export find_tradeoff_wilcox
 ##' @import data.table
 find_tradeoff_wilcox = function(data_attr, arc_col = c("archetype_1", "archetype_2"),
-                                  features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
-                                  bin_prop = 0.1, na.rm = FALSE) {
+                                features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
+                                bin_prop = 0.1, na.rm = FALSE) {
 
   if(length(arc_col) != 2) stop("find_tradeoff_wilcox() works for pairs of arc_col but length(arc_col) != 2")
 

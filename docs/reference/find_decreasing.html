@@ -148,12 +148,12 @@ find_tradeoff_wilcox(): find features that are most different between 2 archetyp
   <span class='kw'>min_max_diff_cutoff_g</span> <span class='kw'>=</span> <span class='fl'>0.3</span>, <span class='kw'>min_max_diff_cutoff_f</span> <span class='kw'>=</span> <span class='fl'>0.1</span>)
 
 <span class='fu'>find_decreasing_wilcox</span>(<span class='no'>data_attr</span>, <span class='no'>arc_col</span>, <span class='kw'>features</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"Gpx1"</span>, <span class='st'>"Alb"</span>,
-  <span class='st'>"Cyp2e1"</span>, <span class='st'>"Apoa2"</span>)[<span class='fl'>3</span>], <span class='kw'>bin_prop</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>na.rm</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"s"</span>,
-  <span class='st'>"m"</span>, <span class='st'>"cmq"</span>)[<span class='fl'>1</span>], <span class='kw'>clust_options</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(), <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"BioQC"</span>,
-  <span class='st'>"r_stats"</span>)[<span class='fl'>1</span>])
+  <span class='st'>"Cyp2e1"</span>, <span class='st'>"Apoa2"</span>)[<span class='fl'>3</span>], <span class='kw'>bin_prop</span> <span class='kw'>=</span> <span class='fl'>0.1</span>, <span class='kw'>dist_cutoff</span> <span class='kw'>=</span> <span class='kw'>NULL</span>,
+  <span class='kw'>na.rm</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>, <span class='kw'>type</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"s"</span>, <span class='st'>"m"</span>, <span class='st'>"cmq"</span>)[<span class='fl'>1</span>],
+  <span class='kw'>clust_options</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/list'>list</a></span>(), <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"BioQC"</span>, <span class='st'>"r_stats"</span>)[<span class='fl'>1</span>])
 
 <span class='fu'>bin_cells_by_arch</span>(<span class='no'>data_attr</span>, <span class='no'>arc_col</span>, <span class='kw'>bin_prop</span> <span class='kw'>=</span> <span class='fl'>0.1</span>,
-  <span class='kw'>return_names</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
+  <span class='kw'>dist_cutoff</span> <span class='kw'>=</span> <span class='kw'>NULL</span>, <span class='kw'>return_names</span> <span class='kw'>=</span> <span class='fl'>FALSE</span>)
 
 <span class='fu'>find_tradeoff_wilcox</span>(<span class='no'>data_attr</span>, <span class='kw'>arc_col</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"archetype_1"</span>,
   <span class='st'>"archetype_2"</span>), <span class='kw'>features</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"Gpx1"</span>, <span class='st'>"Alb"</span>, <span class='st'>"Cyp2e1"</span>, <span class='st'>"Apoa2"</span>)[<span class='fl'>3</span>],
@@ -269,6 +269,10 @@ find_tradeoff_wilcox(): find features that are most different between 2 archetyp
     <tr>
       <th>bin_prop</th>
       <td><p>proportion of data to put in bin closest to archetype</p></td>
+    </tr>
+    <tr>
+      <th>dist_cutoff</th>
+      <td><p>cutoff of cell distances to archetypes (high bound) to put cells into in bin closest to archetype.</p></td>
     </tr>
     <tr>
       <th>method</th>

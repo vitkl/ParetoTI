@@ -120,7 +120,7 @@ arch_to_umap() Project archetype positions to UMAP coordinates using umap." />
     
     <p><code>plot_arc()</code> plot data with polytope representing the Pareto front, where vertices are archetypes (dots connected with lines). When archetype data is "b_pch_fit" all archetype locations from each subsample are shown with lines connecting the average location (type "average"); or lines connecting archetypes in each of the experiments (colored differently, type "all").</p>
 <p>arch_to_tsne() Project archetype positions to tSNE coordinates (2D or 3D) using <code><a href='https://www.rdocumentation.org/packages/Rtsne/topics/Rtsne'>Rtsne</a></code>.</p>
-<p>arch_to_umap() Project archetype positions to UMAP coordinates using <code><a href='https://www.rdocumentation.org/packages/umap/topics/umap'>umap</a></code>.</p>
+<p>arch_to_umap() Project archetype positions to UMAP coordinates using <code>umap</code>.</p>
     
     </div>
 
@@ -222,23 +222,23 @@ arch_to_umap() Project archetype positions to UMAP coordinates using umap." />
     </tr>
     <tr>
       <th>...</th>
-      <td><p>additional arguments to <code><a href='https://www.rdocumentation.org/packages/Rtsne/topics/Rtsne'>Rtsne</a></code> and <code><a href='https://www.rdocumentation.org/packages/umap/topics/umap'>umap</a></code>.</p></td>
+      <td><p>additional arguments to <code><a href='https://www.rdocumentation.org/packages/Rtsne/topics/Rtsne'>Rtsne</a></code> and <code>umap</code>.</p></td>
     </tr>
     <tr>
       <th>method</th>
-      <td><p>Method for finding UMAP representation. Available methods are 'naive' (an implementation written in pure R) and 'umap-learn' (requires python package 'umap-learn'). See <code><a href='https://www.rdocumentation.org/packages/umap/topics/umap'>umap</a></code> for details.</p></td>
+      <td><p>Method for finding UMAP representation. Available methods are 'naive' (an implementation written in pure R) and 'umap-learn' (requires python package 'umap-learn'). See <code>umap</code> for details.</p></td>
     </tr>
     <tr>
       <th>n_neighbors</th>
-      <td><p>sensible default for <code><a href='https://www.rdocumentation.org/packages/umap/topics/umap'>umap</a></code>, pass other parameters via ...</p></td>
+      <td><p>sensible default for <code>umap</code>, pass other parameters via ...</p></td>
     </tr>
     <tr>
       <th>min_dist</th>
-      <td><p>sensible default for <code><a href='https://www.rdocumentation.org/packages/umap/topics/umap'>umap</a></code></p></td>
+      <td><p>sensible default for <code>umap</code></p></td>
     </tr>
     <tr>
       <th>metric</th>
-      <td><p>sensible default for <code><a href='https://www.rdocumentation.org/packages/umap/topics/umap'>umap</a></code></p></td>
+      <td><p>sensible default for <code>umap</code></p></td>
     </tr>
     </table>
     
@@ -285,10 +285,9 @@ arch_to_umap() Project archetype positions to UMAP coordinates using umap." />
 <span class='co'># Project to UMAP representation</span>
 <span class='no'>arc_umap</span> <span class='kw'>=</span> <span class='fu'>arch_to_umap</span>(<span class='no'>archetypes</span>, <span class='no'>data</span>, <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>,
                         <span class='kw'>method</span> <span class='kw'>=</span> <span class='fu'><a href='https://www.rdocumentation.org/packages/base/topics/c'>c</a></span>(<span class='st'>"naive"</span>, <span class='co'># implemented in R and slow</span>
-                                   <span class='st'>"umap-learn"</span>)) <span class='co'># requires python module</span>
-<span class='fu'>plot_arc</span>(<span class='kw'>arc_data</span> <span class='kw'>=</span> <span class='no'>arc_umap</span>$<span class='no'>arc_data</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>arc_umap</span>$<span class='no'>data</span>,
+                                   <span class='st'>"umap-learn"</span>)) <span class='co'># requires python module</span></div><div class='output co'>#&gt; <span class='error'>Error in loadNamespace(name): there is no package called ‘umap’</span></div><div class='input'><span class='fu'>plot_arc</span>(<span class='kw'>arc_data</span> <span class='kw'>=</span> <span class='no'>arc_umap</span>$<span class='no'>arc_data</span>, <span class='kw'>data</span> <span class='kw'>=</span> <span class='no'>arc_umap</span>$<span class='no'>data</span>,
     <span class='kw'>which_dimensions</span> <span class='kw'>=</span> <span class='fl'>1</span>:<span class='fl'>2</span>) +
-    <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span>()</div><div class='img'><img src='plot_arc-4.png' alt='' width='700' height='433' /></div></pre>
+    <span class='fu'><a href='https://ggplot2.tidyverse.org/reference/ggtheme.html'>theme_bw</a></span>()</div><div class='output co'>#&gt; <span class='error'>Error in is(arc_data, "pch_fit"): object 'arc_umap' not found</span></div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="sidebar">
     <h2>Contents</h2>

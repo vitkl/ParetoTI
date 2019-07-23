@@ -24,6 +24,7 @@ archetypes = generate_arc(arc_coord = list(c(5, 0, 4), c(-10, 15, 0), c(-30, -20
                           mean = 0, sd = 1)
 # generate 1000 data points that are a convex combination (weighted sum) of archetypes
 data = generate_data(archetypes$XC, N_examples = 1e3, jiiter = 0.04, size = 0.99)
+colnames(data) = paste0("cell", seq_len(ncol(data)))
 
 # plot
 plot_arc(arc_data = archetypes, data = data,
@@ -31,13 +32,17 @@ plot_arc(arc_data = archetypes, data = data,
   ggtitle("Ground truth archetypes")
 ```
 
-## Find archetypes with PCHA and cluster centers with k-means
+## Find archetypes with PCHA and cluster centers with k-means and Louvain methods
 
-```{r arc_vs_kmeans, fig.width=9, fig.height=4}
+```{r arc_vs_kmeans, fig.width=13.5, fig.height=4}
 # find archetypes
 arc = fit_pch(data, noc = 3)
-# find clusters
+# find k-means clusters
 clusters = fit_pch(data, noc = 3, method = "kmeans")
+# find Louvain clusters
+lou_clusters = fit_pch(data, method = "louvain",
+                       # use resolution instead of number of clusters
+                       method_options = list(resolution = 0.15)) 
 
 # show both side-by-side
 plot_grid(plot_arc(arc_data = arc, data = data,
@@ -47,7 +52,11 @@ plot_grid(plot_arc(arc_data = arc, data = data,
                    which_dimensions = 1:2,
                    data_lab = as.character(apply(clusters$S, 2, which.max))) +
             ylim(-18, 17) + ggtitle("K-means clusters"),
-          align = "vh")
+          plot_arc(arc_data = lou_clusters, data = data,
+                   which_dimensions = 1:2,
+                   data_lab = as.character(apply(lou_clusters$S, 2, which.max))) +
+            ylim(-18, 17) + ggtitle("Louvain clusters"),
+          align = "vh", nrow = 1)
 ```
 
 ## Use bootstrapping to find variability in positions of archetypes and cluster centers
@@ -60,6 +69,12 @@ arc_rob = fit_pch_bootstrap(data, n = 200, sample_prop = 0.65, seed = 2543,
 clusters_rob = fit_pch_bootstrap(data, n = 200, sample_prop = 0.65, seed = 2543,
                                  noc = 3, method = "kmeans")
 
+# bootstrap Louvain 
+# impossible because number of clusters will be different in each sample at fixed resolution
+lou_clusters_rob = fit_pch_bootstrap(data, n = 200, sample_prop = 1, seed = 2543,
+                                 method = "louvain",
+                                 method_options = list(resolution = 0.12))
+
 # show both side-by-side
 plot_grid(plot_arc(arc_data = arc_rob, data = data,
                    which_dimensions = 1:2) +
@@ -68,6 +83,10 @@ plot_grid(plot_arc(arc_data = arc_rob, data = data,
                    which_dimensions = 1:2,
                    data_lab = as.character(apply(clusters$S, 2, which.max))) +
             ylim(-18, 17) + ggtitle("K-means clusters"),
+          plot_arc(arc_data = lou_clusters_rob, data = data,
+                   which_dimensions = 1:2,
+                   data_lab = as.character(apply(lou_clusters$S, 2, which.max))) +
+            ylim(-18, 17) + ggtitle("Louvain clusters"),
           align = "vh")
 ```
 

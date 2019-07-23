@@ -17,7 +17,7 @@
 ##' @param order_type order archetypes by: cosine distance from c(1,1, ..., 1) vector ("cosine"), dot product that measures position to each side of the c(1,1) vector ("side"), align positions to reference when bootstraping(fit using all data, "align"). See \link[ParetoTI]{align_arc} When order_type is "align" archetypes are ordered by "cosine" first.
 ##' @param volume_ratio find volume of the convex hull of the data and the t-ratio ("t_ratio") or ratio of variance of archetype positions to variance of data ("variance_ratio") or do nothing ("none")? Caution! Geometric figure should be at least simplex: qhull algorhirm will fail to find convex hull of flat 2D shapes in 3D, 3D shapes in 4D and so on. So, for calculating this dimentions are selected based order of rows in data. Makes sense for principal components but not for original data. Caution 2! Computation time and memory use increse very quickly with dimensions. Do not use for more than 7-8 dimentions.
 ##' @param converge_else_fail throw an error and stop execution if PCHA did not converge in \code{maxiter} steps.
-##' @param method method for archetypal analysis: PCHA (default), \link[stats]{kmeans}. Non-default methods use \code{data} and \code{noc}for data matrix and the number of archetypes, pass additional arguments via method_options.
+##' @param method method for archetypal analysis: PCHA (default), \link[stats]{kmeans}, \link[Seurat]{FindClusters} (louvain). Non-default methods use \code{data} and \code{noc}for data matrix and the number of archetypes, but require to pass additional arguments via method_options.
 ##' @param method_options additional arguments for non-default method, named list: \code{list(arg = "value")}.
 ##' @return \code{fit_pch()}: object of class pch_fit (list) containing the following elements:
 ##' XC - numeric matrix, dim(I, noc)/dim(dimensions, archetypes) feature matrix (i.e. XC=data[,I]*C forming the archetypes), or matrix with cluster centers (method = "kmeans");
@@ -84,7 +84,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    volume_ratio = c("t_ratio", "variance_ratio", "none"),
                    converge_else_fail = TRUE,
                    var_in_dims = FALSE, normalise_var = TRUE,
-                   method = c("pcha", "kmeans"), method_options = list()) {
+                   method = c("pcha", "kmeans", "louvain"),
+                   method_options = list()) {
 
   # check arguments
   method = match.arg(method)
@@ -117,6 +118,60 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
       if(isTRUE(converge_else_fail)) stop(paste0("fit_pch(noc = ",noc,") error: ", err))
       return(NULL)
     })
+    #---------------------------------------------------------------------------
+
+  } else if(method == "louvain") {
+
+    # run louvain clustering using Seurat --------------------------------------
+
+    # set defaults or replace them with provided options
+    default = list(k.param = 20, prune.SNN = 1/15,
+                   resolution = 0.8, n.start = 10, n.iter = 10,
+                   graph = NA)
+    default_retain = !names(default) %in% names(method_options)
+    options = c(default[default_retain], method_options)
+
+    # compute nearest neibours SNN graph
+    if(is.na(options$graph)) {
+      options$graph = Seurat::FindNeighbors(t(data),
+                                            k.param = options$k.param,
+                                            prune.SNN = options$prune.SNN,
+                                            verbose = verbose)
+    }
+
+    # run clustering
+    clusters = Seurat::FindClusters(options$graph$snn,
+                                    resolution = options$resolution,
+                                    n.start = options$n.start,
+                                    n.iter = options$n.iter,
+                                    verbose = verbose)
+    clusters = as.numeric(clusters[, 1])
+
+    # Create S as binary cluster membership matrix
+    S = Matrix::sparseMatrix(i = clusters,
+                             j = seq_len(length(clusters)), x = 1)
+    # compute C so that X %*% C gives cluster averages
+    C = S / matrix(Matrix::rowSums(S), nrow = nrow(S), ncol = ncol(S), byrow = FALSE)
+    C = Matrix::t(C)
+
+    # compute SSE (within cluster variance) and total variance
+    ss = function(x) sum(scale(t(x), scale = FALSE)^2)
+    totss = ss(data)
+    tot.withinss = sum(vapply(unique(clusters), function(x){
+      ss(data[, clusters == x])
+    }, FUN.VALUE = numeric(1L)))
+
+    # create pch_fit object to be returned
+    res = list(XC = as.matrix(Matrix::crossprod(Matrix::t(data), C)),
+               S = S, C = C,
+               SSE = tot.withinss, varexpl = totss - tot.withinss / totss)
+    if(!is.null(rownames(data))) rownames(res$XC) = rownames(data)
+    colnames(res$XC) = NULL
+    class(res) = "pch_fit"
+
+    # change noc according to what louvain found
+    noc = length(unique(clusters))
+
     #---------------------------------------------------------------------------
 
   } else if(method == "kmeans") {
@@ -194,7 +249,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
       # Calculate the volume of simplex polytope
       archetypes = res$XC[data_dim, ]
       arch_red = archetypes - archetypes[, noc]
-      res$arc_vol = abs(det(arch_red[, seq_len(noc - 1)]) /
+      res$arc_vol = abs(Matrix::det(arch_red[, seq_len(noc - 1)]) /
                           factorial(noc - 1))
     }
 
@@ -920,17 +975,17 @@ c.k_pch_fit = function(...) {
   # combine k_pch_fit objects
   pch_list = lapply(pch_fit_list, function(pch) pch$pch_fits)
   res$pch_fits = list(XC = unlist(lapply(pch_list, function(pch) pch$XC), recursive = F),
-                  S = unlist(lapply(pch_list, function(pch) pch$S), recursive = F),
-                  C = unlist(lapply(pch_list, function(pch) pch$C), recursive = F),
-                  SSE = unlist(lapply(pch_list, function(pch) pch$SSE)),
-                  varexpl = unlist(lapply(pch_list, function(pch) pch$varexpl)),
-                  hull_vol = unlist(lapply(pch_list, function(pch) pch$hull_vol)),
-                  arc_vol = unlist(lapply(pch_list, function(pch) pch$arc_vol)),
-                  t_ratio = unlist(lapply(pch_list, function(pch) pch$t_ratio)),
-                  var_vert = unlist(lapply(pch_list, function(pch) pch$var_vert), recursive = F),
-                  var_dim = data.table::rbindlist(lapply(pch_list, function(pch) pch$var_dim)),
-                  total_var = unlist(lapply(pch_list, function(pch) pch$total_var)),
-                  summary = data.table::rbindlist(lapply(pch_list, function(pch) pch$summary)))
+                      S = unlist(lapply(pch_list, function(pch) pch$S), recursive = F),
+                      C = unlist(lapply(pch_list, function(pch) pch$C), recursive = F),
+                      SSE = unlist(lapply(pch_list, function(pch) pch$SSE)),
+                      varexpl = unlist(lapply(pch_list, function(pch) pch$varexpl)),
+                      hull_vol = unlist(lapply(pch_list, function(pch) pch$hull_vol)),
+                      arc_vol = unlist(lapply(pch_list, function(pch) pch$arc_vol)),
+                      t_ratio = unlist(lapply(pch_list, function(pch) pch$t_ratio)),
+                      var_vert = unlist(lapply(pch_list, function(pch) pch$var_vert), recursive = F),
+                      var_dim = data.table::rbindlist(lapply(pch_list, function(pch) pch$var_dim)),
+                      total_var = unlist(lapply(pch_list, function(pch) pch$total_var)),
+                      summary = data.table::rbindlist(lapply(pch_list, function(pch) pch$summary)))
   res$pch_fits$summary = NULL
 
   # combine summaries

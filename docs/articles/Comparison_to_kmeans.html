@@ -96,6 +96,7 @@ archetypes =<span class="st"> </span><span class="kw"><a href="../reference/gene
                           <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>)
 <span class="co"># generate 1000 data points that are a convex combination (weighted sum) of archetypes</span>
 data =<span class="st"> </span><span class="kw"><a href="../reference/generate_arc.html">generate_data</a></span>(archetypes<span class="op">$</span>XC, <span class="dt">N_examples =</span> <span class="fl">1e3</span>, <span class="dt">jiiter =</span> <span class="fl">0.04</span>, <span class="dt">size =</span> <span class="fl">0.99</span>)
+<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/colnames">colnames</a></span>(data) =<span class="st"> </span><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/paste">paste0</a></span>(<span class="st">"cell"</span>, <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/seq">seq_len</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/nrow">ncol</a></span>(data)))
 
 <span class="co"># plot</span>
 <span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> archetypes, <span class="dt">data =</span> data,
@@ -103,15 +104,21 @@ data =<span class="st"> </span><span class="kw"><a href="../reference/generate_a
 <span class="st">  </span><span class="kw">ggtitle</span>(<span class="st">"Ground truth archetypes"</span>)</code></pre></div>
 <p><img src="Comparison_to_kmeans_files/figure-html/sim-1.png" width="432"></p>
 </div>
-<div id="find-archetypes-with-pcha-and-cluster-centers-with-k-means" class="section level2">
+<div id="find-archetypes-with-pcha-and-cluster-centers-with-k-means-and-louvain-methods" class="section level2">
 <h2 class="hasAnchor">
-<a href="#find-archetypes-with-pcha-and-cluster-centers-with-k-means" class="anchor"></a>Find archetypes with PCHA and cluster centers with k-means</h2>
+<a href="#find-archetypes-with-pcha-and-cluster-centers-with-k-means-and-louvain-methods" class="anchor"></a>Find archetypes with PCHA and cluster centers with k-means and Louvain methods</h2>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># find archetypes</span>
 arc =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch</a></span>(data, <span class="dt">noc =</span> <span class="dv">3</span>)
-<span class="co"># find clusters</span>
+<span class="co"># find k-means clusters</span>
 clusters =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch</a></span>(data, <span class="dt">noc =</span> <span class="dv">3</span>, <span class="dt">method =</span> <span class="st">"kmeans"</span>)
-
-<span class="co"># show both side-by-side</span>
+<span class="co"># find Louvain clusters</span>
+lou_clusters =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch</a></span>(data, <span class="dt">method =</span> <span class="st">"louvain"</span>,
+                       <span class="co"># use resolution instead of number of clusters</span>
+                       <span class="dt">method_options =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">resolution =</span> <span class="fl">0.15</span>)) </code></pre></div>
+<pre><code>## Registered S3 method overwritten by 'R.oo':
+##   method        from       
+##   throw.default R.methodsS3</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># show both side-by-side</span>
 <span class="kw">plot_grid</span>(<span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc, <span class="dt">data =</span> data,
                    <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
 <span class="st">            </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot.window">ylim</a></span>(<span class="op">-</span><span class="dv">18</span>, <span class="dv">17</span>) <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"Detected archetypes (PCHA)"</span>),
@@ -119,8 +126,12 @@ clusters =<span class="st"> </span><span class="kw"><a href="../reference/fit_pc
                    <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,
                    <span class="dt">data_lab =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/character">as.character</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/apply">apply</a></span>(clusters<span class="op">$</span>S, <span class="dv">2</span>, which.max))) <span class="op">+</span>
 <span class="st">            </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot.window">ylim</a></span>(<span class="op">-</span><span class="dv">18</span>, <span class="dv">17</span>) <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"K-means clusters"</span>),
-          <span class="dt">align =</span> <span class="st">"vh"</span>)</code></pre></div>
-<p><img src="Comparison_to_kmeans_files/figure-html/arc_vs_kmeans-1.png" width="864"></p>
+          <span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> lou_clusters, <span class="dt">data =</span> data,
+                   <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,
+                   <span class="dt">data_lab =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/character">as.character</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/apply">apply</a></span>(lou_clusters<span class="op">$</span>S, <span class="dv">2</span>, which.max))) <span class="op">+</span>
+<span class="st">            </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot.window">ylim</a></span>(<span class="op">-</span><span class="dv">18</span>, <span class="dv">17</span>) <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"Louvain clusters"</span>),
+          <span class="dt">align =</span> <span class="st">"vh"</span>, <span class="dt">nrow =</span> <span class="dv">1</span>)</code></pre></div>
+<p><img src="Comparison_to_kmeans_files/figure-html/arc_vs_kmeans-1.png" width="1296"></p>
 </div>
 <div id="use-bootstrapping-to-find-variability-in-positions-of-archetypes-and-cluster-centers" class="section level2">
 <h2 class="hasAnchor">
@@ -132,6 +143,12 @@ arc_rob =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch
 clusters_rob =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch_bootstrap</a></span>(data, <span class="dt">n =</span> <span class="dv">200</span>, <span class="dt">sample_prop =</span> <span class="fl">0.65</span>, <span class="dt">seed =</span> <span class="dv">2543</span>,
                                  <span class="dt">noc =</span> <span class="dv">3</span>, <span class="dt">method =</span> <span class="st">"kmeans"</span>)
 
+<span class="co"># bootstrap Louvain </span>
+<span class="co"># impossible because number of clusters will be different in each sample at fixed resolution</span>
+lou_clusters_rob =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch_bootstrap</a></span>(data, <span class="dt">n =</span> <span class="dv">200</span>, <span class="dt">sample_prop =</span> <span class="dv">1</span>, <span class="dt">seed =</span> <span class="dv">2543</span>,
+                                 <span class="dt">method =</span> <span class="st">"louvain"</span>,
+                                 <span class="dt">method_options =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">resolution =</span> <span class="fl">0.12</span>))
+
 <span class="co"># show both side-by-side</span>
 <span class="kw">plot_grid</span>(<span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc_rob, <span class="dt">data =</span> data,
                    <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
@@ -140,6 +157,10 @@ clusters_rob =<span class="st"> </span><span class="kw"><a href="../reference/fi
                    <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,
                    <span class="dt">data_lab =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/character">as.character</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/apply">apply</a></span>(clusters<span class="op">$</span>S, <span class="dv">2</span>, which.max))) <span class="op">+</span>
 <span class="st">            </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot.window">ylim</a></span>(<span class="op">-</span><span class="dv">18</span>, <span class="dv">17</span>) <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"K-means clusters"</span>),
+          <span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> lou_clusters_rob, <span class="dt">data =</span> data,
+                   <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,
+                   <span class="dt">data_lab =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/character">as.character</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/apply">apply</a></span>(lou_clusters<span class="op">$</span>S, <span class="dv">2</span>, which.max))) <span class="op">+</span>
+<span class="st">            </span><span class="kw"><a href="https://www.rdocumentation.org/packages/graphics/topics/plot.window">ylim</a></span>(<span class="op">-</span><span class="dv">18</span>, <span class="dv">17</span>) <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"Louvain clusters"</span>),
           <span class="dt">align =</span> <span class="st">"vh"</span>)</code></pre></div>
 <p><img src="Comparison_to_kmeans_files/figure-html/unnamed-chunk-1-1.png" width="700"></p>
 </div>
@@ -191,7 +212,7 @@ cluster_ks =<span class="st"> </span><span class="kw"><a href="../reference/fit_
 <a href="#tocnav" class="anchor"></a>Contents</h2>
       <ul class="nav nav-pills nav-stacked">
 <li><a href="#this-document-shows-the-difference-between-archetypal-analysis-and-k-means-clustering">This document shows the difference between archetypal analysis and k-means clustering</a></li>
-      <li><a href="#find-archetypes-with-pcha-and-cluster-centers-with-k-means">Find archetypes with PCHA and cluster centers with k-means</a></li>
+      <li><a href="#find-archetypes-with-pcha-and-cluster-centers-with-k-means-and-louvain-methods">Find archetypes with PCHA and cluster centers with k-means and Louvain methods</a></li>
       <li><a href="#use-bootstrapping-to-find-variability-in-positions-of-archetypes-and-cluster-centers">Use bootstrapping to find variability in positions of archetypes and cluster centers</a></li>
       <li><a href="#too-many-archetypes-and-cluster-centers-increased-variability-in-positions">Too many archetypes and cluster centers =&gt; increased variability in positions?</a></li>
       </ul>

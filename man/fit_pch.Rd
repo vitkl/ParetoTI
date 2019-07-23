@@ -27,7 +27,8 @@ fit_pch(data, noc = as.integer(3), I = NULL, U = NULL, delta = 0,
   order_type = c("align", "cosine", "side"),
   volume_ratio = c("t_ratio", "variance_ratio", "none"),
   converge_else_fail = TRUE, var_in_dims = FALSE,
-  normalise_var = TRUE, method = c("pcha", "kmeans", "poisson_aa"),
+  normalise_var = TRUE,
+  method = c("pcha", "kmeans", "louvain", "poisson_aa"),
   method_options = list())
 
 k_fit_pch(data, ks = 2:4, check_installed = TRUE, bootstrap = FALSE,
@@ -75,7 +76,7 @@ merge_arch_dist(arc_data, data, feature_data, colData = NULL, colData_id,
 
 \method{print}{r_pch_fit}(res)
 
-plot.r_pch_fit(rand_arch, ks = unique(rand_arch$rand_dist$k),
+\method{plot}{r_pch_fit}(rand_arch, ks = unique(rand_arch$rand_dist$k),
   type = c("total_var", "varexpl", "t_ratio"), colors = c("#1F77B4",
   "#D62728", "#2CA02C", "#17BED0", "#006400", "#FF7E0F"), nudge_y = 0.8,
   nudge_x = 0.1, text_lab_size = 4, line_size = 0.5)
@@ -122,7 +123,7 @@ subset.k_pch_fit(arc_data, ks)
 
 \item{normalise_var}{normalise variance in position of archetypes by variance in data in each dimention}
 
-\item{method}{method for archetypal analysis: PCHA (default), \link[stats]{kmeans}. Non-default methods use \code{data} and \code{noc}for data matrix and the number of archetypes, pass additional arguments via method_options.}
+\item{method}{method for archetypal analysis: PCHA (default), \link[stats]{kmeans}, \link[Seurat]{FindClusters} (louvain). Non-default methods use \code{data} and \code{noc}for data matrix and the number of archetypes, but require to pass additional arguments via method_options.}
 
 \item{method_options}{additional arguments for non-default method, named list: \code{list(arg = "value")}.}
 

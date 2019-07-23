@@ -86,7 +86,7 @@ paa_poisson = function(data,
     # compute archetypes
     archetypes = c %*% data
     # compute averages
-    mu_arch = log(weights %*% archetypes)
+    mu_arch = weights %*% log(archetypes)
     mu = exp(mu_arch + mu_covar)
 
     # define the distribution over data

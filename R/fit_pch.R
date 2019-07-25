@@ -118,6 +118,9 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
       if(isTRUE(converge_else_fail)) stop(paste0("fit_pch(noc = ",noc,") error: ", err))
       return(NULL)
     })
+
+    method_res = NA
+
     #---------------------------------------------------------------------------
 
   } else if(method == "louvain") {
@@ -172,6 +175,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     # change noc according to what louvain found
     noc = length(unique(clusters))
 
+    method_res = NA
+
     #---------------------------------------------------------------------------
 
   } else if(method == "kmeans") {
@@ -202,6 +207,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     if(!is.null(rownames(data))) rownames(res$XC) = rownames(data)
     colnames(res$XC) = NULL
     class(res) = "pch_fit"
+
+    method_res = NA
 
     #---------------------------------------------------------------------------
 
@@ -258,7 +265,9 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     }
     class(res) = "pch_fit"
 
-  } else stop("method should be pcha, poisson_aa or kmeans")
+    method_res = opt_res
+
+  } else stop("method should be pcha, poisson_aa, louvain or kmeans")
 
   if(is.null(res)) return(NULL)
 
@@ -339,6 +348,9 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     # (at variance_ratio step)
     res = ParetoTI:::.cacl_var_in_dims(res, data, var_in_dims, normalise_var)
   }
+
+  # add method-speficic results
+  res$method_res = method_res
 
   res$total_var = NA
   # add summary table:

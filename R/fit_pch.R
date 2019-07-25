@@ -602,6 +602,7 @@ average_pch_fits = function(res, XC_array = NULL){
   res_aver$t_ratio = mean(res$pch_fits$t_ratio)
   res_aver$var_vert = res$var_vert
   res_aver$var_dim = res$var_dim
+  res_aver$method_res = NA
   res_aver$total_var = res$total_var
   res_aver$summary = res$summary
   class(res_aver) = "pch_fit"
@@ -1022,6 +1023,7 @@ merge_arch_dist = function(arc_data, data, feature_data,
        t_ratio = vapply(pch_fit_list, function(pch) pch$t_ratio, FUN.VALUE = numeric(1L)),
        var_vert = lapply(pch_fit_list, function(pch) pch$var_vert),
        var_dim = data.table::rbindlist(lapply(pch_fit_list, function(pch) pch$var_dim)),
+       method_res = lapply(pch_fit_list, function(pch) pch$method_res),
        total_var = vapply(pch_fit_list, function(pch) pch$total_var, FUN.VALUE = numeric(1L)),
        summary = data.table::rbindlist(lapply(pch_fit_list, function(pch) pch$summary)))
 }

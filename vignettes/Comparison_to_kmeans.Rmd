@@ -40,9 +40,7 @@ arc = fit_pch(data, noc = 3)
 # find k-means clusters
 clusters = fit_pch(data, noc = 3, method = "kmeans")
 # find Louvain clusters
-lou_clusters = fit_pch(data, method = "louvain",
-                       # use resolution instead of number of clusters
-                       method_options = list(resolution = 0.15)) 
+lou_clusters = fit_pch(data, noc = 3, method = "louvain") 
 
 # show both side-by-side
 plot_grid(plot_arc(arc_data = arc, data = data,
@@ -68,12 +66,11 @@ arc_rob = fit_pch_bootstrap(data, n = 200, sample_prop = 0.65, seed = 2543,
 # bootstrap kmeans
 clusters_rob = fit_pch_bootstrap(data, n = 200, sample_prop = 0.65, seed = 2543,
                                  noc = 3, method = "kmeans")
-
 # bootstrap Louvain 
-# impossible because number of clusters will be different in each sample at fixed resolution
-lou_clusters_rob = fit_pch_bootstrap(data, n = 200, sample_prop = 1, seed = 2543,
-                                 method = "louvain",
-                                 method_options = list(resolution = 0.12))
+# specific noc is achieved by optimising clustering resolution to get noc clusters
+lou_clusters_rob = fit_pch_bootstrap(data, n = 200, sample_prop = 0.9, seed = 2543,
+                                 noc = 3, method = "louvain",
+                                 method_options = list(resolution = 0.1))
 
 # show both side-by-side
 plot_grid(plot_arc(arc_data = arc_rob, data = data,
@@ -108,6 +105,15 @@ cluster_ks = k_fit_pch(data, ks = 2:5,
                    volume_ratio = "none", # set to "none" if too slow
                    order_type = "align", sample_prop = 0.65, reference = T, method = "kmeans")
 
+lou_cluster_ks = k_fit_pch(data, ks = 2:5,
+                           bootstrap = T, bootstrap_N = 200, maxiter = 500,
+                           bootstrap_type = "m", clust_options = list(cores = 3),
+                           seed = 2543, replace = FALSE,
+                           volume_ratio = "none", # set to "none" if too slow
+                           sample_prop = 0.95, method = "louvain",
+                           method_options = list(resolution = 0.1,
+                                                 noc_optim_iter = 500)) # try resolutions for more iterations
+
 # Show variance explained by k-vertex model on top of k-1 model (each k separately)
 plot_grid(plot_arc_var(arc_ks, type = "res_varexpl",
                        point_size = 2, line_size = 1.5) +
@@ -115,6 +121,9 @@ plot_grid(plot_arc_var(arc_ks, type = "res_varexpl",
           plot_arc_var(cluster_ks, type = "res_varexpl",
                        point_size = 2, line_size = 1.5) +
             theme_bw() + ggtitle("K-means clusters"),
+          plot_arc_var(lou_cluster_ks, type = "res_varexpl",
+                       point_size = 2, line_size = 1.5) +
+            theme_bw() + ggtitle("Louvain clusters"),
           align = "vh")
 
 # Show variance in position of vertices obtained using bootstraping
@@ -127,6 +136,9 @@ plot_grid(plot_arc_var(arc_ks, type = "total_var",
                        point_size = 2, line_size = 1.5) +
             theme_bw() + ylab("Mean variance in position of vertices") +
             ggtitle("K-means clusters"),
+          plot_arc_var(lou_cluster_ks, type = "total_var",
+                       point_size = 2, line_size = 1.5) +
+            theme_bw() + ggtitle("Louvain clusters"),
           align = "vh")
 ```
 

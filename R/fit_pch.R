@@ -167,7 +167,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     # create pch_fit object to be returned
     res = list(XC = as.matrix(Matrix::crossprod(Matrix::t(data), C)),
                S = S, C = C,
-               SSE = tot.withinss, varexpl = totss - tot.withinss / totss)
+               SSE = tot.withinss, varexpl = (totss - tot.withinss) / totss)
     if(!is.null(rownames(data))) rownames(res$XC) = rownames(data)
     colnames(res$XC) = NULL
     class(res) = "pch_fit"

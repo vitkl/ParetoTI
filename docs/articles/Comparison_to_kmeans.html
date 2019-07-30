@@ -30,7 +30,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">ParetoTI</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.12</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.13</span>
       </span>
     </div>
 
@@ -112,9 +112,7 @@ arc =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.htm
 <span class="co"># find k-means clusters</span>
 clusters =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch</a></span>(data, <span class="dt">noc =</span> <span class="dv">3</span>, <span class="dt">method =</span> <span class="st">"kmeans"</span>)
 <span class="co"># find Louvain clusters</span>
-lou_clusters =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch</a></span>(data, <span class="dt">method =</span> <span class="st">"louvain"</span>,
-                       <span class="co"># use resolution instead of number of clusters</span>
-                       <span class="dt">method_options =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">resolution =</span> <span class="fl">0.15</span>)) </code></pre></div>
+lou_clusters =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch</a></span>(data, <span class="dt">noc =</span> <span class="dv">3</span>, <span class="dt">method =</span> <span class="st">"louvain"</span>) </code></pre></div>
 <pre><code>## Registered S3 method overwritten by 'R.oo':
 ##   method        from       
 ##   throw.default R.methodsS3</code></pre>
@@ -142,12 +140,11 @@ arc_rob =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch
 <span class="co"># bootstrap kmeans</span>
 clusters_rob =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch_bootstrap</a></span>(data, <span class="dt">n =</span> <span class="dv">200</span>, <span class="dt">sample_prop =</span> <span class="fl">0.65</span>, <span class="dt">seed =</span> <span class="dv">2543</span>,
                                  <span class="dt">noc =</span> <span class="dv">3</span>, <span class="dt">method =</span> <span class="st">"kmeans"</span>)
-
 <span class="co"># bootstrap Louvain </span>
-<span class="co"># impossible because number of clusters will be different in each sample at fixed resolution</span>
-lou_clusters_rob =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch_bootstrap</a></span>(data, <span class="dt">n =</span> <span class="dv">200</span>, <span class="dt">sample_prop =</span> <span class="dv">1</span>, <span class="dt">seed =</span> <span class="dv">2543</span>,
-                                 <span class="dt">method =</span> <span class="st">"louvain"</span>,
-                                 <span class="dt">method_options =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">resolution =</span> <span class="fl">0.12</span>))
+<span class="co"># specific noc is achieved by optimising clustering resolution to get noc clusters</span>
+lou_clusters_rob =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">fit_pch_bootstrap</a></span>(data, <span class="dt">n =</span> <span class="dv">200</span>, <span class="dt">sample_prop =</span> <span class="fl">0.9</span>, <span class="dt">seed =</span> <span class="dv">2543</span>,
+                                 <span class="dt">noc =</span> <span class="dv">3</span>, <span class="dt">method =</span> <span class="st">"louvain"</span>,
+                                 <span class="dt">method_options =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">resolution =</span> <span class="fl">0.1</span>))
 
 <span class="co"># show both side-by-side</span>
 <span class="kw">plot_grid</span>(<span class="kw"><a href="../reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc_rob, <span class="dt">data =</span> data,
@@ -182,6 +179,15 @@ cluster_ks =<span class="st"> </span><span class="kw"><a href="../reference/fit_
                    <span class="dt">volume_ratio =</span> <span class="st">"none"</span>, <span class="co"># set to "none" if too slow</span>
                    <span class="dt">order_type =</span> <span class="st">"align"</span>, <span class="dt">sample_prop =</span> <span class="fl">0.65</span>, <span class="dt">reference =</span> T, <span class="dt">method =</span> <span class="st">"kmeans"</span>)
 
+lou_cluster_ks =<span class="st"> </span><span class="kw"><a href="../reference/fit_pch.html">k_fit_pch</a></span>(data, <span class="dt">ks =</span> <span class="dv">2</span><span class="op">:</span><span class="dv">5</span>,
+                           <span class="dt">bootstrap =</span> T, <span class="dt">bootstrap_N =</span> <span class="dv">200</span>, <span class="dt">maxiter =</span> <span class="dv">500</span>,
+                           <span class="dt">bootstrap_type =</span> <span class="st">"m"</span>, <span class="dt">clust_options =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">cores =</span> <span class="dv">3</span>),
+                           <span class="dt">seed =</span> <span class="dv">2543</span>, <span class="dt">replace =</span> <span class="ot">FALSE</span>,
+                           <span class="dt">volume_ratio =</span> <span class="st">"none"</span>, <span class="co"># set to "none" if too slow</span>
+                           <span class="dt">sample_prop =</span> <span class="fl">0.95</span>, <span class="dt">method =</span> <span class="st">"louvain"</span>,
+                           <span class="dt">method_options =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="dt">resolution =</span> <span class="fl">0.1</span>,
+                                                 <span class="dt">noc_optim_iter =</span> <span class="dv">500</span>)) <span class="co"># try resolutions for more iterations</span>
+
 <span class="co"># Show variance explained by k-vertex model on top of k-1 model (each k separately)</span>
 <span class="kw">plot_grid</span>(<span class="kw"><a href="../reference/plot_arc_var.html">plot_arc_var</a></span>(arc_ks, <span class="dt">type =</span> <span class="st">"res_varexpl"</span>,
                        <span class="dt">point_size =</span> <span class="dv">2</span>, <span class="dt">line_size =</span> <span class="fl">1.5</span>) <span class="op">+</span>
@@ -189,6 +195,9 @@ cluster_ks =<span class="st"> </span><span class="kw"><a href="../reference/fit_
           <span class="kw"><a href="../reference/plot_arc_var.html">plot_arc_var</a></span>(cluster_ks, <span class="dt">type =</span> <span class="st">"res_varexpl"</span>,
                        <span class="dt">point_size =</span> <span class="dv">2</span>, <span class="dt">line_size =</span> <span class="fl">1.5</span>) <span class="op">+</span>
 <span class="st">            </span><span class="kw">theme_bw</span>() <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"K-means clusters"</span>),
+          <span class="kw"><a href="../reference/plot_arc_var.html">plot_arc_var</a></span>(lou_cluster_ks, <span class="dt">type =</span> <span class="st">"res_varexpl"</span>,
+                       <span class="dt">point_size =</span> <span class="dv">2</span>, <span class="dt">line_size =</span> <span class="fl">1.5</span>) <span class="op">+</span>
+<span class="st">            </span><span class="kw">theme_bw</span>() <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"Louvain clusters"</span>),
           <span class="dt">align =</span> <span class="st">"vh"</span>)</code></pre></div>
 <p><img src="Comparison_to_kmeans_files/figure-html/unnamed-chunk-2-1.png" width="700"></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Show variance in position of vertices obtained using bootstraping</span>
@@ -201,6 +210,9 @@ cluster_ks =<span class="st"> </span><span class="kw"><a href="../reference/fit_
                        <span class="dt">point_size =</span> <span class="dv">2</span>, <span class="dt">line_size =</span> <span class="fl">1.5</span>) <span class="op">+</span>
 <span class="st">            </span><span class="kw">theme_bw</span>() <span class="op">+</span><span class="st"> </span><span class="kw">ylab</span>(<span class="st">"Mean variance in position of vertices"</span>) <span class="op">+</span>
 <span class="st">            </span><span class="kw">ggtitle</span>(<span class="st">"K-means clusters"</span>),
+          <span class="kw"><a href="../reference/plot_arc_var.html">plot_arc_var</a></span>(lou_cluster_ks, <span class="dt">type =</span> <span class="st">"total_var"</span>,
+                       <span class="dt">point_size =</span> <span class="dv">2</span>, <span class="dt">line_size =</span> <span class="fl">1.5</span>) <span class="op">+</span>
+<span class="st">            </span><span class="kw">theme_bw</span>() <span class="op">+</span><span class="st"> </span><span class="kw">ggtitle</span>(<span class="st">"Louvain clusters"</span>),
           <span class="dt">align =</span> <span class="st">"vh"</span>)</code></pre></div>
 <p><img src="Comparison_to_kmeans_files/figure-html/unnamed-chunk-2-2.png" width="700"></p>
 </div>

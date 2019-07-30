@@ -129,8 +129,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 
     # set defaults or replace them with provided options
     default = list(k.param = 20, prune.SNN = 1/15,
-                   resolution = 0.8, n.start = 10, n.iter = 10,
-                   graph = NA)
+                   resolution = 1, n.start = 10, n.iter = 10,
+                   graph = NA, lr = 0.2, noc_optim_iter = 200)
     default_retain = !names(default) %in% names(method_options)
     options = c(default[default_retain], method_options)
 
@@ -142,13 +142,30 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                                             verbose = verbose)
     }
 
-    # run clustering
-    clusters = Seurat::FindClusters(options$graph$snn,
-                                    resolution = options$resolution,
-                                    n.start = options$n.start,
-                                    n.iter = options$n.iter,
-                                    verbose = verbose)
-    clusters = as.numeric(clusters[, 1])
+
+    # run clustering by optimising resolution to reach desired noc
+    iter = 1
+    clusters = NULL
+    while((!isTRUE(uniqueN(clusters) == noc) | iter == 1) & # iterate until desired noc is reached
+          iter != options$noc_optim_iter ) { # or until noc_optim_iter exhausted
+
+      # compute gradient of resolution
+      if(iter == 1) grad = 0 else {
+        grad = options$resolution * options$lr * log(noc / uniqueN(clusters))
+      }
+      options$resolution = abs(options$resolution + grad)
+      # increment iterations
+      iter = iter + 1
+
+      # run clustering
+      clusters = Seurat::FindClusters(options$graph$snn,
+                                      resolution = options$resolution,
+                                      n.start = options$n.start,
+                                      n.iter = options$n.iter,
+                                      verbose = verbose)
+      clusters = as.numeric(clusters[, 1])
+
+    }
 
     # Create S as binary cluster membership matrix
     S = Matrix::sparseMatrix(i = clusters,
@@ -175,7 +192,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     # change noc according to what louvain found
     noc = length(unique(clusters))
 
-    method_res = NA
+    method_res = list(resolution = options$resolution)
 
     #---------------------------------------------------------------------------
 

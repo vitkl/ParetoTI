@@ -237,6 +237,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     default = list(weight_alpha_prior = 0.8, c_alpha_prior = 0.001,
                    covar = NULL, precision = c("double", "single"),
                    optimiser = greta::adam(learning_rate = 0.3),
+                   maxiter = maxiter,
                    initial_values = greta::initials())
     default_retain = !names(default) %in% names(method_options)
     options = c(default[default_retain], method_options)
@@ -280,7 +281,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
       tryCatch({
         opt_res = opt(model,
                       optimiser = options$optimiser,   # optimisation method used to find prior-adjusted maximum likelihood estimate
-                      max_iterations = maxiter,
+                      max_iterations = options$maxiter,
                       initial_values = initial_values,
                       tolerance = conv_crit, adjust = TRUE,
                       hessian = FALSE)

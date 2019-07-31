@@ -233,7 +233,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 
     # run probabilistic poisson archetypal analysis  ---------------------------
 
-    # set defaults or replace them with provided options
+    # set defaults or replace them with provided options ========
     default = list(weight_alpha_prior = 0.8, c_alpha_prior = 0.001,
                    covar = NULL, precision = c("double", "single"),
                    optimiser = greta::adam(learning_rate = 0.3),
@@ -241,7 +241,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     default_retain = !names(default) %in% names(method_options)
     options = c(default[default_retain], method_options)
 
-    # create greta / tensorflow model
+    # create greta / tensorflow model ========
     m = paa_poisson(t(data),                   # data: data points * dimensions
                     n_arc = noc,              # number of achetypes
                     weight_alpha_prior = options$weight_alpha_prior,
@@ -250,26 +250,41 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                     precision = options$precision
     )
 
-    # visualise computation graph
+    # visualise computation graph ========
     if(verbose) plot(m$model)
 
-    # solve model with optimisation
-    tryCatch({
-      opt_res = opt(m$model,
-                    optimiser = options$optimiser,   # optimisation method used to find prior-adjusted maximum likelihood estimate: adam, l_bfgs_b,
-                    max_iterations = maxiter,
-                    initial_values = options$initial_values,
-                    tolerance = conv_crit, adjust = TRUE,
-                    hessian = FALSE)
-    }, error = function(err) {
-      if(grepl("Error in while \\(self\\$it", err)) {
-        stop(paste0(err, "\n\n try reducing learning rate with `method_options = list(optimiser = optimiser(learning_rate = 0.3))`\n
-                         e.g. `method_options = list(optimiser = greta::adam(learning_rate = 0.3))`"))
-      }
-      return(NULL)
-    })
+    # add initial values if any provided ========
+    # (this has to be done in the same environment as the components of the model)
+    if(!isTRUE(all.equal(initial_values, greta::initials()))){
 
-    # create pch_fit object
+      vals = paste0(names(initial_values), " = initial_values[[",
+                    seq_along(initial_values), "]]", collapse = ", ")
+      vals = paste0("initial_values = greta::initials(", vals, ")")
+
+      evalq(eval(parse(text = vals)), envir = m)
+    }
+
+    # solve model with optimisation ========
+    evalq({
+      tryCatch({
+        opt_res = opt(m$model,
+                      optimiser = options$optimiser,   # optimisation method used to find prior-adjusted maximum likelihood estimate
+                      max_iterations = maxiter,
+                      initial_values = m$initial_values,
+                      tolerance = conv_crit, adjust = TRUE,
+                      hessian = FALSE)
+      }, error = function(err) {
+        if(grepl("Error in while \\(self\\$it", err)) {
+          stop(paste0(err, "\n\n try reducing learning rate with `method_options = list(optimiser = optimiser(learning_rate = 0.3))`\n
+                         e.g. `method_options = list(optimiser = greta::adam(learning_rate = 0.3))`"))
+        } else stop(err)
+        return(NULL)
+      })
+    }, envir = m)
+
+    opt_res = m$opt_res
+
+    # create pch_fit object ========
     res = list(XC = t(opt_res$par$c %*% t(data)),
                S = t(opt_res$par$weights), C = t(opt_res$par$c),
                SSE = opt_res$iterations, # number of iterations (e.i. did it converge?)

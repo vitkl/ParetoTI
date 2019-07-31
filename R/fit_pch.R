@@ -249,6 +249,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                     covar = options$covar,            # covariates affecting the mean in addition to archetypes: data points * n_covariates
                     precision = options$precision
     )
+    m$options = options
 
     # visualise computation graph ========
     if(verbose) plot(m$model)
@@ -257,6 +258,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     # (this has to be done in the same environment as the components of the model)
     if(!isTRUE(all.equal(options$initial_values, greta::initials()))){
 
+      evalq({
       init = options$initial_values
 
       vals = paste0(names(init), " = init[[",
@@ -264,7 +266,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
       vals = paste0("initial_values = greta::initials(", vals, ")")
       vals = str2expression(vals)
 
-      eval(expr = vals, envir = m, enclos = environment())
+      eval(expr = vals)
+      }, envir = m)
 
     } else {
 
@@ -275,10 +278,10 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     # solve model with optimisation ========
     evalq({
       tryCatch({
-        opt_res = opt(m$model,
+        opt_res = opt(model,
                       optimiser = options$optimiser,   # optimisation method used to find prior-adjusted maximum likelihood estimate
                       max_iterations = maxiter,
-                      initial_values = m$initial_values,
+                      initial_values = initial_values,
                       tolerance = conv_crit, adjust = TRUE,
                       hessian = FALSE)
       }, error = function(err) {

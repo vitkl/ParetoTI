@@ -257,11 +257,19 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     # (this has to be done in the same environment as the components of the model)
     if(!isTRUE(all.equal(options$initial_values, greta::initials()))){
 
-      vals = paste0(names(options$initial_values), " = options$initial_values[[",
-                    seq_along(options$initial_values), "]]", collapse = ", ")
-      vals = paste0("evalq({initial_values = greta::initials(", vals, ")}, envir = m)")
+      init = options$initial_values
+
+      vals = paste0(names(init), " = init[[",
+                    seq_along(init), "]]", collapse = ", ")
+      vals = paste0("initial_values = greta::initials(", vals, ")")
       vals = str2expression(vals)
-      eval(expr = vals)
+
+      eval(expr = vals, envir = m, enclos = environment())
+
+    } else {
+
+      evalq({initial_values = greta::initials()}, envir = m)
+
     }
 
     # solve model with optimisation ========

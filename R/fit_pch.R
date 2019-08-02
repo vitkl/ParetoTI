@@ -144,7 +144,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     iter = 1
     clusters = NULL
     while((!isTRUE(uniqueN(clusters) == noc) | iter == 1) & # iterate until desired noc is reached
-          iter != options$noc_optim_iter ) { # or until noc_optim_iter exhausted
+          iter <= options$noc_optim_iter ) { # or until noc_optim_iter exhausted
 
       # compute gradient of resolution
       if(iter == 1) grad = 0 else {
@@ -160,7 +160,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                                       n.start = options$n.start,
                                       n.iter = options$n.iter,
                                       verbose = verbose)
-      clusters = as.numeric(clusters[, 1])
+      clusters = as.integer(clusters[, 1])
 
     }
 

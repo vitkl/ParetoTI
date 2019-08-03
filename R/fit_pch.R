@@ -238,9 +238,27 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    covar = NULL, precision = c("double", "single"),
                    optimiser = greta::adam(learning_rate = 0.3),
                    maxiter = maxiter, conv_crit = conv_crit,
-                   initial_values = greta::initials())
+                   initial_values = greta::initials(),
+                   resolution = 1) # louvain initial values resolution
     default_retain = !names(default) %in% names(method_options)
     options = c(default[default_retain], method_options)
+
+    # optionally: use louvain cluster centers as initial values
+    if(options$initial_values == "louvain_centers"){
+      # initial values ===============
+      # compute Louvain clustering with Seurat to use as initial value
+      clust = fit_pch(data, noc = noc, method = "louvain",
+                      method_options = list(resolution = options$resolution),
+                      volume_ratio = "none")
+      c_init = t(clust$C) + 1e-7 # add small random value to initialise correctly
+      c_init = c_init / Matrix::rowSums(c_init)
+      weights_init = t(clust$S) + 1e-5 # add small random value to initialise correctly
+      weights_init = weights_init / Matrix::rowSums(weights_init)
+
+      options$initial_values = greta::initials(c_var = as.matrix(c_init),
+                                       weights_var = as.matrix(weights_init))
+    }
+
 
     # create greta / tensorflow model ========
     m = paa_poisson(t(data),                   # data: data points * dimensions

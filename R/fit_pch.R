@@ -250,9 +250,9 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
       clust = fit_pch(data, noc = noc, method = "louvain",
                       method_options = list(resolution = options$resolution),
                       volume_ratio = "none")
-      c_init = t(clust$C) + 1e-7 # add small random value to initialise correctly
+      c_init = Matrix::t(clust$C) + 1e-7 # add small random value to initialise correctly
       c_init = c_init / Matrix::rowSums(c_init)
-      weights_init = t(clust$S) + 1e-5 # add small random value to initialise correctly
+      weights_init = Matrix::t(clust$S) + 1e-5 # add small random value to initialise correctly
       weights_init = weights_init / Matrix::rowSums(weights_init)
 
       options$initial_values = greta::initials(c_var = as.matrix(c_init),

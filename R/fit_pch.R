@@ -84,7 +84,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    volume_ratio = c("t_ratio", "variance_ratio", "none"),
                    converge_else_fail = TRUE,
                    var_in_dims = FALSE, normalise_var = TRUE,
-                   method = c("pcha", "kmeans", "louvain"),
+                   method = c("pcha", "kmeans", "louvain", "aanet"),
                    method_options = list()) {
 
   # check arguments
@@ -224,7 +224,155 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 
     #---------------------------------------------------------------------------
 
-  }  else stop("method should be pcha or kmeans")
+  }  else if(method == "aanet"){
+
+    # run probabilistic poisson archetypal analysis  ---------------------------
+
+    # set defaults or replace them with provided options ========
+    default = list(weight_alpha_prior = 0.8, c_alpha_prior = 0.001,
+                   covar = NULL, precision = c("double", "single"),
+                   optimiser = greta::adam(learning_rate = 0.3),
+                   maxiter = maxiter, conv_crit = conv_crit,
+                   initial_values = greta::initials(),
+                   resolution = 1) # louvain initial values resolution
+    default_retain = !names(default) %in% names(method_options)
+    options = c(default[default_retain], method_options)
+
+    # optionally: use louvain cluster centers as initial values
+    if(options$initial_values == "louvain_centers"){
+      # initial values ===============
+      # compute Louvain clustering with Seurat to use as initial value
+      clust = fit_pch(data, noc = noc, method = "louvain",
+                      method_options = list(resolution = options$resolution),
+                      volume_ratio = "none")
+      c_init = Matrix::t(clust$C) + 1e-7 # add small random value to initialise correctly
+      c_init = c_init / Matrix::rowSums(c_init)
+      weights_init = Matrix::t(clust$S) + 1e-5 # add small random value to initialise correctly
+      weights_init = weights_init / Matrix::rowSums(weights_init)
+
+      options$initial_values = greta::initials(c_var = as.matrix(c_init),
+                                       weights_var = as.matrix(weights_init))
+    }
+
+
+    # create greta / tensorflow model ========
+    m = paa_poisson(t(data),                   # data: data points * dimensions
+                    n_arc = noc,              # number of achetypes
+                    weight_alpha_prior = options$weight_alpha_prior,
+                    c_alpha_prior = options$c_alpha_prior,
+                    covar = options$covar,            # covariates affecting the mean in addition to archetypes: data points * n_covariates
+                    precision = options$precision
+    )
+    m$options = options
+
+    # visualise computation graph ========
+    if(verbose) plot(m$model)
+
+    # add initial values if any provided ========
+    # (this has to be done in the same environment as the components of the model)
+    if(!isTRUE(all.equal(options$initial_values, greta::initials()))){
+
+      evalq({
+      init = options$initial_values
+
+      vals = paste0(names(init), " = init[[",
+                    seq_along(init), "]]", collapse = ", ")
+      vals = paste0("initial_values = greta::initials(", vals, ")")
+      vals = str2expression(vals)
+
+      eval(expr = vals)
+      }, envir = m)
+
+    } else {
+
+      evalq({initial_values = greta::initials()}, envir = m)
+
+    }
+
+    # solve model with optimisation ========
+    evalq({
+      tryCatch({
+        opt_res = opt(model,
+                      optimiser = options$optimiser,   # optimisation method used to find prior-adjusted maximum likelihood estimate
+                      max_iterations = options$maxiter,
+                      initial_values = initial_values,
+                      tolerance = options$conv_crit, adjust = TRUE,
+                      hessian = FALSE)
+      }, error = function(err) {
+        if(grepl("Error in while \\(self\\$it", err)) {
+          stop(paste0(err, "\n\n try reducing learning rate with `method_options = list(optimiser = optimiser(learning_rate = 0.3))`\n
+                         e.g. `method_options = list(optimiser = greta::adam(learning_rate = 0.3))`"))
+        } else stop(err)
+        return(NULL)
+      })
+    }, envir = m)
+
+    opt_res = m$opt_res
+
+    # create pch_fit object ========
+    res = list(XC = t(opt_res$par$c %*% t(data)),
+               S = t(opt_res$par$weights), C = t(opt_res$par$c),
+               SSE = opt_res$iterations, # number of iterations (e.i. did it converge?)
+               varexpl = opt_res$value) # negative log-likelihood
+
+    if(!is.null(rownames(data))) {
+      rownames(res$XC) = rownames(data)
+      colnames(res$S) = colnames(data)
+      rownames(res$C) = colnames(data)
+    }
+    class(res) = "pch_fit"
+
+    method_res = opt_res
+
+  } else if(method == "aanet"){
+
+    # run AAnet -------------------------------------------------------------------
+
+    # coerce to matrix
+    if(!is.matrix(data)) data = as.matrix(Matrix::t(data))
+
+    # set defaults or replace them with provided options ========
+    default = list(noise_z_std = 0.0,
+                   maxiter = list(256L, 64L), act_out = tensorflow::tf$nn$tanh,
+                   learning_rate = 1e-3, gpu_mem = 0.4,
+                   batch_size=128L, num_batches=5000L,
+                   input_dim = ncol(data),
+                   AAnet = reticulate::import_from_path("AAnet", path = "../AAnet/", convert = TRUE),
+                   network = reticulate::import_from_path("network", path = "../AAnet/", convert = TRUE),
+                   AAtools = reticulate::import_from_path("AAtools", path = "../AAnet/", convert = TRUE))
+
+    default_retain = !names(default) %in% names(method_options)
+    options = c(default[default_retain], method_options)
+
+    # construct network  ========
+    enc_net = network$Encoder(num_at=as.integer(noc), z_dim=options$z_dim)
+    dec_net = network$Decoder(x_dim=options$input_dim, noise_z_std=options$noise_z_std, z_dim=options$z_dim, act_out=options$act_out)
+    model = AAnet$AAnet(enc_net, dec_net, learning_rate=options$learning_rate, gpu_mem=options$gpu_mem)
+
+    # train model ========
+    model$train(aanet_data, batch_size=options$batch_size, num_batches=options$num_batches)
+
+    # export results  ========
+    # get archetypes in input space
+    XC = t(model$get_ats_x())
+    # compute loss function
+    mse = model$compute_mse_loss(data = aanet_data)
+    # compute S
+    S = t(model$data2at(data = aanet_data))
+
+    res = list(XC = XC, S = S, C = NULL, SSE = mse, varexpl = mse)
+    if(!is.null(colnames(data))) rownames(res$XC) = colnames(data)
+    if(!is.null(rownames(data))) {
+      colnames(res$S) = rownames(data)
+    }
+
+    class(res) = "pch_fit"
+
+    method_res = model
+
+    #---------------------------------------------------------------------------
+
+  } else stop("method should be pcha, poisson_aa, aanet, louvain or kmeans")
 
   if(is.null(res)) return(NULL)
 

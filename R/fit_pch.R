@@ -84,7 +84,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
                    volume_ratio = c("t_ratio", "variance_ratio", "none"),
                    converge_else_fail = TRUE,
                    var_in_dims = FALSE, normalise_var = TRUE,
-                   method = c("pcha", "kmeans", "louvain", "poisson_aa"),
+                   method = c("pcha", "kmeans", "louvain", "poisson_aa", "aanet"),
                    method_options = list()) {
 
   # check arguments
@@ -329,7 +329,55 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 
     method_res = opt_res
 
-  } else stop("method should be pcha, poisson_aa, louvain or kmeans")
+  } else if(method == "aanet"){
+
+    # run AAnet -------------------------------------------------------------------
+
+    # coerce to matrix
+    if(!is.matrix(data)) data = as.matrix(Matrix::t(data))
+
+    # set defaults or replace them with provided options ========
+    default = list(noise_z_std = 0.0,
+                   maxiter = list(256L, 64L), act_out = tensorflow::tf$nn$tanh,
+                   learning_rate = 1e-3, gpu_mem = 0.4,
+                   batch_size=128L, num_batches=5000L,
+                   input_dim = ncol(data),
+                   AAnet = reticulate::import_from_path("AAnet", path = "../AAnet/", convert = TRUE),
+                   network = reticulate::import_from_path("network", path = "../AAnet/", convert = TRUE),
+                   AAtools = reticulate::import_from_path("AAtools", path = "../AAnet/", convert = TRUE))
+
+    default_retain = !names(default) %in% names(method_options)
+    options = c(default[default_retain], method_options)
+
+    # construct network  ========
+    enc_net = network$Encoder(num_at=as.integer(noc), z_dim=options$z_dim)
+    dec_net = network$Decoder(x_dim=options$input_dim, noise_z_std=options$noise_z_std, z_dim=options$z_dim, act_out=options$act_out)
+    model = AAnet$AAnet(enc_net, dec_net, learning_rate=options$learning_rate, gpu_mem=options$gpu_mem)
+
+    # train model ========
+    model$train(aanet_data, batch_size=options$batch_size, num_batches=options$num_batches)
+
+    # export results  ========
+    # get archetypes in input space
+    XC = t(model$get_ats_x())
+    # compute loss function
+    mse = model$compute_mse_loss(data = aanet_data)
+    # compute S
+    S = t(model$data2at(data = aanet_data))
+
+    res = list(XC = XC, S = S, C = NULL, SSE = mse, varexpl = mse)
+    if(!is.null(colnames(data))) rownames(res$XC) = colnames(data)
+    if(!is.null(rownames(data))) {
+      colnames(res$S) = rownames(data)
+    }
+
+    class(res) = "pch_fit"
+
+    method_res = model
+
+    #---------------------------------------------------------------------------
+
+  } else stop("method should be pcha, poisson_aa, aanet, louvain or kmeans")
 
   if(is.null(res)) return(NULL)
 

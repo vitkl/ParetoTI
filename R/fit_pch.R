@@ -338,7 +338,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 
     # set defaults or replace them with provided options ========
     default = list(noise_z_std = 0.0,
-                   maxiter = list(256L, 64L), act_out = tensorflow::tf$nn$tanh,
+                   z_dim = list(256L, 64L), act_out = tensorflow::tf$nn$tanh,
                    learning_rate = 1e-3, gpu_mem = 0.4,
                    batch_size=128L, num_batches=5000L,
                    input_dim = ncol(data),

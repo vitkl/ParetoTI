@@ -334,7 +334,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     # run AAnet -------------------------------------------------------------------
 
     # coerce to matrix
-    if(!is.matrix(data)) data = as.matrix(Matrix::t(data))
+    if(!is.matrix(data)) data = as.matrix(data)
+    data = t(data) # transpose
 
     # set defaults or replace them with provided options ========
     default = list(noise_z_std = 0.0,
@@ -350,8 +351,6 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     options = c(default[default_retain], method_options)
 
     # construct network  ========
-    z_dim = options$z_dim
-    names(z_dim) = NULL
     enc_net = network$Encoder(num_at=as.integer(noc), z_dim=options$z_dim)
     dec_net = network$Decoder(x_dim=options$input_dim, noise_z_std=options$noise_z_std, z_dim=options$z_dim, act_out=options$act_out)
     model = AAnet$AAnet(enc_net, dec_net, learning_rate=options$learning_rate, gpu_mem=options$gpu_mem)

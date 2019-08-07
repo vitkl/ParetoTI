@@ -14,6 +14,7 @@ BiocManager::install("vitkl/ParetoTI",
                      dependencies = c("Depends", "Imports", "LinkingTo"),
                      ref = "probabilistic")
 
+unloadNamespace("ParetoTI")
 library(ParetoTI)
 
 # Random data that fits into the triangle

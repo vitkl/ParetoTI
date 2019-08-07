@@ -147,9 +147,11 @@ paa_poisson_free = function(data,
   n_dim = ncol(data)           # number of dimensions (e.g. genes)
   # data average in each dimension
   data_mean = matrix(Matrix::colMeans(data), nrow = n_arc, ncol = n_dim, byrow = TRUE)
+  data_mean = log(data_mean)
   # data sd in each dimension
   data_sd = matrix(DelayedMatrixStats::colSds(DelayedArray::DelayedArray(data)),
                    nrow = n_arc, ncol = n_dim, byrow = TRUE) * scale_data_sd
+  data_sd = sqrt(data_sd) # if this evaluates to < 0 everything breaks
 
   # make this a part of greta calculation ================
   weight_alpha = as_data(rep(weight_alpha_prior, n_arc)) # dirichlet alpha prior on archetype weights of data points
@@ -184,7 +186,7 @@ paa_poisson_free = function(data,
     mu = weights %*% archetypes
 
     # define the distribution over data
-    distribution(data) = poisson(mu)
+    distribution(data) = poisson(exp(mu))
 
     # create model
     model = model(weights, archetypes, precision = precision)

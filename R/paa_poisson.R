@@ -130,13 +130,16 @@ paa_poisson = function(data,
 ##' @description archetypes = Normal(mean = mean(data), sd = sd(data))
 ##' @description Covariates can be added (experimental):
 ##' @description mu = exp(weights * archetypes + beta * covar)
+##' @param scale_data_sd by what factor to scale sd(data)
+##' @param ... unused - temporary hack to make paa models easier to exchange
 ##' @export paa_poisson_free
 paa_poisson_free = function(data,
                        n_arc = 7,              # number of achetypes
                        weight_alpha_prior = 0.8,
                        scale_data_sd = 0.2,
                        covar = NULL,
-                       precision = c("double", "single")
+                       precision = c("double", "single"),
+                       ...
 ) {
 
   # define derived parameters ================

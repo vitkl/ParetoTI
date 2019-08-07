@@ -255,9 +255,15 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
       c_init = c_init / Matrix::rowSums(c_init)
       weights_init = Matrix::t(clust$S) + 1e-5 # add small random value to initialise correctly
       weights_init = weights_init / Matrix::rowSums(weights_init)
+      arch_init = t(clust$XC)
 
-      options$initial_values = greta::initials(c_var = as.matrix(c_init),
-                                               weights_var = as.matrix(weights_init))
+      if(isTRUE(all.equal(options$model_fun, ParetoTI::paa_poisson))){
+        options$initial_values = greta::initials(c_var = as.matrix(c_init),
+                                                 weights_var = as.matrix(weights_init))
+      } else if(isTRUE(all.equal(options$model_fun, ParetoTI::paa_poisson_free))) {
+        options$initial_values = greta::initials(archetypes = as.matrix(arch_init),
+                                                 weights_var = as.matrix(weights_init))
+      }
     }
 
 

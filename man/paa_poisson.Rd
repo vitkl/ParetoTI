@@ -11,7 +11,7 @@ paa_poisson(data, n_arc = 7, weight_alpha_prior = 0.8,
 
 paa_poisson_free(data, n_arc = 7, weight_alpha_prior = 0.8,
   scale_data_sd = 0.2, covar = NULL, precision = c("double",
-  "single"))
+  "single"), ...)
 }
 \arguments{
 \item{data}{matrix of positive count data: data points * dimensions. At the moment, greta does not support sparse matrix.}
@@ -25,6 +25,10 @@ paa_poisson_free(data, n_arc = 7, weight_alpha_prior = 0.8,
 \item{covar}{matrix of covariates affecting the expression (mu) in addition to archetypes: data points * n_covariates}
 
 \item{precision}{argument for \link[greta]{model}. Use "single" for large datasets to reduce memory footprint}
+
+\item{scale_data_sd}{by what factor to scale sd(data)}
+
+\item{...}{unused - temporary hack to make paa models easier to exchange}
 }
 \value{
 \code{poisson_regression()}: R environment containing the model and parameters as greta arrays

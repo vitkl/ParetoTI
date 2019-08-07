@@ -2,10 +2,15 @@
 % Please edit documentation in R/paa_poisson.R
 \name{paa_poisson}
 \alias{paa_poisson}
+\alias{paa_poisson_free}
 \title{Create probabilistic archetypal analysis model in greta (tensorflow backend)}
 \usage{
 paa_poisson(data, n_arc = 7, weight_alpha_prior = 0.8,
   c_alpha_prior = 0.001, covar = NULL, precision = c("double",
+  "single"))
+
+paa_poisson_free(data, n_arc = 7, weight_alpha_prior = 0.8,
+  scale_data_sd = 0.2, covar = NULL, precision = c("double",
   "single"))
 }
 \arguments{
@@ -36,6 +41,18 @@ archetypes = c * data
 Covariates can be added (experimental):
 
 mu = exp(log(weights * archetypes) + beta * covar)
+
+\code{paa_poisson_free()} creates Archetypal Analysis greta model with Poisson likelihood function:
+
+data = Poisson(mu)
+
+mu = exp(weights * archetypes)
+
+archetypes = Normal(mean = mean(data), sd = sd(data))
+
+Covariates can be added (experimental):
+
+mu = exp(weights * archetypes + beta * covar)
 }
 \examples{
 # create greta / tensorflow model

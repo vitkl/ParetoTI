@@ -120,3 +120,89 @@ paa_poisson = function(data,
   # return environment of this function storing the greta arrays and the model
   environment()
 }
+
+
+##' @rdname paa_poisson
+##' @name paa_poisson_free
+##' @description \code{paa_poisson_free()} creates Archetypal Analysis greta model with Poisson likelihood function:
+##' @description data = Poisson(mu)
+##' @description mu = exp(weights * archetypes)
+##' @description archetypes = Normal(mean = mean(data), sd = sd(data))
+##' @description Covariates can be added (experimental):
+##' @description mu = exp(weights * archetypes + beta * covar)
+##' @export paa_poisson_free
+paa_poisson_free = function(data,
+                       n_arc = 7,              # number of achetypes
+                       weight_alpha_prior = 0.8,
+                       scale_data_sd = 0.2,
+                       covar = NULL,
+                       precision = c("double", "single")
+) {
+
+  # define derived parameters ================
+  n_points = nrow(data)        # number of data points (e.g. cells)
+  n_dim = ncol(data)           # number of dimensions (e.g. genes)
+  # data average in each dimension
+  data_mean = matrix(Matrix::colMeans(data), nrow = n_arc, ncol = n_dim, byrow = TRUE)
+  # data sd in each dimension
+  data_sd = matrix(DelayedMatrixStats::colSds(DelayedArray::DelayedArray(data)),
+                   nrow = n_arc, ncol = n_dim, byrow = TRUE) * scale_data_sd
+
+  # make this a part of greta calculation ================
+  weight_alpha = as_data(rep(weight_alpha_prior, n_arc)) # dirichlet alpha prior on archetype weights of data points
+
+  # convert covariates to greta arrays ================
+  data = as_data(data)
+  if(!is.null(covar)) covar = as_data(covar)
+
+  # define priors on parameters ================
+  # archetype weights of data points: dim(n_points, n_arc)
+  weights = dirichlet(alpha = matrix(weight_alpha, nrow = 1, ncol = n_arc),
+                      n_realisations = n_points, dimension = n_arc)
+  # archetypes: dim(n_arc, n_dim)
+  archetypes = normal(data_mean, data_sd)
+
+  # extract variable to enable setting initial values on dirichet parameters  ================
+  # internal greta functions
+  get_node = .internals$greta_arrays$get_node
+  as.greta_array = .internals$greta_arrays$as.greta_array
+
+  # dig out the greta array corresponding to the unconstrained version of weights
+  weights_node = get_node(weights)
+  weights_var_node = weights_node$children[[1]]
+  weights_var = as.greta_array(weights_var_node)
+
+  # compute archetypes and expected value ======================================
+  # expected value = (mu = dim(data points, dimensions))
+
+  if(is.null(covar)) { # without cell covariates  ================
+
+    # compute averages ================
+    mu = weights %*% archetypes
+
+    # define the distribution over data
+    distribution(data) = poisson(mu)
+
+    # create model
+    model = model(weights, archetypes, precision = precision)
+
+  } else { # with cell covariates / gene beta  ================
+
+    # beta weights for covariates like nUMI or batch ================
+    beta = normal(0, 1, dim = c(ncol(covar), n_dim))
+    mu_covar = covar %*% beta
+
+    # compute averages ================
+    mu_arch = weights %*% archetypes
+    mu = exp(mu_arch + mu_covar)
+
+    # define the distribution over data ================
+    distribution(data) = poisson(mu)
+
+    # create model ================
+    model = model(weights, archetypes, beta, precision = precision)
+  }
+
+  # return environment of this function storing the greta arrays and the model
+  environment()
+}

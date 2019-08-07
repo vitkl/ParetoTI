@@ -234,7 +234,8 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     # run probabilistic poisson archetypal analysis  ---------------------------
 
     # set defaults or replace them with provided options ========
-    default = list(weight_alpha_prior = 0.8, c_alpha_prior = 0.001,
+    default = list(model_fun = ParetoTI::paa_poisson,
+                   weight_alpha_prior = 0.8, c_alpha_prior = 0.001,
                    covar = NULL, precision = c("double", "single"),
                    optimiser = greta::adam(learning_rate = 0.3),
                    maxiter = maxiter, conv_crit = conv_crit,
@@ -256,17 +257,17 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
       weights_init = weights_init / Matrix::rowSums(weights_init)
 
       options$initial_values = greta::initials(c_var = as.matrix(c_init),
-                                       weights_var = as.matrix(weights_init))
+                                               weights_var = as.matrix(weights_init))
     }
 
 
     # create greta / tensorflow model ========
-    m = paa_poisson(t(data),                   # data: data points * dimensions
-                    n_arc = noc,              # number of achetypes
-                    weight_alpha_prior = options$weight_alpha_prior,
-                    c_alpha_prior = options$c_alpha_prior,
-                    covar = options$covar,            # covariates affecting the mean in addition to archetypes: data points * n_covariates
-                    precision = options$precision
+    m = options$model_fun(t(data),                   # data: data points * dimensions
+                          n_arc = noc,              # number of achetypes
+                          weight_alpha_prior = options$weight_alpha_prior,
+                          c_alpha_prior = options$c_alpha_prior,
+                          covar = options$covar,            # covariates affecting the mean in addition to archetypes: data points * n_covariates
+                          precision = options$precision
     )
     m$options = options
 
@@ -278,14 +279,14 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     if(!isTRUE(all.equal(options$initial_values, greta::initials()))){
 
       evalq({
-      init = options$initial_values
+        init = options$initial_values
 
-      vals = paste0(names(init), " = init[[",
-                    seq_along(init), "]]", collapse = ", ")
-      vals = paste0("initial_values = greta::initials(", vals, ")")
-      vals = str2expression(vals)
+        vals = paste0(names(init), " = init[[",
+                      seq_along(init), "]]", collapse = ", ")
+        vals = paste0("initial_values = greta::initials(", vals, ")")
+        vals = str2expression(vals)
 
-      eval(expr = vals)
+        eval(expr = vals)
       }, envir = m)
 
     } else {

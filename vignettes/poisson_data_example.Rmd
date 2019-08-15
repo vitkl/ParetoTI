@@ -1,0 +1,363 @@
+---
+title: "Triangle poisson data example"
+author: "Vitalii Kleshchevnikov"
+date: "15/08/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(reticulate)
+library(greta)
+library(ParetoTI)
+library(ggplot2)
+reticulate::use_condaenv("r-tensorflow", conda = "auto", required = TRUE)
+np = import("numpy")
+```
+
+## Generate data
+
+```{r generate_data}
+# generate some triangle-shaped data
+set.seed(234532)
+if(file.exists("./poisson_archetypes.rds")){
+  arc = readRDS("./poisson_archetypes.rds")
+  data = arc$data
+  arc = arc$arc
+} else {
+  #np$random$seed(234532L)
+  # generate archetypes
+  arc = np$column_stack(list(np$random$normal(20, 1, 4L),
+                             np$random$normal(60, 2, 4L),
+                             np$random$normal(40, 3, 4L)))
+  arc = apply(arc, 1, sample)
+  # generate weights
+  sim_weights = np$random$dirichlet(c(0.1, 0.1, 0.1), 10000L)
+  data = np$matmul(sim_weights, arc)
+  data = np$random$poisson(data)
+  rownames(data) = paste0("C", 1:nrow(data))
+  data = t(data)
+  saveRDS(list(data = data, arc = arc), "./poisson_archetypes.rds")
+}
+dim(data)
+```
+
+## Settings
+
+```{r}
+n_arc = 3L
+weight_alpha_prior = 0.05
+```
+
+## Standard Poisson PAA
+
+```{r paa}
+# Poisson archetypal analysis
+arc_data = fit_pch(data, n_arc, method = "poisson_aa",
+                   method_options = list(model_fun = ParetoTI::paa_poisson,
+                                         c_alpha_prior = 0.0001,
+                                         weight_alpha_prior = weight_alpha_prior,
+                                         #greta::adam(learning_rate = 0.1)),  greta::l_bfgs_b(),  greta::momentum(learning_rate = 0.001, momentum = 0.9, use_nesterov = TRUE)
+                                         optimiser = greta::adam(learning_rate = 0.1),
+                                         # initialise archetypes at louvain cluster centers
+                                         initial_values = "louvain_centers"
+                                         #covar = covar
+                   ),
+                   conv_crit = 1e-04,
+                   maxiter = 5000, volume_ratio = "none")
+
+plot_arc(arc_data, data, data_size = 0.1, geom = geom_bin2d)
+```
+
+## Poisson PAA with no archetype constraint
+
+```{r paa_free}
+# Poisson archetypal analysis with no archetype position constraint
+arc_data_free = fit_pch(data, n_arc, method = "poisson_aa",
+                        method_options = list(model_fun = ParetoTI::paa_poisson_free,
+                                              weight_alpha_prior = weight_alpha_prior,
+                                              #greta::adam(learning_rate = 0.1)),  greta::l_bfgs_b(),  greta::momentum(learning_rate = 0.001, momentum = 0.9, use_nesterov = TRUE)
+                                              optimiser = greta::adam(learning_rate = 0.1),
+                                              # initialise archetypes at louvain cluster centers
+                                              initial_values = "louvain_centers"
+                                              #covar = covar
+                        ),
+                        conv_crit = 1e-04,
+                        maxiter = 5000, volume_ratio = "none")
+
+plot_arc(arc_data_free, data, data_size = 0.1, geom = geom_bin2d)
+```
+
+## PCHA
+
+```{r pcha}
+# PCHA for normal data
+arc_data_pcha = fit_pch(data, n_arc, method = "pcha",
+                        conv_crit = 1e-06,
+                        maxiter = 5000, volume_ratio = "none")
+plot_arc(arc_data_pcha, data, data_size = 0.1, geom = geom_bin2d)
+```
+
+## MCMC for poisson paa
+
+```{r mcmc_paa, eval=FALSE}
+m = paa_poisson_free(t(data), n_arc = n_arc, weight_alpha_prior = weight_alpha_prior, scale_data_sd = 0.2)
+#m = paa_poisson(t(data), n_arc = n_arc, weight_alpha_prior = weight_alpha_prior, c_alpha_prior = 0.01)
+draws <- mcmc(m$model, n_samples = 1000, chains = 4)
+
+#draws_archetypes = draws[,grepl("archetypes", colnames(draws[[1]]))]
+draws_archetypes = calculate(m$archetypes, draws)
+bayesplot::mcmc_trace(draws_archetypes)
+
+# extract samples in the standardised form
+library(foreach)
+reshape_draws = function(parameter = "archetypes", draws, m){
+  draws_param = calculate(m[[parameter]], draws)
+  # combine chains
+  draws_param = foreach(i = seq_along(draws_param), .combine = rbind) %do% draws_param[[i]]
+  # reshape into dim(chains * samples, param_dim_1, param_dim_2)
+  draws_param = array(draws_param, dim = c(nrow(draws_param),
+                                           dim(m[[parameter]])[1],
+                                           dim(m[[parameter]])[2]))
+  # convert array to list
+  foreach(i = seq_len(dim(draws_param)[1]), .combine = c) %do% list(t(draws_param[i,,]))
+}
+draws_archetypes = reshape_draws("archetypes", draws, m)
+draws_archetypes = lapply(draws_archetypes, exp)
+draws_weights = reshape_draws("weights", draws, m)
+#draws_c = reshape_draws("c", draws, m)
+
+# align to reference - first polytope from bootstraping
+ref_XC = draws_archetypes[[1]]
+for (i in seq_along(draws_archetypes)) {
+  ind = align_arc(ref_XC, draws_archetypes[[i]])$ind
+  draws_archetypes[[i]] = draws_archetypes[[i]][, ind]
+  draws_weights[[i]] = draws_weights[[i]][ind, ]
+  #draws_c[[i]] = draws_c[[i]][ind, ]
+}
+
+# PCHA with bootstrapping
+arc_data_pcha = fit_pch_bootstrap(data, n=3,
+                                  noc = n_arc, method = "pcha",
+                                  conv_crit = 1e-06,
+                                  maxiter = 5000, volume_ratio = "none")
+plot_arc(arc_data_pcha, data, data_size = 0.1)
+
+# replace pcha results with MCMC draws
+arc_data_pcha$pch_fits$XC = draws_archetypes
+arc_data_pcha$pch_fits$S = draws_weights
+#arc_data_pcha$pch_fits$C = draws_c
+
+plot_arc(arc_data_pcha, data, data_size = 0.1, arch_size = 0.1, line_size = 0)
+```
+
+## Normal PAA with no archetype constraint
+
+```{r normal_paa, fig.width=14, fig.height=5}
+####### ---- Normal model ---- #######
+m = paa_normal_free(t(data),
+                    n_arc = n_arc,              # number of achetypes
+                    weight_alpha_prior = weight_alpha_prior,
+                    scale_data_sd = 0.2,
+                    covar = NULL)
+m$arc = arc
+plot(m$model)
+
+####### ---- finding parameters by optimisation ---- #######
+set.seed(100)
+# optimise instead of MCMC
+time = Sys.time()
+evalq({
+  opt_res = opt(model,
+                optimiser = adam(learning_rate = 0.1), #adadelta(learning_rate = 0.001) adam(learning_rate = 0.001), l_bfgs_b()   # optimisation method used to find prior-adjusted maximum likelihood estimate: adam, l_bfgs_b
+                initial_values = initials(archetypes_mean = arc),
+                max_iterations = 10000,
+                tolerance = 1e-4, adjust = TRUE,
+                hessian = FALSE)
+}, envir = m)
+Sys.time() - time
+opt_res = m$opt_res
+opt_res$iterations
+
+arc_norm_free = copy(arc_data_free)
+arc_norm_free$XC = t(opt_res$par$archetypes_mean)
+
+# Generate data from the model parameters
+evalq({
+  mu_sample = calculate(mu, values = opt_res$par)
+  sd_sample = calculate(sd, values = opt_res$par)
+}, envir = m)
+data_sample = array(rnorm(length(m$mu_sample), m$mu_sample, m$sd_sample), dim = dim(m$mu_sample))
+
+cowplot::plot_grid(
+  plot_arc(arc_norm_free, data, data_size = 0.1,
+           geom = ggplot2::geom_bin2d) +
+    xlim(-10, 150) + ylim(-10, 120) +
+    ggtitle("Data"),
+  plot_arc(arc_norm_free, t(data_sample), data_size = 0.1,
+           geom = ggplot2::geom_bin2d) +
+    xlim(-10, 150) + ylim(-10, 120) +
+    ggtitle("Sample from the model"),
+  ncol = 2
+)
+```
+
+## Negative binomial PAA with no archetype constraint
+
+```{r nb_paa, fig.width=14, fig.height=5}
+####### ---- Negative binomial model ---- #######
+m = paa_nb_free(t(data),
+                n_arc = n_arc,              # number of achetypes
+                weight_alpha_prior = weight_alpha_prior,
+                scale_data_sd = 0.2,
+                covar = NULL)
+m$arc = arc
+plot(m$model)
+
+####### ---- finding parameters by optimisation ---- #######
+set.seed(100)
+# optimise instead of MCMC
+time = Sys.time()
+evalq({
+  opt_res = opt(model,
+                optimiser = adam(learning_rate = 0.1), #adadelta(learning_rate = 0.001) adam(learning_rate = 0.001), l_bfgs_b()   # optimisation method used to find prior-adjusted maximum likelihood estimate: adam, l_bfgs_b
+                #initial_values = initials(archetypes_mean = arc),
+                max_iterations = 10000,
+                tolerance = 1e-4, adjust = TRUE,
+                hessian = FALSE)
+}, envir = m)
+Sys.time() - time
+opt_res = m$opt_res
+opt_res$iterations
+
+arc_norm_free = copy(arc_data_free)
+arc_norm_free$XC = t(opt_res$par$archetypes_mean)
+
+evalq({
+  size_sample = calculate(size, values = opt_res$par)
+  prob_sample = calculate(prob, values = opt_res$par)
+}, envir = m)
+data_sample = array(rnbinom(length(m$size_sample), size = m$size_sample, prob = m$prob_sample), dim = dim(m$size_sample))
+
+cowplot::plot_grid(
+  plot_arc(arc_norm_free, data, data_size = 0.1,
+           geom = ggplot2::geom_bin2d) +
+    xlim(-10, 150) + ylim(-10, 120) +
+    ggtitle("Data"),
+  plot_arc(arc_norm_free, t(data_sample), data_size = 0.1,
+           geom = ggplot2::geom_bin2d) +
+    xlim(-10, 150) + ylim(-10, 120) +
+    ggtitle("Sample from the model"),
+  ncol = 2
+)
+```
+
+## Poisson PAA with no archetype constraint (posterior predictive check)
+
+```{r paa_poisson_data, fig.width=14, fig.height=5}
+####### ---- Poisson model ---- #######
+m = paa_poisson_free(t(data),
+                     n_arc = n_arc,              # number of achetypes
+                     weight_alpha_prior = weight_alpha_prior,
+                     scale_data_sd = 0.2,
+                     covar = NULL)
+m$arc = arc
+plot(m$model)
+
+####### ---- finding parameters by optimisation ---- #######
+set.seed(100)
+# optimise instead of MCMC
+time = Sys.time()
+evalq({
+  opt_res = opt(model,
+                optimiser = adam(learning_rate = 0.1), #adadelta(learning_rate = 0.001) adam(learning_rate = 0.001), l_bfgs_b()   # optimisation method used to find prior-adjusted maximum likelihood estimate: adam, l_bfgs_b
+                #initial_values = initials(archetypes = arc),
+                max_iterations = 10000,
+                tolerance = 1e-4, adjust = TRUE,
+                hessian = FALSE)
+}, envir = m)
+Sys.time() - time
+opt_res = m$opt_res
+opt_res$iterations
+
+arc_norm_free = copy(arc_data_free)
+arc_norm_free$XC = t(opt_res$par$archetypes)
+
+evalq({
+  mu_sample = calculate(mu, values = opt_res$par)
+}, envir = m)
+data_sample = array(rpois(length(m$mu_sample), lambda = m$mu_sample), dim = dim(m$mu_sample))
+
+cowplot::plot_grid(
+  plot_arc(arc_norm_free, data, data_size = 0.1,
+           geom = ggplot2::geom_bin2d) +
+    xlim(-10, 150) + ylim(-10, 120) +
+    ggtitle("Data"),
+  plot_arc(arc_norm_free, t(data_sample), data_size = 0.1,
+           geom = ggplot2::geom_bin2d) +
+    xlim(-10, 150) + ylim(-10, 120) +
+    ggtitle("Sample from the model"),
+  ncol = 2
+)
+```
+
+## Poisson mixture model
+
+```{r poisson_mixture, fig.width=14, fig.height=5}
+####### ---- Poisson model ---- #######
+m = poisson_mixture(t(data),
+                    n_arc = n_arc,              # number of achetypes
+                    weight_alpha_prior = weight_alpha_prior,
+                    scale_data_sd = 0.2,
+                    covar = NULL,
+                    cell_weights = TRUE)
+m$arc = arc
+plot(m$model)
+
+# initial values
+lou = fit_pch(data, n_arc, method = "louvain")
+####### ---- finding parameters by optimisation ---- #######
+set.seed(100)
+# optimise instead of MCMC
+time = Sys.time()
+evalq({
+  opt_res = opt(model,
+                optimiser = adam(learning_rate = 0.1), #adadelta(learning_rate = 0.001) adam(learning_rate = 0.001), l_bfgs_b()   # optimisation method used to find prior-adjusted maximum likelihood estimate: adam, l_bfgs_b
+                initial_values = initials(archetypes = t(lou$XC)),
+                max_iterations = 10000,
+                tolerance = 1e-6, adjust = TRUE,
+                hessian = FALSE)
+}, envir = m)
+Sys.time() - time
+opt_res = m$opt_res
+opt_res$iterations
+
+arc_norm_free = copy(arc_data_free)
+arc_norm_free$XC = t(opt_res$par$archetypes)
+
+evalq({
+  archetypes_sample = calculate(archetypes, values = opt_res$par)
+  weights2_sample = calculate(weights2, values = opt_res$par)
+  data_sample = array(0, dim(data))
+  for (arc in seq_len(n_arc)) {
+    data_sample = data_sample +
+      array(rpois(n_points * n_dim,
+                  array(1, c(n_points, 1)) %*%
+                    archetypes_sample[arc,]) * weights2_sample[arc,,], dim(data))
+  }
+}, envir = m)
+#data_sample = array(rpois(length(m$mu_sample), lambda = m$mu_sample), dim = dim(m$mu_sample))
+data_sample = m$data_sample
+
+cowplot::plot_grid(
+  plot_arc(arc_norm_free, data, data_size = 0.1,
+           geom = ggplot2::geom_bin2d) +
+    xlim(-10, 150) + ylim(-10, 120) +
+    ggtitle("Data"),
+  plot_arc(arc_norm_free, t(data_sample), data_size = 0.1,
+           geom = ggplot2::geom_bin2d) +
+    xlim(-10, 150) + ylim(-10, 120) +
+    ggtitle("Sample from the model"),
+  ncol = 2
+)
+```

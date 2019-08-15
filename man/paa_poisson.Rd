@@ -3,6 +3,9 @@
 \name{paa_poisson}
 \alias{paa_poisson}
 \alias{paa_poisson_free}
+\alias{paa_normal_free}
+\alias{paa_nb_free}
+\alias{poisson_mixture}
 \title{Create probabilistic archetypal analysis model in greta (tensorflow backend)}
 \usage{
 paa_poisson(data, n_arc = 7, weight_alpha_prior = 0.8,
@@ -10,6 +13,18 @@ paa_poisson(data, n_arc = 7, weight_alpha_prior = 0.8,
   "single"))
 
 paa_poisson_free(data, n_arc = 7, weight_alpha_prior = 0.8,
+  scale_data_sd = 0.2, covar = NULL, precision = c("double",
+  "single"), ...)
+
+paa_normal_free(data, n_arc = 7, weight_alpha_prior = 0.8,
+  scale_data_sd = 0.2, covar = NULL, precision = c("double",
+  "single"), ...)
+
+paa_nb_free(data, n_arc = 7, weight_alpha_prior = 0.8,
+  scale_data_sd = 0.2, covar = NULL, precision = c("double",
+  "single"), ...)
+
+poisson_mixture(data, n_arc = 7, weight_alpha_prior = 0.8,
   scale_data_sd = 0.2, covar = NULL, precision = c("double",
   "single"), ...)
 }
@@ -25,6 +40,10 @@ paa_poisson_free(data, n_arc = 7, weight_alpha_prior = 0.8,
 \item{covar}{matrix of covariates affecting the expression (mu) in addition to archetypes: data points * n_covariates}
 
 \item{precision}{argument for \link[greta]{model}. Use "single" for large datasets to reduce memory footprint}
+
+\item{scale_data_sd}{by what factor to scale sd(data)}
+
+\item{...}{unused - temporary hack to make paa models easier to exchange}
 
 \item{scale_data_sd}{by what factor to scale sd(data)}
 
@@ -54,9 +73,39 @@ mu = exp(weights * archetypes)
 
 archetypes = Normal(mean = mean(data), sd = sd(data))
 
-Covariates can be added (experimental):
+\code{paa_normal_free()} creates Archetypal Analysis greta model with Normal likelihood function:
 
-mu = exp(weights * archetypes + beta * covar)
+data = Normal(mean = mu, sd)
+
+mu = weights * archetypes_mean
+
+sd = weights * archetypes_sd
+
+archetypes_mean = Normal(mean = mean(data), sd = sd(data))
+
+archetypes_sd = Exponential(rate = 1 / sd(data))
+
+\code{paa_nb_free()} creates Archetypal Analysis greta model with Negative binomial likelihood function:
+
+data = NegativeBinomial(prob = prob, size = size)
+
+prob = size / (size + mu)
+
+mu = weights * archetypes_mean
+
+size = weights * archetypes_size
+
+archetypes_mean = Normal(mean = mean(data), sd = sd(data), truncation = c(0, Inf))
+
+archetypes_size = Exponential(rate = (mean(data) + mean(data)^2) / var(data))
+
+\code{poisson_mixture()} creates Archetypal Analysis greta model with Poisson likelihood function:
+
+data = Poisson(mu)
+
+mu = exp(weights * archetypes)
+
+archetypes = Normal(mean = mean(data), sd = sd(data))
 }
 \examples{
 # create greta / tensorflow model

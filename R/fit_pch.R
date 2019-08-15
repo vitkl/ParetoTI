@@ -245,7 +245,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     options = c(default[default_retain], method_options)
 
     # optionally: use louvain cluster centers as initial values
-    if(options$initial_values == "louvain_centers"){
+    if(isTRUE(options$initial_values == "louvain_centers")){
       # initial values ===============
       # compute Louvain clustering with Seurat to use as initial value
       clust = fit_pch(data, noc = noc, method = "louvain",
@@ -321,9 +321,16 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
 
     opt_res = m$opt_res
 
+    # extract results depending on the model ========
+    if(isTRUE(all.equal(options$model_fun, ParetoTI::paa_poisson))){
+      XC = t(opt_res$par$c %*% t(data))
+      C = t(opt_res$par$c)
+    } else if(isTRUE(all.equal(options$model_fun, ParetoTI::paa_poisson_free))) {
+      XC = t(opt_res$par$archetypes)
+      C = t(opt_res$par$weights)
+    }
     # create pch_fit object ========
-    res = list(XC = t(opt_res$par$c %*% t(data)),
-               S = t(opt_res$par$weights), C = t(opt_res$par$c),
+    res = list(XC = XC, S = t(opt_res$par$weights), C = C,
                SSE = opt_res$iterations, # number of iterations (e.i. did it converge?)
                varexpl = opt_res$value) # negative log-likelihood
 

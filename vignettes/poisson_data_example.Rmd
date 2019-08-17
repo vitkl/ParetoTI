@@ -153,13 +153,48 @@ plot_arc(arc_data_pcha, data, data_size = 0.1, arch_size = 0.1, line_size = 0)
 
 ## Normal PAA with no archetype constraint
 
-```{r normal_paa, fig.width=14, fig.height=5}
-####### ---- Normal model ---- #######
+```{r normal_paa, fig.width=14, fig.height=5, eval=FALSE, echo=FALSE}
+####### ---- Normal model - prior predictive simulation ---- #######
+# prior predictive simulation
 m = paa_normal_free(t(data),
                     n_arc = n_arc,              # number of achetypes
                     weight_alpha_prior = weight_alpha_prior,
                     scale_data_sd = 0.2,
-                    covar = NULL)
+                    covar = NULL,
+                    prior_predictive = T)
+m$arc = arc
+plot(m$model)
+prior_draws = mcmc(m$model, n_samples = 1, warmup = 0, thin = 1)
+prior_data = calculate(m$prior_data, prior_draws)
+prior_archetypes = calculate(m$archetypes_mean, prior_draws)
+arc_norm_free = copy(arc_data_free)
+arc_norm_free$XC = t(array(t(as.matrix(prior_archetypes[[1]])), dim = c(dim(arc), nrow(prior_archetypes[[1]])))[,,1])
+plot_data = t(array(t(as.matrix(prior_data[[1]])), dim = c(dim(data), nrow(prior_data[[1]])))[,,1])
+rownames(arc_norm_free$XC) = NULL
+rownames(plot_data) = NULL
+
+#
+cowplot::plot_grid(
+  plot_arc(arc_norm_free, data, data_size = 0.1,
+           geom = ggplot2::geom_bin2d) +
+    xlim(-10, 150) + ylim(-10, 120) +
+    ggtitle("Data"),
+  plot_arc(arc_norm_free, plot_data, data_size = 0.1,
+           geom = ggplot2::geom_bin2d) +
+    #xlim(-10, 150) + ylim(-10, 120) +
+    ggtitle("Sample from the model"),
+  ncol = 2
+)
+```
+
+```{r, fig.width=14, fig.height=5}
+# model for fitting
+m = paa_normal_free(t(data),
+                    n_arc = n_arc,              # number of achetypes
+                    weight_alpha_prior = weight_alpha_prior,
+                    scale_data_sd = 2,
+                    covar = NULL,
+                    prior_predictive = F)
 m$arc = arc
 plot(m$model)
 
@@ -343,7 +378,7 @@ evalq({
     data_sample = data_sample +
       array(rpois(n_points * n_dim,
                   array(1, c(n_points, 1)) %*%
-                    archetypes_sample[arc,]) * weights2_sample[arc,,], dim(data))
+                    archetypes_sample[arc,] * weights2_sample[arc,,]), dim(data))
   }
 }, envir = m)
 #data_sample = array(rpois(length(m$mu_sample), lambda = m$mu_sample), dim = dim(m$mu_sample))

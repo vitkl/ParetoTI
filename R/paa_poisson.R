@@ -223,7 +223,6 @@ paa_normal_free = function(data,
   # data sd in each dimension
   data_sd = matrix(DelayedMatrixStats::colSds(DelayedArray::DelayedArray(data)),
                    nrow = n_arc, ncol = n_dim, byrow = TRUE) * scale_data_sd
-  #data_sd = sqrt(data_sd) # if this evaluates to < 0 everything breaks
 
   # make this a part of greta calculation ================
   weight_alpha = as_data(matrix(rep(weight_alpha_prior, n_arc),
@@ -240,6 +239,7 @@ paa_normal_free = function(data,
   # archetypes: dim(n_arc, n_dim)
   archetypes_mean = normal(data_mean, data_sd)
   archetypes_sd = exponential(1 / data_sd)
+  #total_sd = exponential(1 / t(data_sd[1,]), dim = c(1, n_dim))
 
   # extract variable to enable setting initial values on dirichet parameters  ================
   # internal greta functions
@@ -258,13 +258,17 @@ paa_normal_free = function(data,
 
     # compute averages ================
     mu = weights %*% archetypes_mean
-    sd = weights %*% archetypes_sd
+    sd = weights %*% archetypes_sd #+
+    #ones(n_points, 1) %*% total_sd # add data sd as a way of penalising the model for explaining to much variance with mixtures
 
     # define the distribution over data
+
     distribution(data) = normal(mu, sd)
 
     # create model
-    model = model(weights, archetypes_mean, archetypes_sd, precision = precision)
+    model = model(weights, archetypes_mean, archetypes_sd,
+                  #total_sd,
+                  precision = precision)
 
   } else { # with cell covariates / gene beta  ================
   }

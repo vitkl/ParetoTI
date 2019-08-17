@@ -327,7 +327,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
       C = t(opt_res$par$c)
     } else if(isTRUE(all.equal(options$model_fun, ParetoTI::paa_poisson_free))) {
       XC = t(opt_res$par$archetypes)
-      C = t(opt_res$par$weights)
+      C = opt_res$par$weights
     }
     # create pch_fit object ========
     res = list(XC = XC, S = t(opt_res$par$weights), C = C,
@@ -342,6 +342,7 @@ fit_pch = function(data, noc = as.integer(3), I = NULL, U = NULL,
     class(res) = "pch_fit"
 
     method_res = opt_res
+    method_res$m = m
 
   } else if(method == "aanet"){
 

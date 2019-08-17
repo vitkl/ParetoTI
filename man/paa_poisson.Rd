@@ -18,15 +18,15 @@ paa_poisson_free(data, n_arc = 7, weight_alpha_prior = 0.8,
 
 paa_normal_free(data, n_arc = 7, weight_alpha_prior = 0.8,
   scale_data_sd = 0.2, covar = NULL, precision = c("double",
-  "single"), ...)
+  "single"), prior_predictive = FALSE, ...)
 
 paa_nb_free(data, n_arc = 7, weight_alpha_prior = 0.8,
   scale_data_sd = 0.2, covar = NULL, precision = c("double",
   "single"), ...)
 
 poisson_mixture(data, n_arc = 7, weight_alpha_prior = 0.8,
-  scale_data_sd = 0.2, covar = NULL, precision = c("double",
-  "single"), ...)
+  scale_data_sd = 0.2, covar = NULL, cell_weights = FALSE,
+  precision = c("double", "single"), ...)
 }
 \arguments{
 \item{data}{matrix of positive count data: data points * dimensions. At the moment, greta does not support sparse matrix.}

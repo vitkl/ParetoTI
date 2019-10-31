@@ -499,18 +499,20 @@ bin_cells_by_arch = function(data_attr, arc_col,
 
 ##' @rdname find_decreasing
 ##' @name find_tradeoff_wilcox
-##' @description \code{find_tradeoff_wilcox()}: find features that are most different between 2 archetypes (at a tradeoff, DE, differentially expressed genes) by finding features with highest value (median) in bin closest to archetype (1 vs all Wilcox test).
-##' @return \code{find_tradeoff_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.
+##' @description \code{find_tradeoff_wilcox()}: find features that are most different between 2 archetypes by finding features with highest value (median) in bin closest to archetype 1 vs 2 (Wilcox test).
+##' @return \code{find_tradeoff_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When using log(counts), mean_diff reflects log-fold change.
 ##' @export find_tradeoff_wilcox
 ##' @import data.table
 find_tradeoff_wilcox = function(data_attr, arc_col = c("archetype_1", "archetype_2"),
                                 features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
-                                bin_prop = 0.1, na.rm = FALSE) {
+                                bin_prop = 0.1, na.rm = FALSE,
+                                dist_cutoff = NULL) {
 
   if(length(arc_col) != 2) stop("find_tradeoff_wilcox() works for pairs of arc_col but length(arc_col) != 2")
 
   # find which cells are in bin closest to each archetype
-  arch_bin = bin_cells_by_arch(data_attr, arc_col, bin_prop, return_names = FALSE)
+  arch_bin = bin_cells_by_arch(data_attr, arc_col, bin_prop,
+                               dist_cutoff = dist_cutoff, return_names = FALSE)
 
   # filter data to include only that archetype
   data_attr_2 = data_attr[unlist(arch_bin[arc_col]), ]
@@ -521,6 +523,7 @@ find_tradeoff_wilcox = function(data_attr, arc_col = c("archetype_1", "archetype
   # but due to the filtering above 2 specific archetypes are compared
   find_decreasing_wilcox(data_attr = data_attr_2, arc_col = arc_col,
                          features = features, bin_prop = n_cells/nrow(data_attr_2),
+                         dist_cutoff = dist_cutoff,
                          na.rm = na.rm)
 
 }

@@ -36,7 +36,7 @@ bin_cells_by_arch(data_attr, arc_col, bin_prop = 0.1,
 
 find_tradeoff_wilcox(data_attr, arc_col = c("archetype_1",
   "archetype_2"), features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
-  bin_prop = 0.1, na.rm = FALSE)
+  bin_prop = 0.1, na.rm = FALSE, dist_cutoff = NULL)
 }
 \arguments{
 \item{data_attr}{data.table dim(examples, dimensions) that includes distance of each example to archetype in columns given by \code{arc_col} and feature values given by \code{features}}
@@ -112,7 +112,7 @@ find_tradeoff_wilcox(data_attr, arc_col = c("archetype_1",
 
 \code{bin_cells_by_arch()} list of indices of cells or names of cells that are in bin closest to each archetype
 
-\code{find_tradeoff_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.
+\code{find_tradeoff_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When using log(counts), mean_diff reflects log-fold change.
 }
 \description{
 \code{find_decreasing()} Fits gam models to find features that are a decreasing function of distance from archetype. Both gam functions and first derivatives can be visualised using plot() method.
@@ -125,5 +125,5 @@ find_tradeoff_wilcox(data_attr, arc_col = c("archetype_1",
 
 \code{bin_cells_by_arch()} find which cells are in bin closest to archetype.
 
-\code{find_tradeoff_wilcox()}: find features that are most different between 2 archetypes (at a tradeoff, DE, differentially expressed genes) by finding features with highest value (median) in bin closest to archetype (1 vs all Wilcox test).
+\code{find_tradeoff_wilcox()}: find features that are most different between 2 archetypes by finding features with highest value (median) in bin closest to archetype 1 vs 2 (Wilcox test).
 }

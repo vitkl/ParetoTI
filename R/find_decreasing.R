@@ -301,6 +301,7 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
 ##' @name find_decreasing_wilcox
 ##' @description \code{find_decreasing_wilcox()} find features that are a decreasing function of distance from archetype by finding features with highest value (median) in bin closest to archetype (1 vs all Wilcox test).
 ##' @param bin_prop proportion of data to put in bin closest to archetype
+##' @param filter_by_bin filter cells that do not fall into any bin (not close to any archetype)? (default = FALSE)
 ##' @param dist_cutoff cutoff of cell distances to archetypes (high bound) to put cells into in bin closest to archetype.
 ##' @param method how to find_decreasing_wilcox()? Use \link[BioQC]{wmwTest} or \link[stats]{wilcox.test}. BioQC::wmwTest can be up to 1000 times faster, so it is default.
 ##' @return \code{find_decreasing_wilcox()} data.table containing p-values for each feature at each archetype and effect-size measures (average difference between bins). When log(counts) was used mean_diff reflects log-fold change.
@@ -308,7 +309,8 @@ get_top_decreasing = function(summary_genes, summary_sets = NULL,
 ##' @import data.table
 find_decreasing_wilcox = function(data_attr, arc_col,
                                   features = c("Gpx1", "Alb", "Cyp2e1", "Apoa2")[3],
-                                  bin_prop = 0.1, dist_cutoff = NULL,
+                                  bin_prop = 0.1, filter_by_bin = FALSE,
+                                  dist_cutoff = NULL,
                                   na.rm = FALSE,
                                   type = c("s", "m", "cmq")[1],
                                   clust_options = list(),
@@ -318,6 +320,19 @@ find_decreasing_wilcox = function(data_attr, arc_col,
   if(!between(bin_prop, 0, 1)) stop("bin_prop should be between 0 and 1")
   arch_bin = bin_cells_by_arch(data_attr, arc_col, bin_prop,
                                dist_cutoff = dist_cutoff, return_names = FALSE)
+
+  # optionally filter cells that do not lie close to any archetype
+  if(filter_by_bin){
+
+    n_cells = lapply(arch_bin[arc_col], length)[[1]]
+    data_attr = copy(data_attr[unlist(arch_bin[arc_col]),])
+
+    # and redefine cells lists in bin closest to archetype
+    arch_bin = bin_cells_by_arch(data_attr, arc_col,
+                                 bin_prop = n_cells / nrow(data_attr),
+                                 dist_cutoff = dist_cutoff, return_names = FALSE)
+
+  }
 
   if(method == "BioQC"){
     ## create gene sets using bin_prop,
@@ -500,9 +515,12 @@ find_tradeoff_wilcox = function(data_attr, arc_col = c("archetype_1", "archetype
   # filter data to include only that archetype
   data_attr_2 = data_attr[unlist(arch_bin[arc_col]), ]
 
+  n_cells = lapply(arch_bin[arc_col], length)[[1]]
+
   # run two one-sided Wilcoxon tests as normal
   # but due to the filtering above 2 specific archetypes are compared
   find_decreasing_wilcox(data_attr = data_attr_2, arc_col = arc_col,
-                         features = features, bin_prop = bin_prop, na.rm = na.rm)
+                         features = features, bin_prop = n_cells/nrow(data_attr_2),
+                         na.rm = na.rm)
 
 }

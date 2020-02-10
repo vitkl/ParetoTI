@@ -7,8 +7,9 @@
   
   In theory, archetypes are cells specialised at a combination of tasks, cells expressing a distinct combination of gene modules / gene expression programmes. While the continuum of transcriptional states between archetypes mirrors how much of those programmes cells share, and in some cases the trade-offs between tasks (see [citation](https://www.nature.com/articles/nmeth.3254)). In practice, many factors lead could to a distinct expression profile (archetype), including technical bias, cell doublets, stress response induced by cell dissociation and other factors. So it is necessary to keep [the small-world large-world distinction](https://youtu.be/4WVelCswXo4?t=2256) in mind: specific statistical/computational method will find the best archetypes (specialised cells) it could find conditional on that method's assumptions about the data - rather than the true archetypes you are trying to discover. So you have to supervise and rule out spurious causes the same way you would do for annotating cell clusters.    
   
-  Caution: the package in currently in development and testing. If you encounter problems please contact Vitalii Kleshchevnikov (vk7 at sanger.ac.uk) or report bugs on [github](https://github.com/vitkl/ParetoTI/issues).
+  If you encounter an issue please report on [github](https://github.com/vitkl/ParetoTI/issues).
   
+  If you find the package useful please cite it using Zenodo DOI:
   [![DOI](https://zenodo.org/badge/146516634.svg)](https://zenodo.org/badge/latestdoi/146516634)
   
 #### Background
@@ -143,6 +144,4 @@ plot_arc(arc_data = arc_tsne$arc_data, data = arc_tsne$data,
 
 ### Development and further improvements
 
-It is currently under development and enables polytope fitting, statistical significance test by permutation, evaluating variance in vertex position by bootstraping, feature enrichment at archetype using the Wilcox test and the first derivative of Generalised Additive Model, measuring gene set activities in each cell with subsequent enrichment at archetypes.
-
-Alternative methods for archetypal analysis are being considered: AANet (https://github.com/KrishnaswamyLab/AAnet/) and SPAMS implemented in c++ via R interface (https://arxiv.org/pdf/1405.6472.pdf, http://spams-devel.gforge.inria.fr/downloads.html)
+The package is now not under development and new feature will not be implemented. If you encounter an issue please report [github](https://github.com/vitkl/ParetoTI/issues). The package currently enables polytope fitting, statistical significance test by permutation, evaluating variance in vertex position by bootstraping, feature enrichment at archetype using the Wilcox test and the first derivative of Generalised Additive Model, measuring gene set activities in each cell with subsequent enrichment at archetypes.

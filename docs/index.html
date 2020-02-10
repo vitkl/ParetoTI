@@ -7,8 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data • ParetoTI</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script><!-- Bootstrap --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w=" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0=" crossorigin="anonymous">
-<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- sticky kit --><script src="https://cdnjs.cloudflare.com/ajax/libs/sticky-kit/1.1.3/sticky-kit.min.js" integrity="sha256-c4Rlo1ZozqTPE2RLuvbusY3+SU1pQaJC0TjuhygMipw=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/all.min.css" integrity="sha256-nAmazAk6vS34Xqo0BSrTb+abbtFlgsFK7NKSi6o7Y78=" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.7.1/css/v4-shims.min.css" integrity="sha256-6qHlizsOWFskGlwVOKuns+D1nB6ssZrHQrNj1wGplHc=" crossorigin="anonymous">
+<!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.4/clipboard.min.js" integrity="sha256-FiZwavyI2V6+EXO1U+xzLG3IKldpiTFf3153ea9zikQ=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/headroom.min.js" integrity="sha256-DJFC1kqIhelURkuza0AvYal5RxMtpzLjFhsnVIeuk+U=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.9.4/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="pkgdown.css" rel="stylesheet">
 <script src="pkgdown.js"></script><meta property="og:title" content="R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data">
 <meta property="og:description" content="R toolbox for Archetypal Analysis and Pareto Task Inference on single cell data, partially based on ParTI described in
     Yuval Hart &amp; Uri Alon paper in Nature Methods (2015):
@@ -51,7 +52,7 @@
       <ul class="nav navbar-nav">
 <li>
   <a href="index.html">
-    <span class="fa fa-home fa-lg"></span>
+    <span class="fas fa fas fa-home fa-lg"></span>
      
   </a>
 </li>
@@ -83,6 +84,7 @@
 <!--/.navbar -->
 
       
+
       </header><div class="row">
   <div class="contents col-md-9">
 <div id="paretoti-r-package" class="section level2">
@@ -94,8 +96,8 @@
 <p>This package allows describing a continuum of cell states by identifying representative cells with most distinctive expression (archetypes). Detecting which genes and functional annotations (e.g. GO) make those cells distinctive gives marker genes and predicted functions for each state.</p>
 <p>Archetypal Analysis avoids drawing arbitrary cluster boundaries when a continuum of cell states is apparent (e.g. within-cell-type heterogeniety, multi-step differentiation trajectories, <a href="https://vitkl.github.io/ParetoTI/articles/Comparison_to_kmeans.html#find-archetypes-with-pcha-and-cluster-centers-with-k-means">this artificial example</a>). Yet the method provides a similar and easy to understand conceptual framework for unsupervised discovery of cell subpopulations.</p>
 <p>In theory, archetypes are cells specialised at a combination of tasks, cells expressing a distinct combination of gene modules / gene expression programmes. While the continuum of transcriptional states between archetypes mirrors how much of those programmes cells share, and in some cases the trade-offs between tasks (see <a href="https://www.nature.com/articles/nmeth.3254">citation</a>). In practice, many factors lead could to a distinct expression profile (archetype), including technical bias, cell doublets, stress response induced by cell dissociation and other factors. So it is necessary to keep <a href="https://youtu.be/4WVelCswXo4?t=2256">the small-world large-world distinction</a> in mind: specific statistical/computational method will find the best archetypes (specialised cells) it could find conditional on that method’s assumptions about the data - rather than the true archetypes you are trying to discover. So you have to supervise and rule out spurious causes the same way you would do for annotating cell clusters.</p>
-<p>Caution: the package in currently in development and testing. If you encounter problems please contact Vitalii Kleshchevnikov (vk7 at sanger.ac.uk) or report bugs on <a href="https://github.com/vitkl/ParetoTI/issues">github</a>.</p>
-<p><a href="https://zenodo.org/badge/latestdoi/146516634"><img src="https://zenodo.org/badge/146516634.svg" alt="DOI"></a></p>
+<p>If you encounter an issue please report on <a href="https://github.com/vitkl/ParetoTI/issues">github</a>.</p>
+<p>If you find the package useful please cite it using Zenodo DOI: <a href="https://zenodo.org/badge/latestdoi/146516634"><img src="https://zenodo.org/badge/146516634.svg" alt="DOI"></a></p>
 <div id="background" class="section level4">
 <h4 class="hasAnchor">
 <a href="#background" class="anchor"></a>Background</h4>
@@ -116,24 +118,24 @@
 <a href="#installation" class="anchor"></a>Installation</h4>
 <p>You need to install development version of this package from github.com and install a python dependencies (PCHA algorithm implementation, and (optionally) keras, geosketch, fbpca, umap-learn). If you want to take advantage of high-performance computing cluster you need to do extra set up, please follow the instructions here: <a href="https://github.com/mschubert/clustermq" class="uri">https://github.com/mschubert/clustermq</a>.</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Install ParetoTI package, this should also install reticulate package, if not - install manually.</span>
-<span class="kw"><a href="https://www.rdocumentation.org/packages/utils/topics/install.packages">install.packages</a></span>(<span class="st">"BiocManager"</span>) <span class="co"># for installing BioConductor dependencies</span>
-BiocManager<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/BiocManager/topics/install">install</a></span>(<span class="st">"vitkl/ParetoTI"</span>, <span class="dt">dependencies =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"Depends"</span>, <span class="st">"Imports"</span>, <span class="st">"LinkingTo"</span>))</code></pre></div>
+<span class="kw"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"BiocManager"</span>) <span class="co"># for installing BioConductor dependencies</span>
+BiocManager<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/BiocManager/man/install.html">install</a></span>(<span class="st">"vitkl/ParetoTI"</span>, <span class="dt">dependencies =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"Depends"</span>, <span class="st">"Imports"</span>, <span class="st">"LinkingTo"</span>))</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Load package</span>
-<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ParetoTI)
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(ParetoTI)
 <span class="co"># If package does not load because "py_pcha is not found" make sure you do not have</span>
 <span class="co"># a python environment already loaded in this R session (e.g. restart R and try loading again).</span>
 
 <span class="co"># Install python dependencies (like py_pcha) into python conda environment,</span>
 <span class="co"># and (optionally) install *extra_packages*.</span>
-ParetoTI<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/ParetoTI/topics/install_py_pcha">install_py_pcha</a></span>(<span class="dt">method =</span> <span class="st">"conda"</span>, 
-                          <span class="dt">extra_packages =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"tensorflow"</span>, <span class="st">"tensorflow-probability"</span>,
+ParetoTI<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/ParetoTI/man/install_py_pcha.html">install_py_pcha</a></span>(<span class="dt">method =</span> <span class="st">"conda"</span>, 
+                          <span class="dt">extra_packages =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"tensorflow"</span>, <span class="st">"tensorflow-probability"</span>,
                                         <span class="st">"pandas"</span>, <span class="st">"keras"</span>, <span class="st">"h5py"</span>,
                                         <span class="st">"geosketch"</span>, <span class="st">"pydot"</span>, <span class="st">"scikit-learn==0.20"</span>,
                                         <span class="st">"umap-learn"</span>))</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># If no conda manager installed on your machine, install python 3 miniconda distribution:</span>
 <span class="co"># https://conda.io/projects/conda/en/latest/user-guide/install/index.html#regular-installation</span>
 <span class="co"># or try virtualenv:</span>
-ParetoTI<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/ParetoTI/topics/install_py_pcha">install_py_pcha</a></span>(<span class="dt">method =</span> <span class="st">"virtualenv"</span>)</code></pre></div>
+ParetoTI<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/ParetoTI/man/install_py_pcha.html">install_py_pcha</a></span>(<span class="dt">method =</span> <span class="st">"virtualenv"</span>)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode python"><code class="sourceCode python"><span class="co"># You can also install these python modules directly in terminal,</span>
 <span class="co"># To help ParetoTI find the right python create conda environment named "reticulate_PCHA" (uncomment):</span>
 <span class="co"># (other enviroment containing py_pcha will be used if reticulate_PCHA doesn't exist)    </span>
@@ -148,21 +150,21 @@ source activate reticulate_PCHA <span class="op">&amp;&amp;</span> pip install <
 <span class="co"># In that case use:</span>
 source activate base <span class="op">&amp;&amp;</span> pip install <span class="op">--</span>upgrade py_pcha numpy scipy datetime geosketch umap<span class="op">-</span>learn</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Finally, check that py_pcha library is successfully installed and discoverable</span>
-reticulate<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/reticulate/topics/py_discover_config">py_discover_config</a></span>(<span class="st">"py_pcha"</span>)</code></pre></div>
+reticulate<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/reticulate/man/py_discover_config.html">py_discover_config</a></span>(<span class="st">"py_pcha"</span>)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># To make sure R uses the correct conda enviroment you can run this when you start R:</span>
-reticulate<span class="op">::</span><span class="kw"><a href="https://www.rdocumentation.org/packages/reticulate/topics/use_python">use_condaenv</a></span>(<span class="st">"reticulate_PCHA"</span>, <span class="dt">conda =</span> <span class="st">"auto"</span>,
+reticulate<span class="op">::</span><span class="kw"><a href="https://rdrr.io/pkg/reticulate/man/use_python.html">use_condaenv</a></span>(<span class="st">"reticulate_PCHA"</span>, <span class="dt">conda =</span> <span class="st">"auto"</span>,
                          <span class="dt">required =</span> <span class="ot">TRUE</span>) <span class="co"># set TRUE to force R to use reticulate_PCHA</span></code></pre></div>
 <p><strong>Example: Finding archetypes in data created by simulating a triangle </strong></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ParetoTI)
-<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/library">library</a></span>(ggplot2)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(ParetoTI)
+<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span>(ggplot2)
 
 <span class="co"># Generate random data that fits into the triangle (3D)</span>
-<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/Random">set.seed</a></span>(<span class="dv">4355</span>)
-archetypes =<span class="st"> </span><span class="kw"><a href="reference/generate_arc.html">generate_arc</a></span>(<span class="dt">arc_coord =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/list">list</a></span>(<span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">4</span>), <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="op">-</span><span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">0</span>), <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="op">-</span><span class="dv">30</span>, <span class="op">-</span><span class="dv">20</span>, <span class="op">-</span><span class="dv">5</span>)),
+<span class="kw"><a href="https://rdrr.io/r/base/Random.html">set.seed</a></span>(<span class="dv">4355</span>)
+archetypes =<span class="st"> </span><span class="kw"><a href="reference/generate_arc.html">generate_arc</a></span>(<span class="dt">arc_coord =</span> <span class="kw"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">4</span>), <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="op">-</span><span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">0</span>), <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="op">-</span><span class="dv">30</span>, <span class="op">-</span><span class="dv">20</span>, <span class="op">-</span><span class="dv">5</span>)),
                           <span class="dt">mean =</span> <span class="dv">0</span>, <span class="dt">sd =</span> <span class="dv">1</span>)
 data =<span class="st"> </span><span class="kw"><a href="reference/generate_arc.html">generate_data</a></span>(archetypes<span class="op">$</span>XC, <span class="dt">N_examples =</span> <span class="fl">1e4</span>, <span class="dt">jiiter =</span> <span class="fl">0.04</span>, <span class="dt">size =</span> <span class="fl">0.9</span>)</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Fit polytope to those data</span>
-arc_data =<span class="st"> </span><span class="kw"><a href="reference/fit_pch.html">fit_pch</a></span>(data, <span class="dt">noc =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/integer">as.integer</a></span>(<span class="dv">3</span>), <span class="dt">delta =</span> <span class="dv">0</span>)
+arc_data =<span class="st"> </span><span class="kw"><a href="reference/fit_pch.html">fit_pch</a></span>(data, <span class="dt">noc =</span> <span class="kw"><a href="https://rdrr.io/r/base/integer.html">as.integer</a></span>(<span class="dv">3</span>), <span class="dt">delta =</span> <span class="dv">0</span>)
 
 <span class="co"># Show results as interactive 3D scatterplot using plotly</span>
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc_data, <span class="dt">data =</span> data,
@@ -178,7 +180,7 @@ arc_data =<span class="st"> </span><span class="kw"><a href="reference/fit_pch.h
 <span class="st">  </span><span class="kw"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html">theme_bw</a></span>()</code></pre></div>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Project to UMAP coordinates (3D -&gt; 2D)</span>
 arc_umap =<span class="st"> </span><span class="kw"><a href="reference/plot_arc.html">arch_to_umap</a></span>(arc_data, data, <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>,
-                        <span class="dt">method =</span> <span class="kw"><a href="https://www.rdocumentation.org/packages/base/topics/c">c</a></span>(<span class="st">"naive"</span>, <span class="co"># implemented in R and slow</span>
+                        <span class="dt">method =</span> <span class="kw"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"naive"</span>, <span class="co"># implemented in R and slow</span>
                                    <span class="st">"umap-learn"</span>)) <span class="co"># requires python module</span>
 <span class="kw"><a href="reference/plot_arc.html">plot_arc</a></span>(<span class="dt">arc_data =</span> arc_umap<span class="op">$</span>arc_data, <span class="dt">data =</span> arc_umap<span class="op">$</span>data,
     <span class="dt">which_dimensions =</span> <span class="dv">1</span><span class="op">:</span><span class="dv">2</span>) <span class="op">+</span>
@@ -203,8 +205,9 @@ arc_tsne =<span class="st"> </span><span class="kw"><a href="reference/plot_arc.
 <div id="development-and-further-improvements" class="section level3">
 <h3 class="hasAnchor">
 <a href="#development-and-further-improvements" class="anchor"></a>Development and further improvements</h3>
-<p>It is currently under development and enables polytope fitting, statistical significance test by permutation, evaluating variance in vertex position by bootstraping, feature enrichment at archetype using the Wilcox test and the first derivative of Generalised Additive Model, measuring gene set activities in each cell with subsequent enrichment at archetypes.</p>
-<p>Alternative methods for archetypal analysis are being considered: AANet (<a href="https://github.com/KrishnaswamyLab/AAnet/" class="uri">https://github.com/KrishnaswamyLab/AAnet/</a>) and SPAMS implemented in c++ via R interface (<a href="https://arxiv.org/pdf/1405.6472.pdf" class="uri">https://arxiv.org/pdf/1405.6472.pdf</a>, <a href="http://spams-devel.gforge.inria.fr/downloads.html" class="uri">http://spams-devel.gforge.inria.fr/downloads.html</a>)</p>
+<p>The package is now not under active development and new features will not be implemented. Please feel free to contribute by submitting a pull request.<br>
+If you encounter an issue please report <a href="https://github.com/vitkl/ParetoTI/issues">github</a>.</p>
+<p>The package currently enables polytope fitting, statistical significance test by permutation, evaluating variance in vertex position by bootstraping, feature enrichment at archetype using the Wilcox test and the first derivative of Generalised Additive Model, measuring gene set activities in each cell with subsequent enrichment at archetypes.</p>
 </div>
 </div>
   </div>
@@ -233,17 +236,20 @@ arc_tsne =<span class="st"> </span><span class="kw"><a href="reference/plot_arc.
   </div>
 </div>
 
+
       <footer><div class="copyright">
   <p>Developed by Vitalii Kleshchevnikov.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.3.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.4.1.</p>
 </div>
+
       </footer>
 </div>
 
   
+
 
   </body>
 </html>

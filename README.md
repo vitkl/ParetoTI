@@ -144,4 +144,7 @@ plot_arc(arc_data = arc_tsne$arc_data, data = arc_tsne$data,
 
 ### Development and further improvements
 
-The package is now not under development and new feature will not be implemented. If you encounter an issue please report [github](https://github.com/vitkl/ParetoTI/issues). The package currently enables polytope fitting, statistical significance test by permutation, evaluating variance in vertex position by bootstraping, feature enrichment at archetype using the Wilcox test and the first derivative of Generalised Additive Model, measuring gene set activities in each cell with subsequent enrichment at archetypes.
+The package is now not under active development and new features will not be implemented. Please feel free to contribute by submitting a pull request.   
+If you encounter an issue please report [github](https://github.com/vitkl/ParetoTI/issues).    
+
+The package currently enables polytope fitting, statistical significance test by permutation, evaluating variance in vertex position by bootstraping, feature enrichment at archetype using the Wilcox test and the first derivative of Generalised Additive Model, measuring gene set activities in each cell with subsequent enrichment at archetypes.

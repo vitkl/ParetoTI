@@ -404,64 +404,82 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
   # coerce to matrix
   if(!is.matrix(data)) data = as.matrix(data)
 
-  # single process -------------------------------------------------------------
-  if(type == "s"){
+  # Check if the OS is unix based to use mclapply else use default coding
+  if (.Platform$OS.type == "unix" && type == "m") {
+
+    # Only the cores will be used here, nothing else will end up being used
+    default = list(cores = parallel::detectCores() - 1, cluster_type = "PSOCK")
+    default_retain = !names(default) %in% names(clust_options)
+    options = c(default[default_retain], clust_options)
+
+    # Set the seed
     set.seed(seed)
-    res = lapply(seq_len(n), fit_pch_resample, data, sample_prop,
+    res = mclapply(seq_len(n), fit_pch_resample, data, sample_prop,
                  replace = replace, order_type = order_type,
                  converge_else_fail = FALSE,
                  var_in_dims = var_in_dims,
-                 normalise_var = normalise_var, ...)
+                 normalise_var = normalise_var, mc.cores = options$cores, ...)
   }
+  else {
+    # single process -------------------------------------------------------------
+    if(type == "s"){
+      set.seed(seed)
+      res = lapply(seq_len(n), fit_pch_resample, data, sample_prop,
+                   replace = replace, order_type = order_type,
+                   converge_else_fail = FALSE,
+                   var_in_dims = var_in_dims,
+                   normalise_var = normalise_var, ...)
+    }
 
-  # multi-process --------------------------------------------------------------
-  if(type == "m"){
-    # set defaults or replace them with provided options
-    default = list(cores = parallel::detectCores()-1, cluster_type = "PSOCK")
-    default_retain = !names(default) %in% names(clust_options)
-    options = c(default[default_retain], clust_options)
+    # multi-process --------------------------------------------------------------
+    if(type == "m"){
+      # set defaults or replace them with provided options
+      default = list(cores = parallel::detectCores()-1, cluster_type = "PSOCK")
+      default_retain = !names(default) %in% names(clust_options)
+      options = c(default[default_retain], clust_options)
 
-    # create cluster
-    cl = parallel::makeCluster(options$cores, type = options$cluster_type)
-    # get library support needed to run the code
-    parallel::clusterEvalQ(cl, {library(ParetoTI)})
-    # set seed
-    parallel::clusterSetRNGStream(cl, iseed = seed)
-    res = parallel::parLapply(cl, seq_len(n), ParetoTI::fit_pch_resample, data,
-                              sample_prop, replace = replace,
-                              order_type = order_type,
-                              converge_else_fail = FALSE,
-                              var_in_dims = var_in_dims,
-                              normalise_var = normalise_var, ...)
-    # stop cluster
-    parallel::stopCluster(cl)
-  }
+      # create cluster
+      cl = parallel::makeCluster(options$cores, type = options$cluster_type)
+      # get library support needed to run the code
+      parallel::clusterEvalQ(cl, {library(ParetoTI)})
+      # set seed
+      parallel::clusterSetRNGStream(cl, iseed = seed)
+      res = parallel::parLapply(cl, seq_len(n), ParetoTI::fit_pch_resample, data,
+                                sample_prop, replace = replace,
+                                order_type = order_type,
+                                converge_else_fail = FALSE,
+                                var_in_dims = var_in_dims,
+                                normalise_var = normalise_var, ...)
+      # stop cluster
+      parallel::stopCluster(cl)
+    }
 
-  # clustermq ------------------------------------------------------------------
-  if(type == "cmq"){
-    # set defaults or replace them with provided options
-    default = list(memory = 2000, template = list(), n_jobs = 10,
-                   fail_on_error = FALSE, timeout = Inf)
-    default_retain = !names(default) %in% names(clust_options)
-    options = c(default[default_retain], clust_options)
+    # clustermq ------------------------------------------------------------------
+    if(type == "cmq"){
+      # set defaults or replace them with provided options
+      default = list(memory = 2000, template = list(), n_jobs = 10,
+                     fail_on_error = FALSE, timeout = Inf)
+      default_retain = !names(default) %in% names(clust_options)
+      options = c(default[default_retain], clust_options)
 
-    # run analysis
-    suppressWarnings({ # hide "NA introduced by coersion" warning specific to cmq implementation
-      suppressPackageStartupMessages({ # hide package startup warnings on each cluster
-        res = clustermq::Q(fun = ParetoTI::fit_pch_resample, i = seq_len(n),
-                           const = list(data = data, sample_prop = sample_prop,
-                                        replace = replace,
-                                        order_type = order_type,
-                                        converge_else_fail = FALSE,
-                                        var_in_dims = var_in_dims,
-                                        normalise_var = normalise_var, ...),
-                           seed = seed,
-                           memory = options$memory, template = options$template,
-                           n_jobs = options$n_jobs, rettype = "list",
-                           fail_on_error = options$fail_on_error,
-                           timeout = options$timeout)
+      # run analysis
+      suppressWarnings({ # hide "NA introduced by coersion" warning specific to cmq implementation
+        suppressPackageStartupMessages({ # hide package startup warnings on each cluster
+          res = clustermq::Q(fun = ParetoTI::fit_pch_resample, i = seq_len(n),
+                             const = list(data = data, sample_prop = sample_prop,
+                                          replace = replace,
+                                          order_type = order_type,
+                                          converge_else_fail = FALSE,
+                                          var_in_dims = var_in_dims,
+                                          normalise_var = normalise_var, ...),
+                             seed = seed,
+                             memory = options$memory, template = options$template,
+                             n_jobs = options$n_jobs, rettype = "list",
+                             fail_on_error = options$fail_on_error,
+                             timeout = options$timeout)
+        })
       })
-    })
+    }
   }
 
   # combine results ------------------------------------------------------------
@@ -627,11 +645,16 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
   ks = sort(unique(arc_data$summary$k))
   var_in_dims = isTRUE(nrow(arc_data$var_dim) > 0) |
     isTRUE(nrow(arc_data$pch_fits$var_dim) > 0)
-  # single process -------------------------------------------------------------
 
-  if(type == "s"){
+  if (.Platform$OS.type == "unix" && type == "m") {
+    # set defaults or replace them with provided options
+    # Will only use the "cores" variable
+    default = list(cores = parallel::detectCores()-1, cluster_type = "PSOCK")
+    default_retain = !names(default) %in% names(clust_options)
+    options = c(default[default_retain], clust_options)
+
     set.seed(seed)
-    res = lapply(seq_len(n_rand), randomise_fit_pch1, data = data, ks = ks,
+    res = mclapply(seq_len(n_rand), randomise_fit_pch1, data = data, ks = ks,
                  replace = replace, bootstrap_N = bootstrap_N, seed = seed,
                  bootstrap_type = "s",
                  return_data = FALSE, return_arc = FALSE,
@@ -639,67 +662,86 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
                  maxiter = maxiter, delta = delta,
                  order_type = order_type,
                  var_in_dims = var_in_dims,
-                 normalise_var = normalise_var, ...)
+                 normalise_var = normalise_var, mc.cores = options$cores, ...)
   }
+  else {
+    # single process -------------------------------------------------------------
 
-  # multi-process --------------------------------------------------------------
+    if(type == "s"){
+      set.seed(seed)
+      res = lapply(seq_len(n_rand), randomise_fit_pch1, data = data, ks = ks,
+                   replace = replace, bootstrap_N = bootstrap_N, seed = seed,
+                   bootstrap_type = "s",
+                   return_data = FALSE, return_arc = FALSE,
+                   bootstrap_average = TRUE, volume_ratio = volume_ratio,
+                   maxiter = maxiter, delta = delta,
+                   order_type = order_type,
+                   var_in_dims = var_in_dims,
+                   normalise_var = normalise_var, ...)
+    }
 
-  if(type == "m"){
-    # set defaults or replace them with provided options
-    default = list(cores = parallel::detectCores()-1, cluster_type = "PSOCK")
-    default_retain = !names(default) %in% names(clust_options)
-    options = c(default[default_retain], clust_options)
-    # create cluster
-    cl = parallel::makeCluster(options$cores, type = options$cluster_type)
-    # get library support needed to run the code
-    parallel::clusterEvalQ(cl, {library(ParetoTI)})
-    # set seed
-    parallel::clusterSetRNGStream(cl, iseed = seed)
-    res = parallel::parLapply(cl, seq_len(n_rand), ParetoTI::randomise_fit_pch1,
-                              data = data, ks = ks,
-                              replace = replace, bootstrap_N = bootstrap_N,
-                              seed = seed, bootstrap_type = "s",
-                              return_data = FALSE,
-                              return_arc = FALSE, bootstrap_average = TRUE,
-                              volume_ratio = volume_ratio,
-                              maxiter = maxiter, delta = delta,
-                              order_type = order_type,
-                              var_in_dims = var_in_dims,
-                              normalise_var = normalise_var, ...)
-    # stop cluster
-    parallel::stopCluster(cl)
-  }
+    # multi-process --------------------------------------------------------------
 
-  # clustermq ------------------------------------------------------------------
+    if(type == "m"){
+      # set defaults or replace them with provided options
+      default = list(cores = parallel::detectCores()-1, cluster_type = "PSOCK")
+      default_retain = !names(default) %in% names(clust_options)
+      options = c(default[default_retain], clust_options)
 
-  if(type == "cmq"){
-    # set defaults or replace them with provided options
-    default = list(memory = 2000, template = list(), n_jobs = 10,
-                   fail_on_error = FALSE, timeout = Inf)
-    default_retain = !names(default) %in% names(clust_options)
-    options = c(default[default_retain], clust_options)
+      # create cluster
+      cl = parallel::makeCluster(options$cores, type = options$cluster_type)
 
-    # run analysis
-    suppressWarnings({ # hide "NA introduced by coersion" warning specific to cmq implementation
-      suppressPackageStartupMessages({ # hide package startup warnings on each cluster
-        res = clustermq::Q(fun = ParetoTI::randomise_fit_pch1, i = seq_len(n_rand),
-                           const = list(data = data, ks = ks,
-                                        replace = replace, bootstrap_N = bootstrap_N,
-                                        seed = seed, bootstrap_type = "s",
-                                        return_data = FALSE,
-                                        return_arc = FALSE, bootstrap_average = TRUE,
-                                        volume_ratio = volume_ratio,
-                                        maxiter = maxiter, delta = delta,
-                                        order_type = order_type,
-                                        var_in_dims = var_in_dims,
-                                        normalise_var = normalise_var, ...),
-                           seed = seed,
-                           memory = options$memory, template = options$template,
-                           n_jobs = options$n_jobs, rettype = "list",
-                           fail_on_error = options$fail_on_error,
-                           timeout = options$timeout)
+      # get library support needed to run the code
+      parallel::clusterEvalQ(cl, {library(ParetoTI)})
+
+      # set seed
+      parallel::clusterSetRNGStream(cl, iseed = seed)
+      res = parallel::parLapply(cl, seq_len(n_rand), ParetoTI::randomise_fit_pch1,
+                                data = data, ks = ks,
+                                replace = replace, bootstrap_N = bootstrap_N,
+                                seed = seed, bootstrap_type = "s",
+                                return_data = FALSE,
+                                return_arc = FALSE, bootstrap_average = TRUE,
+                                volume_ratio = volume_ratio,
+                                maxiter = maxiter, delta = delta,
+                                order_type = order_type,
+                                var_in_dims = var_in_dims,
+                                normalise_var = normalise_var, ...)
+      # stop cluster
+      parallel::stopCluster(cl)
+    }
+
+    # clustermq ------------------------------------------------------------------
+
+    if(type == "cmq"){
+      # set defaults or replace them with provided options
+      default = list(memory = 2000, template = list(), n_jobs = 10,
+                     fail_on_error = FALSE, timeout = Inf)
+      default_retain = !names(default) %in% names(clust_options)
+      options = c(default[default_retain], clust_options)
+
+      # run analysis
+      suppressWarnings({ # hide "NA introduced by coersion" warning specific to cmq implementation
+        suppressPackageStartupMessages({ # hide package startup warnings on each cluster
+          res = clustermq::Q(fun = ParetoTI::randomise_fit_pch1, i = seq_len(n_rand),
+                             const = list(data = data, ks = ks,
+                                          replace = replace, bootstrap_N = bootstrap_N,
+                                          seed = seed, bootstrap_type = "s",
+                                          return_data = FALSE,
+                                          return_arc = FALSE, bootstrap_average = TRUE,
+                                          volume_ratio = volume_ratio,
+                                          maxiter = maxiter, delta = delta,
+                                          order_type = order_type,
+                                          var_in_dims = var_in_dims,
+                                          normalise_var = normalise_var, ...),
+                             seed = seed,
+                             memory = options$memory, template = options$template,
+                             n_jobs = options$n_jobs, rettype = "list",
+                             fail_on_error = options$fail_on_error,
+                             timeout = options$timeout)
+        })
       })
-    })
+    }
   }
 
   # combine results ------------------------------------------------------------

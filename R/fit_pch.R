@@ -405,22 +405,25 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
   if(!is.matrix(data)) data = as.matrix(data)
 
   # Check if the OS is unix based to use mclapply else use default coding
+  # Ideally this would also check for a parameter that says that it wants to
+  # use this processing
   if (.Platform$OS.type == "unix" && type == "m") {
-
+    print("unix based parallel processing")
     # Only the cores will be used here, nothing else will end up being used
-    default = list(cores = parallel::detectCores() - 1, cluster_type = "PSOCK")
+    default = list(cores = parallel::detectCores() - 1, cluster_type = "FORK")
     default_retain = !names(default) %in% names(clust_options)
     options = c(default[default_retain], clust_options)
 
     # Set the seed
     set.seed(seed)
     res = mclapply(seq_len(n), fit_pch_resample, data, sample_prop,
-                 replace = replace, order_type = order_type,
-                 converge_else_fail = FALSE,
-                 var_in_dims = var_in_dims,
-                 normalise_var = normalise_var, mc.cores = options$cores, ...)
+                   replace = replace, order_type = order_type,
+                   converge_else_fail = FALSE,
+                   var_in_dims = var_in_dims,
+                   normalise_var = normalise_var, mc.cores = options$cores, ...)
   }
   else {
+    print("not unix based processing")
     # single process -------------------------------------------------------------
     if(type == "s"){
       set.seed(seed)
@@ -655,14 +658,14 @@ randomise_fit_pch = function(data, arc_data, n_rand = 3, replace = FALSE,
 
     set.seed(seed)
     res = mclapply(seq_len(n_rand), randomise_fit_pch1, data = data, ks = ks,
-                 replace = replace, bootstrap_N = bootstrap_N, seed = seed,
-                 bootstrap_type = "s",
-                 return_data = FALSE, return_arc = FALSE,
-                 bootstrap_average = TRUE, volume_ratio = volume_ratio,
-                 maxiter = maxiter, delta = delta,
-                 order_type = order_type,
-                 var_in_dims = var_in_dims,
-                 normalise_var = normalise_var, mc.cores = options$cores, ...)
+                   replace = replace, bootstrap_N = bootstrap_N, seed = seed,
+                   bootstrap_type = "s",
+                   return_data = FALSE, return_arc = FALSE,
+                   bootstrap_average = TRUE, volume_ratio = volume_ratio,
+                   maxiter = maxiter, delta = delta,
+                   order_type = order_type,
+                   var_in_dims = var_in_dims,
+                   normalise_var = normalise_var, mc.cores = options$cores, ...)
   }
   else {
     # single process -------------------------------------------------------------

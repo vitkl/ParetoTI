@@ -408,7 +408,6 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
   # Ideally this would also check for a parameter that says that it wants to
   # use this processing
   if (.Platform$OS.type == "unix" && type == "m") {
-    print("unix based parallel processing")
     # Only the cores will be used here, nothing else will end up being used
     default = list(cores = parallel::detectCores() - 1, cluster_type = "FORK")
     default_retain = !names(default) %in% names(clust_options)
@@ -423,7 +422,6 @@ fit_pch_bootstrap = function(data, n = 3, sample_prop = NULL, check_installed = 
                    normalise_var = normalise_var, mc.cores = options$cores, ...)
   }
   else {
-    print("not unix based processing")
     # single process -------------------------------------------------------------
     if(type == "s"){
       set.seed(seed)
